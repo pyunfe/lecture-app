@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>스마트 학원 특강 신청 및 출석부 시스템</title>
+  <title>스마트 학원 특강 신청 및 포인트 시스템</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -69,8 +69,15 @@
       gap: 10px;
     }
 
-    @media(min-width: 768px) {
-      header h1 { font-size: 26px; padding-left: 15px; }
+    .user-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #f1f5f9;
+      padding: 8px 14px;
+      border-radius: 10px;
     }
 
     .tab-buttons {
@@ -118,7 +125,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .student-grid, .admin-layout-grid, .att-layout-grid {
+    .student-grid, .admin-layout-grid, .att-layout-grid, .auth-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 20px;
@@ -127,6 +134,7 @@
     @media(min-width: 960px) {
       .student-grid { grid-template-columns: 1fr 1.5fr; gap: 35px; }
       .admin-layout-grid, .att-layout-grid { grid-template-columns: 380px 1fr; gap: 25px; align-items: start; }
+      .auth-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
     }
 
     .card {
@@ -148,10 +156,6 @@
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    @media(min-width: 768px) {
-      .card h3 { font-size: 18px; margin-bottom: 20px; }
     }
 
     .form-group { margin-bottom: 16px; }
@@ -227,7 +231,6 @@
       border-radius: 12px;
       margin-bottom: 8px;
       overflow: hidden;
-      transition: all 0.2s;
       flex-shrink: 0;
     }
 
@@ -242,17 +245,12 @@
       font-size: 14px;
       color: var(--text-main);
       user-select: none;
-      border-bottom: 1px solid transparent;
     }
 
     .tree-folder.open .tree-folder-header {
-      border-bottom-color: var(--border-color);
+      border-bottom: 1px solid var(--border-color);
       background: #f1f5f9;
     }
-
-    .tree-folder-header:hover { background: #f1f5f9; }
-    .tree-folder-header .fa-chevron-down { transition: transform 0.2s ease; }
-    .tree-folder.open .tree-folder-header .fa-chevron-down { transform: rotate(180deg); }
 
     .tree-folder-body {
       display: none; 
@@ -280,7 +278,6 @@
       font-weight: 600;
       font-size: 13px;
       color: var(--primary);
-      background: #f8fafc;
       user-select: none;
     }
 
@@ -288,9 +285,6 @@
       border-bottom: 1px solid var(--border-color);
       background: #eff6ff;
     }
-
-    .tree-subfolder-header .fa-chevron-down { transition: transform 0.2s ease; }
-    .tree-subfolder.open .tree-subfolder-header .fa-chevron-down { transform: rotate(180deg); }
 
     .tree-subfolder-body {
       display: none; 
@@ -302,7 +296,7 @@
 
     .tree-subfolder.open .tree-subfolder-body { display: flex; }
 
-    .date-checkbox-item, .tree-action-item {
+    .date-checkbox-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -311,10 +305,8 @@
       padding: 10px 12px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      cursor: pointer;
     }
 
-    .date-checkbox-item:hover, .tree-action-item:hover { background: #f1f5f9; }
     .date-checkbox-item label {
       display: flex;
       align-items: center;
@@ -335,16 +327,13 @@
       white-space: nowrap;
     }
     .seat-badge.full { background: #fee2e2; color: #991b1b; }
+    .seat-badge.warning { background: #fef3c7; color: #d97706; }
 
     .admin-stats {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 15px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
       margin-bottom: 25px;
-    }
-
-    @media(min-width: 768px) {
-      .admin-stats { grid-template-columns: repeat(3, 1fr); gap: 20px; }
     }
 
     .stat-card {
@@ -358,7 +347,6 @@
     .stat-card h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
     .stat-card .number { font-size: 22px; font-weight: 700; color: var(--primary); }
 
-    /* 모바일 최적화 카드형 리스트 스타일 */
     .mobile-card-list {
       display: flex;
       flex-direction: column;
@@ -373,7 +361,6 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .data-card-header {
@@ -384,17 +371,8 @@
       padding-bottom: 10px;
     }
 
-    .data-card-title {
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--text-main);
-    }
-
-    .data-card-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
+    .data-card-title { font-weight: 700; font-size: 15px; color: var(--text-main); }
+    .data-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
     .data-card-body {
       display: grid;
@@ -403,21 +381,9 @@
       font-size: 13px;
     }
 
-    .data-field {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .data-field span.label {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .data-field span.value {
-      font-weight: 600;
-      color: var(--text-main);
-    }
+    .data-field { display: flex; flex-direction: column; }
+    .data-field span.label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .data-field span.value { font-weight: 600; color: var(--text-main); }
 
     .data-card-footer {
       display: flex;
@@ -425,13 +391,13 @@
       align-items: center;
       border-top: 1px dashed var(--border-color);
       padding-top: 10px;
-      margin-top: 2px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
     th, td { padding: 12px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
     th { background: #f1f5f9; color: var(--text-main); font-weight: 600; }
-    tr:last-child td { border-bottom: none; }
 
     .action-badge {
       padding: 6px 12px;
@@ -441,14 +407,12 @@
       cursor: pointer;
       border: none;
     }
-
     .badge-del { background: #fee2e2; color: #991b1b; }
-    .badge-del:hover { background: #fecaca; }
     .badge-edit { background: #fef3c7; color: #92400e; }
-    .badge-select { background: #e0e7ff; color: var(--primary); }
+    .badge-success { background: #d1fae5; color: #065f46; }
 
     .empty-state { text-align: center; padding: 35px; color: var(--text-muted); font-size: 13px; }
-    .auth-box { max-width: 420px; margin: 40px auto; text-align: center; }
+    .auth-box { max-width: 450px; margin: 40px auto; text-align: center; }
 
     .admin-slot-builder {
       background: #f8fafc;
@@ -458,81 +422,108 @@
       margin-bottom: 20px;
     }
 
-    .slot-input-row {
-      background: white;
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-
-    .slot-main-info {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    @media(min-width: 600px) {
-      .slot-main-info { grid-template-columns: 2fr 1fr auto; }
-    }
-
-    .date-picker-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-      background: #f8fafc;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px dashed var(--border-color);
-    }
-
     .date-tag {
       background: #e0e7ff;
       color: var(--primary);
       padding: 3px 8px;
       border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 12px;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      font-weight: 600;
     }
     .date-tag i { cursor: pointer; }
-    .date-tag i:hover { color: var(--danger); }
   </style>
 </head>
 <body>
   <div class="app-container">
     <header>
-      <h1><i class="fa-solid fa-graduation-cap"></i> 스마트 학원 특강 신청 시스템</h1>
+      <h1><i class="fa-solid fa-graduation-cap"></i> 스마트 학원 특강 신청 및 포인트 시스템</h1>
+      <div id="userStatusBar" class="user-status-bar" style="display: none;">
+        <span><i class="fa-solid fa-user-circle" style="color:var(--primary);"></i> <span id="barUserName"></span> (<span id="barUserSchool"></span>)님</span>
+        <span style="background:var(--primary); color:white; padding:3px 8px; border-radius:6px; font-size:12px;">포인트: <strong id="barUserPoints">0</strong>원</span>
+        <button class="btn btn-secondary btn-sm" onclick="logoutUser()">로그아웃</button>
+      </div>
       <div class="tab-buttons">
-        <button class="tab-btn active" onclick="switchTab('student')"><i class="fa-solid fa-user-pen"></i> 수강생 신청</button>
-        <button class="tab-btn" onclick="switchTab('mypage')"><i class="fa-solid fa-id-card"></i> 마이페이지</button>
-        <button class="tab-btn" onclick="switchTab('attendance')"><i class="fa-solid fa-clipboard-user"></i> 출석부</button>
-        <button class="tab-btn" onclick="switchTab('admin')"><i class="fa-solid fa-lock"></i> 관리자</button>
+        <button class="tab-btn active" id="navAuthBtn" onclick="switchTab('auth')"><i class="fa-solid fa-right-to-bracket"></i> 회원가입/로그인</button>
+        <button class="tab-btn" id="navStudentBtn" onclick="switchTab('student')" style="opacity: 0.5; pointer-events: none;"><i class="fa-solid fa-user-pen"></i> 수강생 신청 (로그인필요)</button>
+        <button class="tab-btn" id="navMypageBtn" onclick="switchTab('mypage')" style="opacity: 0.5; pointer-events: none;"><i class="fa-solid fa-id-card"></i> 마이페이지</button>
+        <button class="tab-btn" id="navAttBtn" onclick="switchTab('attendance')"><i class="fa-solid fa-clipboard-user"></i> 출석부</button>
+        <button class="tab-btn" id="navAdminBtn" onclick="switchTab('admin')"><i class="fa-solid fa-lock"></i> 관리자</button>
       </div>
     </header>
 
-    <!-- 수강생 신청 뷰 -->
-    <div id="studentView" class="view-section active">
-      <div class="student-grid">
-        <div class="card">
-          <h3><i class="fa-solid fa-file-signature"></i> 특강 신청하기</h3>
+    <!-- 회원가입 / 로그인 뷰 -->
+    <div id="authView" class="view-section active">
+      <div class="auth-grid">
+        <!-- 로그인 카드 -->
+        <div class="card" style="margin-bottom:0;">
+          <h3><i class="fa-solid fa-right-to-bracket"></i> 로그인</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">등록하신 정보로 로그인하여 특강을 신청하세요.</p>
           <div class="form-group">
             <label>학생 이름</label>
-            <input type="text" id="sName" class="form-control" placeholder="예: 홍길동">
+            <input type="text" id="loginName" class="form-control" placeholder="홍길동">
           </div>
           <div class="form-group">
             <label>학교 / 학년</label>
-            <input type="text" id="sSchool" class="form-control" placeholder="예: 청라고1">
+            <input type="text" id="loginSchool" class="form-control" placeholder="청라고1">
           </div>
           <div class="form-group">
             <label>전화번호 뒷 4자리</label>
-            <input type="password" id="sPhone" class="form-control" maxlength="4" placeholder="예: 1234">
+            <input type="password" id="loginPhone" class="form-control" maxlength="4" placeholder="1234">
           </div>
-          <button class="btn" onclick="applySelectedLectures()" style="margin-top: 10px;"><i class="fa-solid fa-check-double"></i> 선택한 일정 한 번에 신청하기</button>
+          <div class="form-group">
+            <label>비밀번호</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="비밀번호 입력">
+          </div>
+          <button class="btn" onclick="handleLogin()"><i class="fa-solid fa-check"></i> 로그인하기</button>
+        </div>
+
+        <!-- 회원가입 카드 -->
+        <div class="card" style="margin-bottom:0;">
+          <h3><i class="fa-solid fa-user-plus"></i> 간편 회원가입</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">간단한 정보 입력 후 포인트를 충전하여 특강을 신청하세요.</p>
+          <div class="form-group">
+            <label>학생 이름</label>
+            <input type="text" id="regName" class="form-control" placeholder="홍길동">
+          </div>
+          <div class="form-group">
+            <label>학교 / 학년</label>
+            <input type="text" id="regSchool" class="form-control" placeholder="청라고1">
+          </div>
+          <div class="form-group">
+            <label>전화번호 뒷 4자리</label>
+            <input type="password" id="regPhone" class="form-control" maxlength="4" placeholder="1234">
+          </div>
+          <div class="form-group">
+            <label>비밀번호</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="비밀번호 설정">
+          </div>
+          <div class="form-group">
+            <label>환불받을 계좌 정보 (은행명, 계좌번호, 예금주명)</label>
+            <div style="display:grid; grid-template-columns: 1fr 2fr 1fr; gap:8px;">
+              <input type="text" id="regBank" class="form-control" placeholder="신한은행">
+              <input type="text" id="regAccount" class="form-control" placeholder="계좌번호">
+              <input type="text" id="regHolder" class="form-control" placeholder="예금주명">
+            </div>
+          </div>
+          <button class="btn btn-success" onclick="handleRegister()"><i class="fa-solid fa-user-check"></i> 회원가입 완료하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 수강생 신청 뷰 (로그인 후 이용 가능) -->
+    <div id="studentView" class="view-section">
+      <div class="student-grid">
+        <div class="card">
+          <h3><i class="fa-solid fa-file-signature"></i> 내 포인트 및 특강 신청</h3>
+          <div style="background:#f1f5f9; padding:15px; border-radius:10px; margin-bottom:15px; text-align:center;">
+            <div style="font-size:12px; color:var(--text-muted);">현재 보유 포인트</div>
+            <div style="font-size:24px; font-weight:700; color:var(--primary);"><span id="applyUserPoints">0</span>원</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">우측에서 원하는 특강과 날짜를 선택한 뒤 아래 버튼을 눌러주세요. (신청 시 1일정당 10,000포인트 소모)</p>
+          <button class="btn" onclick="applySelectedLectures()"><i class="fa-solid fa-check-double"></i> 선택한 일정 포인트로 신청하기</button>
         </div>
 
         <div class="card">
@@ -550,29 +541,28 @@
 
     <!-- 마이페이지 뷰 -->
     <div id="mypageView" class="view-section">
-      <div class="card auth-box">
-        <h3><i class="fa-solid fa-magnifying-glass"></i> 내 신청 내역 조회</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">정보를 입력하시면 내역 확인 및 수강 취소가 가능합니다.</p>
-        <div class="form-group" style="text-align: left;">
-          <label>학생 이름</label>
-          <input type="text" id="mySearchName" class="form-control" placeholder="홍길동">
+      <div class="card">
+        <h3><i class="fa-solid fa-id-card"></i> 내 프로필 및 포인트 충전</h3>
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px; margin-bottom:20px; font-size:14px;">
+          <div><strong>이름:</strong> <span id="myInfoName"></span></div>
+          <div><strong>학교/학년:</strong> <span id="myInfoSchool"></span></div>
+          <div><strong>보유 포인트:</strong> <span id="myInfoPoints" style="color:var(--primary); font-weight:700;"></span>원</div>
+          <div><strong>환불 계좌:</strong> <span id="myInfoAccount"></span></div>
         </div>
-        <div class="form-group" style="text-align: left;">
-          <label>학교 / 학년</label>
-          <input type="text" id="mySearchSchool" class="form-control" placeholder="예: 청라고1">
-        </div>
-        <div class="form-group" style="text-align: left;">
-          <label>전화번호 뒷 4자리</label>
-          <input type="password" id="mySearchPhone" class="form-control" maxlength="4" placeholder="1234">
-        </div>
-        <button class="btn" onclick="loadMyApplications()"><i class="fa-solid fa-search"></i> 내역 조회하기</button>
-      </div>
 
-      <div id="myResultContainer" style="display:none; margin-top:20px;">
-        <div class="card">
-          <h3><i class="fa-solid fa-list-check"></i> <span id="myResultTitle"></span>님의 신청 내역</h3>
-          <div id="myCardListContainer" class="mobile-card-list"></div>
+        <div style="background:#f8fafc; border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:25px;">
+          <h4 style="font-size:15px; margin-bottom:10px; color:var(--primary);"><i class="fa-solid fa-won-sign"></i> 포인트 충전 신청 (무통장 입금)</h4>
+          <p style="font-size:13px; color:var(--text-muted); line-height:1.5; margin-bottom:12px;">
+            박윤철 신한 111111 계좌로 송금해 주세요.<br>
+            반드시 <strong>이름+전화번호 뒷 4자리 (예: <span id="guideNamePhone">김철수1234</span>)</strong>로 정확히 입금해 주셔야 시스템이 자동으로 입금을 확인하여 포인트를 즉시 지급해 줍니다.
+          </p>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn btn-sm btn-success" onclick="requestPointCharge(20000)">포인트 충전(2만 원) 가이드 확인</button>
+          </div>
         </div>
+        
+        <h3 style="margin-top:25px;"><i class="fa-solid fa-list-check"></i> 내 신청 내역</h3>
+        <div id="myCardListContainer" class="mobile-card-list"></div>
       </div>
     </div>
 
@@ -580,7 +570,7 @@
     <div id="attendanceView" class="view-section">
       <div id="attLoginBox" class="card auth-box">
         <h3><i class="fa-solid fa-shield-halved"></i> 출석부 접근 인증</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">비밀번호를 입력해주세요.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">관리자 비밀번호를 입력해주세요.</p>
         <div class="form-group" style="text-align: left;">
           <label>비밀번호</label>
           <input type="password" id="attPasswordInput" class="form-control" placeholder="비밀번호 입력">
@@ -590,14 +580,13 @@
 
       <div id="attDashboardBox" style="display: none;">
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3><i class="fa-solid fa-clipboard-user"></i> 출석부 관리</h3>
-            <button class="btn btn-secondary btn-sm" onclick="logoutAttendance()"><i class="fa-solid fa-right-from-bracket"></i> 잠금</button>
+            <button class="btn btn-secondary btn-sm" onclick="logoutAttendance()">잠금</button>
           </div>
-          
           <div class="att-layout-grid">
             <div>
-              <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">특강/날짜 선택 폴더:</label>
+              <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">특강 폴더 트리:</label>
               <div id="attTreeContainer" class="lecture-list" style="max-height: 400px;"></div>
             </div>
             <div>
@@ -629,37 +618,35 @@
             <div class="number" id="statTotalLec">0개</div>
           </div>
           <div class="stat-card">
-            <h4>총 누적 신청</h4>
-            <div class="number" id="statTotalApp">0건</div>
+            <h4>총 가입 회원</h4>
+            <div class="number" id="statTotalUsers">0명</div>
           </div>
           <div class="stat-card">
             <h4>시스템 제어</h4>
-            <button class="btn btn-secondary" onclick="logoutAdmin()" style="margin-top: 5px; padding: 8px; font-size: 12px;"><i class="fa-solid fa-right-from-bracket"></i> 로그아웃</button>
+            <button class="btn btn-secondary" onclick="logoutAdmin()" style="margin-top: 5px; padding: 8px; font-size: 12px;">로그아웃</button>
           </div>
         </div>
 
-        <div class="card" id="lectureFormCard" style="margin-bottom: 20px;">
+        <!-- 입금 문자 수신 시뮬레이션 테스트 박스 -->
+        <div class="card" style="background:#eff6ff; border-color:#bfdbfe; margin-bottom:20px;">
+          <h3 style="color:var(--primary);"><i class="fa-solid fa-comment-sms"></i> 은행 입금 문자 수신 시뮬레이션 (포워딩 앱 연동 테스트)</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">원장님 폰으로 수신된 입금 문자 메시지 형태를 입력하여 자동 포인트 지급 기능을 테스트할 수 있습니다.</p>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="simSmsText" class="form-control" placeholder="예: [KB] 김철수1234 20,000원 입금" style="flex:1;">
+            <button class="btn btn-sm btn-success" onclick="simulateSmsWebhook()" style="width:auto;"><i class="fa-solid fa-bolt"></i> 문자 수신 신호 보내기</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px;">
           <h3 id="formModeTitle"><i class="fa-solid fa-circle-plus"></i> 새 특강 등록</h3>
           <input type="hidden" id="editLectureId" value="">
           <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>폴더(분류)</label>
-              <input type="text" id="newCategory" class="form-control" placeholder="예: 국어">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>특강명</label>
-              <input type="text" id="newTitle" class="form-control" placeholder="예: 한글 맞춤법">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>특강 설명</label>
-              <input type="text" id="newDesc" class="form-control" placeholder="예: 맞춤법 완벽 교정">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>강사명</label>
-              <input type="text" id="newInstructor" class="form-control" placeholder="예: 강윤지T">
-            </div>
+            <div class="form-group" style="margin-bottom:0;"><label>폴더(분류)</label><input type="text" id="newCategory" class="form-control" placeholder="국어"></div>
+            <div class="form-group" style="margin-bottom:0;"><label>특강명</label><input type="text" id="newTitle" class="form-control" placeholder="한글 맞춤법"></div>
+            <div class="form-group" style="margin-bottom:0;"><label>특강 설명</label><input type="text" id="newDesc" class="form-control" placeholder="맞춤법 교정"></div>
+            <div class="form-group" style="margin-bottom:0;"><label>강사명</label><input type="text" id="newInstructor" class="form-control" placeholder="강윤지T"></div>
+            <div class="form-group" style="margin-bottom:0;"><label>신청/취소 마감 기한</label><input type="datetime-local" id="newDeadline" class="form-control"></div>
           </div>
-
           <div class="form-group" style="margin-top: 15px;">
             <label style="display: flex; justify-content: space-between; align-items: center;">
               <span>수업 시간 및 날짜 설정</span>
@@ -667,46 +654,26 @@
             </label>
             <div id="slotBuilderContainer" class="admin-slot-builder" style="margin-top:8px;"></div>
           </div>
-
           <div style="display: flex; gap: 10px;">
-            <button class="btn" id="submitLecBtn" onclick="saveOrUpdateLecture()"><i class="fa-solid fa-plus"></i> 특강 개설하기</button>
+            <button class="btn" id="submitLecBtn" onclick="saveOrUpdateLecture()">특강 개설하기</button>
             <button class="btn btn-secondary" id="cancelEditBtn" onclick="resetLectureForm()" style="display: none; width: auto;">취소</button>
           </div>
         </div>
 
         <div class="card">
-          <h3><i class="fa-solid fa-folder-tree"></i> 개설된 특강 관리</h3>
+          <h3><i class="fa-solid fa-folder-tree"></i> 개설 특강 및 회원 관리</h3>
           <div style="overflow-x: auto; margin-bottom: 25px;">
             <table>
-              <thead>
-                <tr>
-                  <th>순서</th>
-                  <th>폴더</th>
-                  <th>특강명</th>
-                  <th>강사</th>
-                  <th>이동</th>
-                  <th>관리</th>
-                </tr>
-              </thead>
+              <thead><tr><th>순서</th><th>폴더</th><th>특강명</th><th>강사</th><th>마감기한</th><th>관리</th></tr></thead>
               <tbody id="adminLectureTableBody"></tbody>
             </table>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin-bottom:0;"><i class="fa-solid fa-users"></i> 가입 회원 입금 확인 및 포인트 수동 승인 대시보드</h3>
             <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 엑셀(CSV) 다운로드</button>
           </div>
-
-          <div class="admin-layout-grid">
-            <div>
-              <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">필터 폴더 트리:</label>
-              <div id="adminTreeContainer" class="lecture-list" style="max-height: 400px;"></div>
-            </div>
-            <div>
-              <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px;" id="adminSelectedTitleInfo">선택된 필터: 전체 보기</div>
-              <div id="adminCardListContainer" class="mobile-card-list" style="max-height: 450px; overflow-y:auto;"></div>
-            </div>
-          </div>
+          <div id="adminUserCardContainer" class="mobile-card-list" style="max-height: 450px; overflow-y:auto;"></div>
         </div>
       </div>
     </div>
@@ -715,6 +682,7 @@
   <script>
     const ADMIN_PW = "8566";
 
+    let users = JSON.parse(localStorage.getItem('acad_users')) || [];
     let lectures = JSON.parse(localStorage.getItem('acad_lectures')) || [
       { 
         id: 1, 
@@ -722,56 +690,207 @@
         title: '한글 맞춤법', 
         desc: '놓치기 쉬운 맞춤법 완벽 교정!', 
         instructor: '강윤지T', 
+        deadline: '2026-12-31T23:59',
         slots: [
           { slotId: 101, dates: ['7/22', '8/5'], dayTime: '수요일 2-4시', capacity: 40 },
           { slotId: 102, dates: ['7/23', '8/6'], dayTime: '목요일 4-6시', capacity: 40 }
         ]
       }
     ];
-
     let applications = JSON.parse(localStorage.getItem('acad_apps')) || [];
     let attendanceData = JSON.parse(localStorage.getItem('acad_att')) || {}; 
     let attendanceMemo = JSON.parse(localStorage.getItem('acad_att_memo')) || {};
     
-    let isAdminLoggedIn = false;
+    let currentUser = JSON.parse(localStorage.getItem('acad_current_user')) || null;
     let isAttLoggedIn = false;
-    let currentAdminFilter = 'all';
 
     function saveData() {
+      localStorage.setItem('acad_users', JSON.stringify(users));
       localStorage.setItem('acad_lectures', JSON.stringify(lectures));
       localStorage.setItem('acad_apps', JSON.stringify(applications));
       localStorage.setItem('acad_att', JSON.stringify(attendanceData));
       localStorage.setItem('acad_att_memo', JSON.stringify(attendanceMemo));
+      localStorage.setItem('acad_current_user', JSON.stringify(currentUser));
+    }
+
+    function syncLoginState() {
+      const statusBar = document.getElementById('userStatusBar');
+      const navStudentBtn = document.getElementById('navStudentBtn');
+      const navMypageBtn = document.getElementById('navMypageBtn');
+
+      if (currentUser) {
+        const freshUser = users.find(u => u.name === currentUser.name && u.school === currentUser.school && u.phone === currentUser.phone);
+        if (freshUser) currentUser = freshUser;
+
+        statusBar.style.display = 'flex';
+        document.getElementById('barUserName').innerText = currentUser.name;
+        document.getElementById('barUserSchool').innerText = currentUser.school;
+        document.getElementById('barUserPoints').innerText = currentUser.points.toLocaleString();
+
+        navStudentBtn.style.opacity = '1';
+        navStudentBtn.style.pointerEvents = 'auto';
+        navMypageBtn.style.opacity = '1';
+        navMypageBtn.style.pointerEvents = 'auto';
+      } else {
+        statusBar.style.display = 'none';
+        navStudentBtn.style.opacity = '0.5';
+        navStudentBtn.style.pointerEvents = 'none';
+        navMypageBtn.style.opacity = '0.5';
+        navMypageBtn.style.pointerEvents = 'none';
+      }
     }
 
     function switchTab(tabName) {
+      if ((tabName === 'student' || tabName === 'mypage') && !currentUser) {
+        alert('로그인 후 이용할 수 있는 메뉴입니다.');
+        switchTab('auth');
+        return;
+      }
+
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
 
-      if (tabName === 'student') {
-        document.querySelector('.tab-buttons button:nth-child(1)').classList.add('active');
+      if (tabName === 'auth') {
+        document.getElementById('navAuthBtn').classList.add('active');
+        document.getElementById('authView').classList.add('active');
+      } else if (tabName === 'student') {
+        document.getElementById('navStudentBtn').classList.add('active');
         document.getElementById('studentView').classList.add('active');
+        document.getElementById('applyUserPoints').innerText = currentUser.points.toLocaleString();
         updateStudentCategoryFilter();
         renderStudentLectures();
       } else if (tabName === 'mypage') {
-        document.querySelector('.tab-buttons button:nth-child(2)').classList.add('active');
+        document.getElementById('navMypageBtn').classList.add('active');
         document.getElementById('mypageView').classList.add('active');
+        renderMyPage();
       } else if (tabName === 'attendance') {
-        document.querySelector('.tab-buttons button:nth-child(3)').classList.add('active');
+        document.getElementById('navAttBtn').classList.add('active');
         document.getElementById('attendanceView').classList.add('active');
-        updateAttendanceView();
       } else if (tabName === 'admin') {
-        document.querySelector('.tab-buttons button:nth-child(4)').classList.add('active');
+        document.getElementById('navAdminBtn').classList.add('active');
         document.getElementById('adminView').classList.add('active');
         updateAdminView();
       }
+    }
+
+    function handleRegister() {
+      const name = document.getElementById('regName').value.trim();
+      const school = document.getElementById('regSchool').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const bank = document.getElementById('regBank').value.trim();
+      const account = document.getElementById('regAccount').value.trim();
+      const holder = document.getElementById('regHolder').value.trim();
+
+      if (!name || !school || !phone || !password || !bank || !account || !holder) {
+        alert('모든 필수 정보를 입력해주세요.');
+        return;
+      }
+      if (phone.length !== 4 || isNaN(phone)) {
+        alert('전화번호 뒷 4자리를 정확히 입력해주세요.');
+        return;
+      }
+
+      const existing = users.find(u => u.name === name && u.school === school && u.phone === phone);
+      if (existing) {
+        alert('이미 가입된 회원입니다. 로그인해주세요.');
+        return;
+      }
+
+      const newUser = {
+        id: Date.now(),
+        name, school, phone, password, bank, account, holder,
+        points: 0,
+        joinedAt: new Date().toLocaleDateString()
+      };
+
+      users.push(newUser);
+      saveData();
+      alert('회원가입이 완료되었습니다! 로그인 후 포인트를 충전해주세요.');
+      
+      currentUser = newUser;
+      saveData();
+      syncLoginState();
+      switchTab('student');
+    }
+
+    function handleLogin() {
+      const name = document.getElementById('loginName').value.trim();
+      const school = document.getElementById('loginSchool').value.trim();
+      const phone = document.getElementById('loginPhone').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+
+      if (!name || !school || !phone || !password) {
+        alert('로그인 정보를 모두 입력해주세요.');
+        return;
+      }
+
+      const user = users.find(u => u.name === name && u.school === school && u.phone === phone && u.password === password);
+      if (!user) {
+        alert('일치하는 회원 정보를 찾을 수 없습니다. 이름, 학교, 전화번호, 비밀번호를 확인해주세요.');
+        return;
+      }
+
+      currentUser = user;
+      saveData();
+      syncLoginState();
+      alert(`${currentUser.name}님 환영합니다!`);
+      switchTab('student');
+    }
+
+    function logoutUser() {
+      currentUser = null;
+      saveData();
+      syncLoginState();
+      alert('로그아웃 되었습니다.');
+      switchTab('auth');
+    }
+
+    function requestPointCharge(amount) {
+      alert(`[포인트 충전 안내]\n\n박윤철 신한 111111 계좌로 ${amount.toLocaleString()}원을 송금해 주세요.\n반드시 입금하실 때 성함 뒤에 번호 4자리를 붙여주세요 (예: ${currentUser.name}${currentUser.phone})\n정확히 입금하시면 자동으로 포인트가 충전됩니다.`);
+    }
+
+    function simulateSmsWebhook() {
+      const smsText = document.getElementById('simSmsText').value.trim();
+      if (!smsText) {
+        alert('입금 문자 내용을 입력해주세요.');
+        return;
+      }
+
+      const match = smsText.match(/([가-힣]+)(\d{4})\s+([\d,]+)원\s*입금/);
+      if (!match) {
+        alert('문자 포맷을 인식할 수 없습니다. 예시: [KB] 김철수1234 20,000원 입금');
+        return;
+      }
+
+      const targetName = match[1];
+      const targetPhone = match[2];
+      const amountStr = match[3].replace(/,/g, '');
+      const addAmount = parseInt(amountStr, 10);
+
+      const user = users.find(u => u.name === targetName && u.phone === targetPhone);
+      if (!user) {
+        alert(`신청자 정보(${targetName}${targetPhone})와 일치하는 회원을 찾을 수 없습니다.`);
+        return;
+      }
+
+      user.points += addAmount;
+      saveData();
+      updateAdminView();
+      if (currentUser && currentUser.id === user.id) {
+        currentUser = user;
+        syncLoginState();
+      }
+
+      alert(`[자동 충전 성공] ${user.name}(${user.school})님 계정에 ${addAmount.toLocaleString()}포인트가 자동 충전되었습니다!`);
+      document.getElementById('simSmsText').value = '';
     }
 
     function updateStudentCategoryFilter() {
       const filterSelect = document.getElementById('studentCategoryFilter');
       const categories = [...new Set(lectures.map(l => l.category || '기본'))];
       let optionsHtml = '<option value="전체">전체 보기</option>';
-      categories.forEach(cat => { optionsHtml += '<option value="' + cat + '">' + cat + '</option>'; });
+      categories.forEach(cat => { optionsHtml += `<option value="${cat}">${cat}</option>`; });
       filterSelect.innerHTML = optionsHtml;
     }
 
@@ -796,52 +915,53 @@
         let subfoldersHtml = '';
         lec.slots.forEach(slot => {
           let dateItemsHtml = '';
-          if (slot.dates && slot.dates.length > 0) {
+          if (slot.dates) {
             slot.dates.forEach(d => {
               const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
               const remainingSeats = slot.capacity - currentCount;
               const isFull = remainingSeats <= 0;
 
-              dateItemsHtml += '<div class="date-checkbox-item">' +
-                '<label>' +
-                  '<input type="checkbox" class="student-date-chk" data-lec-id="' + lec.id + '" data-slot-id="' + slot.slotId + '" data-lec-title="' + lec.title + '" data-day-time="' + slot.dayTime + '" data-date="' + d + '" ' + (isFull ? 'disabled' : '') + '> ' +
-                  '<i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + (isFull ? ' (마감)' : '') +
-                '</label>' +
-                '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity) + '</span>' +
-              '</div>';
+              dateItemsHtml += `<div class="date-checkbox-item">
+                <label>
+                  <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="${slot.slotId}" data-lec-title="${lec.title}" data-day-time="${slot.dayTime}" data-date="${d}" ${isFull ? 'disabled' : ''}> 
+                  <i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${d} ${isFull ? '(마감)' : ''}
+                </label>
+                <span class="seat-badge ${isFull ? 'full' : ''}">${isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity}</span>
+              </div>`;
             });
           }
 
-          subfoldersHtml += '<div class="tree-subfolder">' +
-            '<div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">' +
-              '<span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span>' +
-              '<i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>' +
-            '</div>' +
-            '<div class="tree-subfolder-body">' + dateItemsHtml + '</div>' +
-          '</div>';
+          subfoldersHtml += `<div class="tree-subfolder">
+            <div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">
+              <span><i class="fa-solid fa-clock"></i> ${slot.dayTime}</span>
+              <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+            </div>
+            <div class="tree-subfolder-body">${dateItemsHtml}</div>
+          </div>`;
         });
 
-        return '<div class="tree-folder">' +
-          '<div class="tree-folder-header" onclick="toggleTreeFolder(this)">' +
-            '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + ' <span style="font-size:11px; color:var(--text-muted);">(' + lec.instructor + ')</span></span>' +
-            '<i class="fa-solid fa-chevron-down" style="font-size:13px;"></i>' +
-          '</div>' +
-          '<div class="tree-folder-body">' + subfoldersHtml + '</div>' +
-        '</div>';
+        return `<div class="tree-folder">
+          <div class="tree-folder-header" onclick="toggleTreeFolder(this)">
+            <span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ${lec.title} <span style="font-size:11px; color:var(--text-muted);">(${lec.instructor})</span></span>
+            <i class="fa-solid fa-chevron-down" style="font-size:13px;"></i>
+          </div>
+          <div class="tree-folder-body">${subfoldersHtml}</div>
+        </div>`;
       }).join('');
     }
 
     function applySelectedLectures() {
-      const name = document.getElementById('sName').value.trim();
-      const school = document.getElementById('sSchool').value.trim();
-      const phone = document.getElementById('sPhone').value.trim();
-
-      if (!name) { alert('학생 이름을 입력해주세요.'); document.getElementById('sName').focus(); return; }
-      if (!school) { alert('학교/학년을 입력해주세요.'); document.getElementById('sSchool').focus(); return; }
-      if (phone.length !== 4 || isNaN(phone)) { alert('전화번호 뒷 4자리를 정확히 입력해주세요.'); document.getElementById('sPhone').focus(); return; }
-
       const checkedBoxes = document.querySelectorAll('.student-date-chk:checked');
-      if (checkedBoxes.length === 0) { alert('신청할 날짜/시간대 체크박스를 선택해주세요.'); return; }
+      if (checkedBoxes.length === 0) {
+        alert('신청할 날짜/시간대 체크박스를 선택해주세요.');
+        return;
+      }
+
+      const requiredPoints = checkedBoxes.length * 10000;
+      if (currentUser.points < requiredPoints) {
+        alert(`포인트가 부족합니다! (필요 포인트: ${requiredPoints.toLocaleString()}원, 보유 포인트: ${currentUser.points.toLocaleString()}원)\n마이페이지에서 포인트를 충전해주세요.`);
+        return;
+      }
 
       let successCount = 0;
       checkedBoxes.forEach(chk => {
@@ -854,16 +974,22 @@
         const lectureObj = lectures.find(l => l.id === lectureId);
         if (!lectureObj) return;
 
+        if (lectureObj.deadline && new Date() > new Date(lectureObj.deadline)) {
+          alert(`'${lectureTitle}' 특강은 신청 마감 기한이 지났습니다.`);
+          return;
+        }
+
         const newApp = {
           id: Date.now() + Math.floor(Math.random() * 10000),
-          lectureId: lectureId,
-          slotId: slotId,
-          lectureTitle: lectureTitle,
-          dayTime: selectedDate + ' / ' + dayTime,
-          selectedDate: selectedDate,
-          name: name,
-          school: school,
-          phone: phone,
+          lectureId, slotId, lectureTitle,
+          dayTime: `${selectedDate} / ${dayTime}`,
+          selectedDate,
+          userName: currentUser.name,
+          school: currentUser.school,
+          phone: currentUser.phone,
+          bank: currentUser.bank,
+          account: currentUser.account,
+          holder: currentUser.holder,
           instructor: lectureObj.instructor,
           appliedAt: new Date().toLocaleDateString()
         };
@@ -872,79 +998,114 @@
         successCount++;
       });
 
-      saveData();
-      renderStudentLectures();
-      alert(successCount + '개 일정이 정상적으로 신청되었습니다!');
-      document.querySelectorAll('.student-date-chk').forEach(c => c.checked = false);
+      if (successCount > 0) {
+        const totalCost = successCount * 10000;
+        currentUser.points -= totalCost;
+        const idx = users.findIndex(u => u.id === currentUser.id);
+        if (idx !== -1) users[idx] = currentUser;
+
+        saveData();
+        syncLoginState();
+        document.getElementById('applyUserPoints').innerText = currentUser.points.toLocaleString();
+        renderStudentLectures();
+        alert(`${successCount}개 일정이 신청되었습니다! (포인트 ${totalCost.toLocaleString()}원 차감)`);
+      }
     }
 
-    function loadMyApplications() {
-      const name = document.getElementById('mySearchName').value.trim();
-      const school = document.getElementById('mySearchSchool').value.trim();
-      const phone = document.getElementById('mySearchPhone').value.trim();
+    function renderMyPage() {
+      document.getElementById('myInfoName').innerText = currentUser.name;
+      document.getElementById('myInfoSchool').innerText = currentUser.school;
+      document.getElementById('myInfoPoints').innerText = currentUser.points.toLocaleString();
+      document.getElementById('myInfoAccount').innerText = `${currentUser.bank} ${currentUser.account} (${currentUser.holder})`;
+      document.getElementById('guideNamePhone').innerText = `${currentUser.name}${currentUser.phone}`;
 
-      if (!name || !school || !phone) { alert('모든 정보를 입력해주세요.'); return; }
-
-      const myApps = applications.filter(app => app.name === name && app.school === school && app.phone === phone);
-      const container = document.getElementById('myResultContainer');
+      const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school && app.phone === currentUser.phone);
       const listContainer = document.getElementById('myCardListContainer');
-      document.getElementById('myResultTitle').innerText = name + ' (' + school + ')';
 
-      container.style.display = 'block';
       if (myApps.length === 0) {
         listContainer.innerHTML = '<div class="empty-state">신청 내역이 없습니다.</div>';
         return;
       }
 
       listContainer.innerHTML = myApps.map(app => {
-        return '<div class="data-card-item">' +
-          '<div class="data-card-header">' +
-            '<div>' +
-              '<div class="data-card-title">' + app.lectureTitle + '</div>' +
-              '<div class="data-card-sub"><i class="fa-regular fa-calendar"></i> ' + app.dayTime + '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="data-card-body">' +
-            '<div class="data-field"><span class="label">강사</span><span class="value">' + app.instructor + '</span></div>' +
-            '<div class="data-field"><span class="label">신청일시</span><span class="value">' + app.appliedAt + '</span></div>' +
-          '</div>' +
-          '<div class="data-card-footer">' +
-            '<span style="font-size:11px; color:var(--text-muted);">학교: ' + app.school + '</span>' +
-            '<button class="action-badge badge-del" onclick="cancelApplication(' + app.id + ')">수강 취소</button>' +
-          '</div>' +
-        '</div>';
+        const lectureObj = lectures.find(l => l.id === app.lectureId);
+        let isDeadlinePassed = false;
+        if (lectureObj && lectureObj.deadline && new Date() > new Date(lectureObj.deadline)) {
+          isDeadlinePassed = true;
+        }
+
+        return `<div class="data-card-item">
+          <div class="data-card-header">
+            <div>
+              <div class="data-card-title">${app.lectureTitle}</div>
+              <div class="data-card-sub"><i class="fa-regular fa-calendar"></i> ${app.dayTime}</div>
+            </div>
+            <span class="seat-badge">10,000포인트 차감됨</span>
+          </div>
+          <div class="data-card-body">
+            <div class="data-field"><span class="label">강사</span><span class="value">${app.instructor}</span></div>
+            <div class="data-field"><span class="label">신청일시</span><span class="value">${app.appliedAt}</span></div>
+          </div>
+          <div class="data-card-footer">
+            <span style="font-size:11px; color:var(--text-muted);">환불계좌: ${app.bank} ${app.account} (${app.holder})</span>
+            ${isDeadlinePassed 
+              ? '<span style="font-size:11px; color:var(--danger); font-weight:600;">마감기한 경과로 취소 불가</span>' 
+              : `<button class="action-badge badge-del" onclick="cancelApplication(${app.id})">수강 취소 (포인트 즉시 원복)</button>`}
+          </div>
+        </div>`;
       }).join('');
     }
 
     function cancelApplication(appId) {
-      if (!confirm('정말 취소하시겠습니까?')) return;
-      applications = applications.filter(app => app.id !== appId);
-      saveData();
-      loadMyApplications();
-      renderStudentLectures();
-      alert('취소되었습니다.');
+      const app = applications.find(a => a.id === appId);
+      if (!app) return;
+
+      const lectureObj = lectures.find(l => l.id === app.lectureId);
+      if (lectureObj && lectureObj.deadline && new Date() > new Date(lectureObj.deadline)) {
+        alert('마감 기한이 지나 취소할 수 없습니다.');
+        return;
+      }
+
+      if (confirm('해당 수강을 취소하시겠습니까? 10,000포인트가 즉시 원복됩니다.')) {
+        applications = applications.filter(a => a.id !== appId);
+        currentUser.points += 10000;
+
+        const idx = users.findIndex(u => u.id === currentUser.id);
+        if (idx !== -1) users[idx] = currentUser;
+
+        saveData();
+        syncLoginState();
+        renderMyPage();
+        alert('수강이 취소되었고 포인트가 원복되었습니다.');
+      }
     }
 
     function checkAttPassword() {
-      if (document.getElementById('attPasswordInput').value === ADMIN_PW) {
+      const pw = document.getElementById('attPasswordInput').value;
+      if (pw === ADMIN_PW) {
         isAttLoggedIn = true;
         document.getElementById('attLoginBox').style.display = 'none';
         document.getElementById('attDashboardBox').style.display = 'block';
         updateAttendanceView();
-      } else { alert('비밀번호가 틀렸습니다.'); }
+      } else {
+        alert('비밀번호가 틀렸습니다.');
+      }
     }
 
     function logoutAttendance() {
       isAttLoggedIn = false;
-      document.getElementById('attPasswordInput').value = '';
       document.getElementById('attLoginBox').style.display = 'block';
       document.getElementById('attDashboardBox').style.display = 'none';
+      document.getElementById('attPasswordInput').value = '';
     }
 
     function updateAttendanceView() {
       if (!isAttLoggedIn) return;
       const treeContainer = document.getElementById('attTreeContainer');
-      if (lectures.length === 0) { treeContainer.innerHTML = '<div class="empty-state">개설된 특강이 없습니다.</div>'; return; }
+      if (lectures.length === 0) {
+        treeContainer.innerHTML = '<div class="empty-state">개설된 특강이 없습니다.</div>';
+        return;
+      }
 
       treeContainer.innerHTML = lectures.map(lec => {
         let subfoldersHtml = '';
@@ -952,133 +1113,234 @@
           let dateItemsHtml = '';
           if (slot.dates) {
             slot.dates.forEach(d => {
-              const filterKey = lec.id + '_' + slot.slotId + '_' + d;
-              dateItemsHtml += '<div class="tree-action-item" onclick="selectAttFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ')\')">' +
-                '<span><i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + '</span>' +
-                '<button class="action-badge badge-select">조회</button>' +
-              '</div>';
+              dateItemsHtml += `<div class="tree-subfolder-header" style="cursor:pointer; background:white; margin-bottom:4px; border-radius:6px;" onclick="loadAttendanceTable(${lec.id}, '${d}', '${slot.dayTime}', '${lec.title}')">
+                <span><i class="fa-regular fa-calendar"></i> ${d}</span>
+                <span style="font-size:11px; color:var(--primary);">조회 &rarr;</span>
+              </div>`;
             });
           }
-          subfoldersHtml += '<div class="tree-subfolder"><div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)"><span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span><i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div><div class="tree-subfolder-body">' + dateItemsHtml + '</div></div>';
+          subfoldersHtml += `<div class="tree-subfolder open">
+            <div class="tree-subfolder-header"><span>${slot.dayTime}</span></div>
+            <div class="tree-subfolder-body" style="display:flex;">${dateItemsHtml}</div>
+          </div>`;
         });
-        return '<div class="tree-folder"><div class="tree-folder-header" onclick="toggleTreeFolder(this)"><span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + '</span><i class="fa-solid fa-chevron-down" style="font-size:13px;"></i></div><div class="tree-folder-body">' + subfoldersHtml + '</div></div>';
+
+        return `<div class="tree-folder open">
+          <div class="tree-folder-header"><span>${lec.title}</span></div>
+          <div class="tree-folder-body" style="display:flex;">${subfoldersHtml}</div>
+        </div>`;
       }).join('');
     }
 
-    function selectAttFilter(filterKey, titleInfo) {
-      const parts = filterKey.split('_');
-      const lecId = parseInt(parts[0]), slotId = parseInt(parts[1]), targetDate = parts[2];
-      const filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && app.selectedDate === targetDate);
+    function loadAttendanceTable(lecId, dateStr, dayTimeStr, lecTitle) {
       const container = document.getElementById('attTableContainer');
+      const targetApps = applications.filter(app => app.lectureId === lecId && app.selectedDate === dateStr);
 
-      if (filteredApps.length === 0) {
-        container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">' + titleInfo + '</div><div class="empty-state">신청 학생이 없습니다.</div>';
+      if (targetApps.length === 0) {
+        container.innerHTML = '<div class="empty-state">해당 날짜에 신청한 학생이 없습니다.</div>';
         return;
       }
 
-      container.innerHTML = '<div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">조회: ' + titleInfo + ' (' + filteredApps.length + '명)</div>' +
-        '<div class="mobile-card-list">' +
-          filteredApps.map(app => {
-            const attKey = filterKey + '_' + app.id;
-            const isChecked = attendanceData[attKey] ? 'checked' : '';
-            const memoVal = attendanceMemo[attKey] || '';
+      const keyBase = `${lecId}_${dateStr}`;
+      let rowsHtml = targetApps.map((app, index) => {
+        const attKey = `${keyBase}_${app.id}`;
+        const isChecked = attendanceData[attKey] ? 'checked' : '';
+        const memoText = attendanceMemo[attKey] || '';
 
-            return '<div class="data-card-item">' +
-              '<div class="data-card-header">' +
-                '<div>' +
-                  '<div class="data-card-title">' + app.name + ' <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">(' + app.school + ')</span></div>' +
-                  '<div class="data-card-sub">연락처 뒷자리: ' + app.phone + '</div>' +
-                '</div>' +
-              '</div>' +
-              '<div class="data-card-body" style="grid-template-columns: 1fr;">' +
-                '<div style="display:flex; align-items:center; gap:8px;">' +
-                  '<input type="checkbox" style="width:18px;height:18px;cursor:pointer;" ' + isChecked + ' onchange="attendanceData[\'' + attKey + '\'] = this.checked; saveData();">' +
-                  '<span style="font-size:13px; font-weight:600;">출석 체크</span>' +
-                '</div>' +
-              '</div>' +
-              '<div><input type="text" class="form-control" style="padding:6px 10px; font-size:12px;" placeholder="메모 입력..." value="' + memoVal + '" oninput="attendanceMemo[\'' + attKey + '\'] = this.value; saveData();"></div>' +
-            '</div>';
-          }).join('') +
-        '</div>';
+        return `<tr>
+          <td>${index + 1}</td>
+          <td><strong>${app.userName}</strong></td>
+          <td>${app.school}</td>
+          <td>${app.bank} ${app.account}<br><span style="font-size:11px; color:var(--text-muted);">예금주: ${app.holder}</span></td>
+          <td style="text-align:center;"><input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${isChecked} onchange="saveAttendanceStatus('${attKey}', this.checked)"></td>
+          <td><input type="text" class="form-control" style="padding:6px 10px; font-size:12px;" value="${memoText}" placeholder="특이사항" oninput="saveAttendanceMemo('${attKey}', this.value)"></td>
+        </tr>`;
+      }).join('');
+
+      container.innerHTML = `<h4 style="margin-bottom:10px; font-size:15px; color:var(--primary);">${lecTitle} (${dateStr} / ${dayTimeStr}) 출석부</h4>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>번호</th><th>이름</th><th>학교/학년</th><th>환불 계좌</th><th>출석</th><th>비고</th></tr></thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>`;
+    }
+
+    function saveAttendanceStatus(attKey, isChecked) {
+      attendanceData[attKey] = isChecked;
+      saveData();
+    }
+
+    function saveAttendanceMemo(attKey, text) {
+      attendanceMemo[attKey] = text;
+      saveData();
     }
 
     function checkAdminPassword() {
-      if (document.getElementById('adminPasswordInput').value === ADMIN_PW) {
-        isAdminLoggedIn = true;
+      const pw = document.getElementById('adminPasswordInput').value;
+      if (pw === ADMIN_PW) {
         document.getElementById('adminLoginBox').style.display = 'none';
         document.getElementById('adminDashboardBox').style.display = 'block';
         updateAdminView();
-      } else { alert('비밀번호가 틀렸습니다.'); }
+      } else {
+        alert('관리자 비밀번호가 틀렸습니다.');
+      }
     }
 
     function logoutAdmin() {
-      isAdminLoggedIn = false;
-      document.getElementById('adminPasswordInput').value = '';
       document.getElementById('adminLoginBox').style.display = 'block';
       document.getElementById('adminDashboardBox').style.display = 'none';
+      document.getElementById('adminPasswordInput').value = '';
     }
 
     function updateAdminView() {
-      if (!isAdminLoggedIn) return;
-      document.getElementById('statTotalLec').innerText = lectures.length + '개';
-      document.getElementById('statTotalApp').innerText = applications.length + '건';
+      document.getElementById('statTotalLec').innerText = `${lectures.length}개`;
+      document.getElementById('statTotalUsers').innerText = `${users.length}명`;
 
-      const adminLecTable = document.getElementById('adminLectureTableBody');
+      const tbody = document.getElementById('adminLectureTableBody');
       if (lectures.length === 0) {
-        adminLecTable.innerHTML = '<tr><td colspan="6" class="empty-state">등록된 특강이 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">개설된 특강이 없습니다.</td></tr>';
       } else {
-        adminLecTable.innerHTML = lectures.map((lec, idx) => 
-          '<tr>' +
-            '<td>' + (idx + 1) + '</td>' +
-            '<td>' + (lec.category || '기본') + '</td>' +
-            '<td><strong>' + lec.title + '</strong></td>' +
-            '<td>' + lec.instructor + '</td>' +
-            '<td>' +
-              '<button class="action-badge badge-edit" onclick="moveLecture(' + lec.id + ', -1)" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>' +
-              '<button class="action-badge badge-edit" onclick="moveLecture(' + lec.id + ', 1)" ' + (idx === lectures.length - 1 ? 'disabled' : '') + '>▼</button>' +
-            '</td>' +
-            '<td>' +
-              '<button class="action-badge badge-edit" onclick="editLecture(' + lec.id + ')">수정</button> ' +
-              '<button class="action-badge badge-del" onclick="deleteLecture(' + lec.id + ')">삭제</button>' +
-            '</td>' +
-          '</tr>'
-        ).join('');
+        tbody.innerHTML = lectures.map((lec, index) => {
+          return `<tr>
+            <td>${index + 1}</td>
+            <td>${lec.category || '기본'}</td>
+            <td><strong>${lec.title}</strong></td>
+            <td>${lec.instructor}</td>
+            <td style="font-size:11px; color:var(--text-muted);">${lec.deadline ? lec.deadline.replace('T', ' ') : '기한 없음'}</td>
+            <td>
+              <button class="action-badge badge-edit" onclick="editLecture(${lec.id})">수정</button> 
+              <button class="action-badge badge-del" onclick="deleteLecture(${lec.id})">삭제</button>
+            </td>
+          </tr>`;
+        }).join('');
       }
 
-      updateAdminTree();
-      renderAdminApplications();
-      if (document.getElementById('slotBuilderContainer').children.length === 0) addSlotRow();
+      const userContainer = document.getElementById('adminUserCardContainer');
+      if (users.length === 0) {
+        userContainer.innerHTML = '<div class="empty-state">가입된 회원이 없습니다.</div>';
+      } else {
+        userContainer.innerHTML = users.map(u => {
+          return `<div class="data-card-item">
+            <div class="data-card-header">
+              <div>
+                <div class="data-card-title">${u.name} <span style="font-size:12px; color:var(--text-muted);">(${u.school})</span></div>
+                <div class="data-card-sub">연락처 뒷자리: ${u.phone} / 가입일: ${u.joinedAt}</div>
+              </div>
+              <span class="seat-badge" style="background:#d1fae5; color:#065f46;">
+                보유 포인트: ${u.points.toLocaleString()}원
+              </span>
+            </div>
+            <div class="data-card-body">
+              <div class="data-field"><span class="label">환불 계좌</span><span class="value">${u.bank} ${u.account} (${u.holder})</span></div>
+            </div>
+            <div class="data-card-footer">
+              <span style="font-size:11px; color:var(--text-muted);">관리자 제어</span>
+              <div style="display:flex; gap:6px;">
+                <button class="action-badge badge-success" onclick="adminManualAddPoints(${u.id})">수동 포인트 지급(+2만 원)</button>
+                <button class="action-badge badge-del" onclick="adminDeleteUser(${u.id})">회원 삭제</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      if (document.getElementById('slotBuilderContainer').children.length === 0) {
+        addSlotRow();
+      }
     }
 
-    function addSlotRow() {
+    function adminManualAddPoints(userId) {
+      const targetUser = users.find(u => u.id === userId);
+      if (!targetUser) return;
+
+      const input = prompt(`[${targetUser.name}]님에게 수동으로 지급할 포인트 금액을 입력하세요 (예: 20000)`, "20000");
+      if (input !== null) {
+        const addAmount = parseInt(input, 10);
+        if (isNaN(addAmount) || addAmount <= 0) {
+          alert('올바른 숫자를 입력해주세요.');
+          return;
+        }
+
+        targetUser.points += addAmount;
+        saveData();
+        updateAdminView();
+        if (currentUser && currentUser.id === targetUser.id) {
+          currentUser = targetUser;
+          syncLoginState();
+        }
+        alert(`${targetUser.name}님에게 ${addAmount.toLocaleString()}포인트가 수동 지급되었습니다.`);
+      }
+    }
+
+    function adminDeleteUser(userId) {
+      const targetUser = users.find(u => u.id === userId);
+      if (!targetUser) return;
+
+      if (confirm(`정말로 [${targetUser.name}(${targetUser.school})] 회원을 삭제하시겠습니까?\n회원이 신청한 내역도 함께 정리됩니다.`)) {
+        // 해당 회원이 로그인 중이었다면 로그아웃 처리
+        if (currentUser && currentUser.id === userId) {
+          currentUser = null;
+        }
+
+        // 회원 목록에서 제거
+        users = users.filter(u => u.id !== userId);
+        // 해당 회원이 신청했던 수강 내역도 함께 삭제 (선택 사항)
+        applications = applications.filter(app => !(app.userName === targetUser.name && app.school === targetUser.school && app.phone === targetUser.phone));
+
+        saveData();
+        syncLoginState();
+        updateAdminView();
+        alert('회원 정보가 삭제되었습니다.');
+      }
+    }
+
+    function addSlotRow(existingSlot = null) {
       const container = document.getElementById('slotBuilderContainer');
-      const rowDiv = document.createElement('div');
-      rowDiv.className = 'slot-input-row';
-      rowDiv.innerHTML = 
-        '<div class="slot-main-info">' +
-          '<input type="text" class="form-control slot-daytime" placeholder="수요일 오후 2-4시" style="font-size:13px; padding:8px 10px;">' +
-          '<input type="number" class="form-control slot-capacity" value="40" placeholder="정원" style="font-size:13px; padding:8px 10px;" min="1">' +
-          '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:8px 10px;">삭제</button>' +
-        '</div>' +
-        '<div class="date-picker-box">' +
-          '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter (예: 7/22)" style="width:150px; font-size:12px; padding:5px 8px;" onkeydown="handleDateInputKey(event, this)">' +
-          '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:4px;"></div>' +
-        '</div>';
-      container.appendChild(rowDiv);
+      const div = document.createElement('div');
+      div.className = 'slot-input-row';
+      div.style.marginBottom = '10px';
+
+      const dayTimeVal = existingSlot ? existingSlot.dayTime : '';
+      const capVal = existingSlot ? existingSlot.capacity : 40;
+      const datesVal = existingSlot && existingSlot.dates ? existingSlot.dates.join(', ') : '';
+
+      div.innerHTML = `<div style="display:flex; gap:8px; margin-bottom:5px;">
+        <input type="text" class="form-control slot-daytime" placeholder="예: 수요일 2-4시" value="${dayTimeVal}">
+        <input type="number" class="form-control slot-capacity" placeholder="정원" value="${capVal}" style="width:90px;">
+        <button type="button" class="action-badge badge-del" onclick="this.closest('.slot-input-row').remove()">삭제</button>
+      </div>
+      <div class="date-picker-box">
+        <input type="text" class="form-control slot-dates-input" placeholder="날짜 입력 후 엔터 (예: 7/22)" style="padding:8px; font-size:13px;" onkeydown="handleDateInputKey(event)">
+        <div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;"></div>
+      </div>`;
+
+      container.appendChild(div);
+
+      const tagContainer = div.querySelector('.date-tags-container');
+      if (datesVal) {
+        datesVal.split(',').forEach(d => addDateTag(tagContainer, d.trim()));
+      }
     }
 
-    function handleDateInputKey(event, inputEl) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        const val = inputEl.value.trim();
-        if (!val) return;
-        const container = inputEl.nextElementSibling;
-        const tag = document.createElement('span');
-        tag.className = 'date-tag';
-        tag.innerHTML = val + ' <i class="fa-solid fa-xmark" onclick="this.parentElement.remove()"></i>';
-        container.appendChild(tag);
-        inputEl.value = '';
+    function handleDateInputKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const input = e.target;
+        const val = input.value.trim();
+        if (val) {
+          const tagContainer = input.closest('.date-picker-box').querySelector('.date-tags-container');
+          addDateTag(tagContainer, val);
+          input.value = '';
+        }
       }
+    }
+
+    function addDateTag(container, dateStr) {
+      const span = document.createElement('span');
+      span.className = 'date-tag';
+      span.innerHTML = `${dateStr} <i class="fa-solid fa-xmark" onclick="this.parentElement.remove()"></i>`;
+      container.appendChild(span);
     }
 
     function saveOrUpdateLecture() {
@@ -1087,35 +1349,72 @@
       const title = document.getElementById('newTitle').value.trim();
       const desc = document.getElementById('newDesc').value.trim();
       const instructor = document.getElementById('newInstructor').value.trim();
+      const deadline = document.getElementById('newDeadline').value;
 
-      if (!title || !instructor) { alert('특강명과 강사명을 입력해주세요.'); return; }
+      if (!title || !instructor) {
+        alert('특강명과 강사명은 필수 입력 항목입니다.');
+        return;
+      }
 
       const slotRows = document.querySelectorAll('.slot-input-row');
       let slots = [];
       slotRows.forEach((row, idx) => {
         const dayTime = row.querySelector('.slot-daytime').value.trim();
         const capacity = parseInt(row.querySelector('.slot-capacity').value) || 40;
+        const dateTags = row.querySelectorAll('.date-tag');
         let dates = [];
-        row.querySelectorAll('.date-tag').forEach(t => dates.push(t.textContent.trim()));
+        dateTags.forEach(tag => dates.push(tag.textContent.replace(' ', '').trim()));
+
         if (dayTime) {
-          slots.push({ slotId: Date.now() + idx, dayTime: dayTime, capacity: capacity, dates: dates });
+          slots.push({ slotId: Date.now() + idx, dayTime, capacity, dates });
         }
       });
 
-      if (slots.length === 0) { alert('최소 1개의 수업 시간 슬롯을 추가해주세요.'); return; }
+      if (slots.length === 0) {
+        alert('최소 1개 이상의 수업 시간 슬롯과 날짜를 추가해주세요.');
+        return;
+      }
 
       if (editId) {
         const lec = lectures.find(l => l.id === parseInt(editId));
-        if (lec) { lec.category = category; lec.title = title; lec.desc = desc; lec.instructor = instructor; lec.slots = slots; }
-        alert('수정되었습니다.');
+        if (lec) {
+          lec.category = category;
+          lec.title = title;
+          lec.desc = desc;
+          lec.instructor = instructor;
+          lec.deadline = deadline;
+          lec.slots = slots;
+        }
+        alert('특강이 수정되었습니다.');
       } else {
-        lectures.push({ id: Date.now(), category, title, desc, instructor, slots });
-        alert('개설되었습니다.');
+        lectures.push({ id: Date.now(), category, title, desc, instructor, deadline, slots });
+        alert('새 특강이 개설되었습니다.');
       }
 
       saveData();
       resetLectureForm();
       updateAdminView();
+    }
+
+    function editLecture(id) {
+      const lec = lectures.find(l => l.id === id);
+      if (!lec) return;
+
+      document.getElementById('editLectureId').value = lec.id;
+      document.getElementById('newCategory').value = lec.category || '';
+      document.getElementById('newTitle').value = lec.title || '';
+      document.getElementById('newDesc').value = lec.desc || '';
+      document.getElementById('newInstructor').value = lec.instructor || '';
+      document.getElementById('newDeadline').value = lec.deadline || '';
+
+      const slotContainer = document.getElementById('slotBuilderContainer');
+      slotContainer.innerHTML = '';
+      lec.slots.forEach(slot => addSlotRow(slot));
+
+      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 특강 정보 수정';
+      document.getElementById('submitLecBtn').innerText = '수정 완료';
+      document.getElementById('cancelEditBtn').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function resetLectureForm() {
@@ -1124,161 +1423,44 @@
       document.getElementById('newTitle').value = '';
       document.getElementById('newDesc').value = '';
       document.getElementById('newInstructor').value = '';
+      document.getElementById('newDeadline').value = '';
       document.getElementById('slotBuilderContainer').innerHTML = '';
-      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록';
-      document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-plus"></i> 특강 개설하기';
-      document.getElementById('cancelEditBtn').style.display = 'none';
       addSlotRow();
+
+      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록';
+      document.getElementById('submitLecBtn').innerText = '특강 개설하기';
+      document.getElementById('cancelEditBtn').style.display = 'none';
     }
 
-    function editLecture(lecId) {
-      const lec = lectures.find(l => l.id === lecId);
-      if (!lec) return;
-      document.getElementById('editLectureId').value = lec.id;
-      document.getElementById('newCategory').value = lec.category || '';
-      document.getElementById('newTitle').value = lec.title;
-      document.getElementById('newDesc').value = lec.desc || '';
-      document.getElementById('newInstructor').value = lec.instructor;
-
-      const container = document.getElementById('slotBuilderContainer');
-      container.innerHTML = '';
-      lec.slots.forEach(slot => {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'slot-input-row';
-        rowDiv.innerHTML = 
-          '<div class="slot-main-info">' +
-            '<input type="text" class="form-control slot-daytime" value="' + slot.dayTime + '" style="font-size:13px; padding:8px 10px;">' +
-            '<input type="number" class="form-control slot-capacity" value="' + slot.capacity + '" style="font-size:13px; padding:8px 10px;" min="1">' +
-            '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:8px 10px;">삭제</button>' +
-          '</div>' +
-          '<div class="date-picker-box">' +
-            '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter" style="width:150px; font-size:12px; padding:5px 8px;" onkeydown="handleDateInputKey(event, this)">' +
-            '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:4px;">' +
-              (slot.dates ? slot.dates.map(d => '<span class="date-tag">' + d + ' <i class="fa-solid fa-xmark" onclick="this.parentElement.remove()"></i></span>').join('') : '') +
-            '</div>' +
-          '</div>';
-        container.appendChild(rowDiv);
-      });
-
-      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 특강 수정';
-      document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-check"></i> 수정 저장';
-      document.getElementById('cancelEditBtn').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function deleteLecture(lecId) {
-      if (!confirm('삭제하시겠습니까?')) return;
-      lectures = lectures.filter(l => l.id !== lecId);
-      applications = applications.filter(app => app.lectureId !== lecId);
-      saveData();
-      updateAdminView();
-    }
-
-    function moveLecture(lecId, direction) {
-      const idx = lectures.findIndex(l => l.id === lecId);
-      const targetIdx = idx + direction;
-      if (targetIdx < 0 || targetIdx >= lectures.length) return;
-      const temp = lectures[idx];
-      lectures[idx] = lectures[targetIdx];
-      lectures[targetIdx] = temp;
-      saveData();
-      updateAdminView();
-    }
-
-    function updateAdminTree() {
-      const treeContainer = document.getElementById('adminTreeContainer');
-      let html = '<div class="tree-folder open" onclick="selectAdminFilter(\'all\', \'전체 신청 명단 보기\')"><div class="tree-folder-header" style="background:#e0e7ff; color:var(--primary);"><span><i class="fa-solid fa-list"></i> 전체 보기</span></div></div>';
-
-      if (lectures.length > 0) {
-        html += lectures.map(lec => {
-          let subfoldersHtml = '';
-          lec.slots.forEach(slot => {
-            let dateItemsHtml = '';
-            if (slot.dates) {
-              slot.dates.forEach(d => {
-                const filterKey = lec.id + '_' + slot.slotId + '_' + d;
-                dateItemsHtml += '<div class="tree-action-item" onclick="selectAdminFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ')\')">' +
-                  '<span><i class="fa-regular fa-calendar"></i> ' + d + '</span><button class="action-badge badge-select">조회</button>' +
-                '</div>';
-              });
-            }
-            subfoldersHtml += '<div class="tree-subfolder"><div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)"><span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span><i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div><div class="tree-subfolder-body">' + dateItemsHtml + '</div></div>';
-          });
-          return '<div class="tree-folder"><div class="tree-folder-header" onclick="toggleTreeFolder(this)"><span><i class="fa-solid fa-book"></i> ' + lec.title + '</span><i class="fa-solid fa-chevron-down" style="font-size:13px;"></i></div><div class="tree-folder-body">' + subfoldersHtml + '</div></div>';
-        }).join('');
+    function deleteLecture(id) {
+      if (confirm('특강을 삭제하시겠습니까?')) {
+        lectures = lectures.filter(l => l.id !== id);
+        applications = applications.filter(a => a.lectureId !== id);
+        saveData();
+        updateAdminView();
       }
-      treeContainer.innerHTML = html;
-    }
-
-    function selectAdminFilter(filterKey, titleInfo) {
-      currentAdminFilter = filterKey;
-      document.getElementById('adminSelectedTitleInfo').innerText = '선택된 필터: ' + titleInfo;
-      renderAdminApplications();
-    }
-
-    function renderAdminApplications() {
-      const container = document.getElementById('adminCardListContainer');
-      let filteredApps = applications;
-
-      if (currentAdminFilter !== 'all') {
-        const parts = currentAdminFilter.split('_');
-        const lecId = parseInt(parts[0]), slotId = parseInt(parts[1]), targetDate = parts[2];
-        filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && app.selectedDate === targetDate);
-      }
-
-      if (filteredApps.length === 0) {
-        container.innerHTML = '<div class="empty-state">신청 내역이 없습니다.</div>';
-        return;
-      }
-
-      container.innerHTML = filteredApps.map(app => {
-        return '<div class="data-card-item">' +
-          '<div class="data-card-header">' +
-            '<div>' +
-              '<div class="data-card-title">' + app.name + ' <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">(' + app.school + ')</span></div>' +
-              '<div class="data-card-sub">' + app.lectureTitle + ' / ' + app.dayTime + '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="data-card-body">' +
-            '<div class="data-field"><span class="label">전화번호 뒷자리</span><span class="value">' + app.phone + '</span></div>' +
-            '<div class="data-field"><span class="label">신청일시</span><span class="value">' + app.appliedAt + '</span></div>' +
-          '</div>' +
-          '<div class="data-card-footer">' +
-            '<span></span>' +
-            '<button class="action-badge badge-del" onclick="adminDeleteApp(' + app.id + ')">삭제</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    }
-
-    function adminDeleteApp(appId) {
-      if (!confirm('삭제하시겠습니까?')) return;
-      applications = applications.filter(app => app.id !== appId);
-      saveData();
-      updateAdminView();
     }
 
     function exportToExcel() {
-      if (applications.length === 0) { alert('데이터가 없습니다.'); return; }
-      let csv = '\uFEFF특강명,일정/시간,학생이름,학교/학년,전화번호뒷4자리,신청일시\n';
-      applications.forEach(app => {
-        csv += '"' + app.lectureTitle + '","' + app.dayTime + '","' + app.name + '","' + app.school + '","' + app.phone + '","' + app.appliedAt + '"\n';
+      if (users.length === 0) {
+        alert('내보낼 회원 데이터가 없습니다.');
+        return;
+      }
+      let csvContent = "\uFEFF이름,학교,연락처뒷자리,은행명,계좌번호,예금주,보유포인트,가입일\n";
+      users.forEach(u => {
+        csvContent += `"${u.name}","${u.school}","${u.phone}","${u.bank}","${u.account}","${u.holder}","${u.points}","${u.joinedAt}"\n`;
       });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = '특강_신청명단_' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.download = '학원_회원_및_포인트_현황.csv';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
     }
 
-    window.onload = function() {
-      updateStudentCategoryFilter();
-      renderStudentLectures();
-    };
+    syncLoginState();
   </script>
 </body>
 </html>
