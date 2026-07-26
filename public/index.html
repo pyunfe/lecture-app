@@ -460,7 +460,7 @@
         <!-- 로그인 카드 -->
         <div class="card" style="margin-bottom:0;">
           <h3><i class="fa-solid fa-right-to-bracket"></i> 로그인</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">등록하신 정보로 로그인하여 특강을 신청하세요.</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">이름, 학교, 전화번호 뒷 4자리로 간편하게 로그인하세요.</p>
           <div class="form-group">
             <label>학생 이름</label>
             <input type="text" id="loginName" class="form-control" placeholder="홍길동">
@@ -471,11 +471,7 @@
           </div>
           <div class="form-group">
             <label>전화번호 뒷 4자리</label>
-            <input type="password" id="loginPhone" class="form-control" maxlength="4" placeholder="1234">
-          </div>
-          <div class="form-group">
-            <label>비밀번호</label>
-            <input type="password" id="loginPassword" class="form-control" placeholder="비밀번호 입력">
+            <input type="text" id="loginPhone" class="form-control" maxlength="4" placeholder="1234">
           </div>
           <button class="btn" onclick="handleLogin()"><i class="fa-solid fa-check"></i> 로그인하기</button>
         </div>
@@ -483,7 +479,7 @@
         <!-- 회원가입 카드 -->
         <div class="card" style="margin-bottom:0;">
           <h3><i class="fa-solid fa-user-plus"></i> 간편 회원가입</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">간단한 정보 입력 후 포인트를 충전하여 특강을 신청하세요.</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">비밀번호 없이 빠르게 가입하고 특강을 신청하세요.</p>
           <div class="form-group">
             <label>학생 이름</label>
             <input type="text" id="regName" class="form-control" placeholder="홍길동">
@@ -494,11 +490,7 @@
           </div>
           <div class="form-group">
             <label>전화번호 뒷 4자리</label>
-            <input type="password" id="regPhone" class="form-control" maxlength="4" placeholder="1234">
-          </div>
-          <div class="form-group">
-            <label>비밀번호</label>
-            <input type="password" id="regPassword" class="form-control" placeholder="비밀번호 설정">
+            <input type="text" id="regPhone" class="form-control" maxlength="4" placeholder="1234">
           </div>
           <div class="form-group">
             <label>환불받을 계좌 정보 (은행명, 계좌번호, 예금주명)</label>
@@ -777,12 +769,11 @@
       const name = document.getElementById('regName').value.trim();
       const school = document.getElementById('regSchool').value.trim();
       const phone = document.getElementById('regPhone').value.trim();
-      const password = document.getElementById('regPassword').value.trim();
       const bank = document.getElementById('regBank').value.trim();
       const account = document.getElementById('regAccount').value.trim();
       const holder = document.getElementById('regHolder').value.trim();
 
-      if (!name || !school || !phone || !password || !bank || !account || !holder) {
+      if (!name || !school || !phone || !bank || !account || !holder) {
         alert('모든 필수 정보를 입력해주세요.');
         return;
       }
@@ -799,7 +790,7 @@
 
       const newUser = {
         id: Date.now(),
-        name, school, phone, password, bank, account, holder,
+        name, school, phone, bank, account, holder,
         points: 0,
         joinedAt: new Date().toLocaleDateString()
       };
@@ -818,16 +809,15 @@
       const name = document.getElementById('loginName').value.trim();
       const school = document.getElementById('loginSchool').value.trim();
       const phone = document.getElementById('loginPhone').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
 
-      if (!name || !school || !phone || !password) {
+      if (!name || !school || !phone) {
         alert('로그인 정보를 모두 입력해주세요.');
         return;
       }
 
-      const user = users.find(u => u.name === name && u.school === school && u.phone === phone && u.password === password);
+      const user = users.find(u => u.name === name && u.school === school && u.phone === phone);
       if (!user) {
-        alert('일치하는 회원 정보를 찾을 수 없습니다. 이름, 학교, 전화번호, 비밀번호를 확인해주세요.');
+        alert('일치하는 회원 정보를 찾을 수 없습니다. 이름, 학교, 전화번호 뒷 4자리를 확인해주세요.');
         return;
       }
 
@@ -1278,14 +1268,11 @@
       if (!targetUser) return;
 
       if (confirm(`정말로 [${targetUser.name}(${targetUser.school})] 회원을 삭제하시겠습니까?\n회원이 신청한 내역도 함께 정리됩니다.`)) {
-        // 해당 회원이 로그인 중이었다면 로그아웃 처리
         if (currentUser && currentUser.id === userId) {
           currentUser = null;
         }
 
-        // 회원 목록에서 제거
         users = users.filter(u => u.id !== userId);
-        // 해당 회원이 신청했던 수강 내역도 함께 삭제 (선택 사항)
         applications = applications.filter(app => !(app.userName === targetUser.name && app.school === targetUser.school && app.phone === targetUser.phone));
 
         saveData();
