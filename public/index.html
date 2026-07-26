@@ -30,7 +30,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 40px 20px;
+      padding: 20px 10px;
     }
 
     .app-container {
@@ -38,15 +38,20 @@
       max-width: 1400px;
       background: var(--card-bg);
       border-radius: 20px;
-      padding: 40px;
+      padding: 25px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    @media(min-width: 768px) {
+      .app-container { padding: 40px; }
+      body { padding: 40px 20px; }
     }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 35px;
+      margin-bottom: 25px;
       border-bottom: 2px solid var(--border-color);
       padding-bottom: 20px;
       flex-wrap: wrap;
@@ -54,31 +59,48 @@
     }
 
     header h1 {
-      font-size: 26px;
+      font-size: 22px;
       color: var(--text-main);
       font-weight: 700;
       border-left: 6px solid var(--primary);
-      padding-left: 15px;
+      padding-left: 12px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+    }
+
+    @media(min-width: 768px) {
+      header h1 { font-size: 26px; padding-left: 15px; }
     }
 
     .tab-buttons {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
+      width: 100%;
+    }
+
+    @media(min-width: 768px) {
+      .tab-buttons { width: auto; }
     }
 
     .tab-btn {
-      padding: 10px 20px;
+      flex: 1;
+      min-width: calc(50% - 8px);
+      padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid var(--border-color);
       background: #f8fafc;
       font-weight: 600;
+      font-size: 13px;
       cursor: pointer;
       transition: all 0.2s ease;
       color: var(--text-muted);
+      text-align: center;
+    }
+
+    @media(min-width: 768px) {
+      .tab-btn { flex: unset; min-width: auto; padding: 10px 20px; font-size: 15px; }
     }
 
     .tab-btn.active {
@@ -88,62 +110,62 @@
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
     }
 
-    .view-section {
-      display: none;
-    }
-
-    .view-section.active {
-      display: block;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+    .view-section { display: none; }
+    .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .student-grid {
+    .student-grid, .admin-layout-grid, .att-layout-grid {
       display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 35px;
+      grid-template-columns: 1fr;
+      gap: 20px;
     }
 
-    @media(max-width: 900px) {
-      .student-grid { grid-template-columns: 1fr; }
+    @media(min-width: 960px) {
+      .student-grid { grid-template-columns: 1fr 1.5fr; gap: 35px; }
+      .admin-layout-grid, .att-layout-grid { grid-template-columns: 380px 1fr; gap: 25px; align-items: start; }
     }
 
     .card {
       background: #f8fafc;
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 30px;
+      padding: 20px;
       margin-bottom: 20px;
     }
 
+    @media(min-width: 768px) {
+      .card { padding: 30px; }
+    }
+
     .card h3 {
-      font-size: 18px;
-      margin-bottom: 20px;
+      font-size: 17px;
+      margin-bottom: 15px;
       color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .form-group {
-      margin-bottom: 20px;
+    @media(min-width: 768px) {
+      .card h3 { font-size: 18px; margin-bottom: 20px; }
     }
 
+    .form-group { margin-bottom: 16px; }
     .form-group label {
       display: block;
       font-size: 13px;
       font-weight: 600;
       color: var(--text-muted);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .form-control {
       width: 100%;
-      padding: 12px 16px;
+      padding: 12px 14px;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
       font-size: 15px;
@@ -176,21 +198,11 @@
 
     .btn:hover { background: var(--primary-hover); }
     .btn:active { transform: scale(0.98); }
-
     .btn-secondary { background: #64748b; }
     .btn-secondary:hover { background: #475569; }
-
     .btn-success { background: var(--success); color: white; }
     .btn-success:hover { background: #059669; }
-
-    .btn-warning { background: var(--warning); color: white; }
-    .btn-warning:hover { background: #d97706; }
-
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 13px;
-      width: auto;
-    }
+    .btn-sm { padding: 6px 12px; font-size: 13px; width: auto; }
 
     .filter-container {
       margin-bottom: 15px;
@@ -203,31 +215,31 @@
     .lecture-list {
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      max-height: 600px;
+      gap: 12px;
+      max-height: 550px;
       overflow-y: auto;
-      padding-right: 5px;
+      padding-right: 2px;
     }
 
     .tree-folder {
       background: white;
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       overflow: hidden;
       transition: all 0.2s;
       flex-shrink: 0;
     }
 
     .tree-folder-header {
-      padding: 16px 20px;
+      padding: 14px 16px;
       background: #f8fafc;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--text-main);
       user-select: none;
       border-bottom: 1px solid transparent;
@@ -238,28 +250,19 @@
       background: #f1f5f9;
     }
 
-    .tree-folder-header:hover {
-      background: #f1f5f9;
-    }
-
-    .tree-folder-header .fa-chevron-down {
-      transition: transform 0.2s ease;
-    }
-    .tree-folder.open .tree-folder-header .fa-chevron-down {
-      transform: rotate(180deg);
-    }
+    .tree-folder-header:hover { background: #f1f5f9; }
+    .tree-folder-header .fa-chevron-down { transition: transform 0.2s ease; }
+    .tree-folder.open .tree-folder-header .fa-chevron-down { transform: rotate(180deg); }
 
     .tree-folder-body {
       display: none; 
-      padding: 15px;
+      padding: 12px;
       background: white;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .tree-folder.open .tree-folder-body {
-      display: flex; 
-    }
+    .tree-folder.open .tree-folder-body { display: flex; }
 
     .tree-subfolder {
       border: 1px solid var(--border-color);
@@ -269,13 +272,13 @@
     }
 
     .tree-subfolder-header {
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       color: var(--primary);
       background: #f8fafc;
       user-select: none;
@@ -286,24 +289,18 @@
       background: #eff6ff;
     }
 
-    .tree-subfolder-header .fa-chevron-down {
-      transition: transform 0.2s ease;
-    }
-    .tree-subfolder.open .tree-subfolder-header .fa-chevron-down {
-      transform: rotate(180deg);
-    }
+    .tree-subfolder-header .fa-chevron-down { transition: transform 0.2s ease; }
+    .tree-subfolder.open .tree-subfolder-header .fa-chevron-down { transform: rotate(180deg); }
 
     .tree-subfolder-body {
       display: none; 
-      padding: 12px;
+      padding: 10px;
       background: white;
       flex-direction: column;
       gap: 8px;
     }
 
-    .tree-subfolder.open .tree-subfolder-body {
-      display: flex; 
-    }
+    .tree-subfolder.open .tree-subfolder-body { display: flex; }
 
     .date-checkbox-item, .tree-action-item {
       display: flex;
@@ -311,17 +308,13 @@
       align-items: center;
       font-size: 13px;
       background: #f8fafc;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      transition: background 0.1s;
       cursor: pointer;
     }
 
-    .date-checkbox-item:hover, .tree-action-item:hover {
-      background: #f1f5f9;
-    }
-
+    .date-checkbox-item:hover, .tree-action-item:hover { background: #f1f5f9; }
     .date-checkbox-item label {
       display: flex;
       align-items: center;
@@ -330,135 +323,137 @@
       color: var(--text-main);
       cursor: pointer;
     }
-
-    .date-checkbox-item input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
+    .date-checkbox-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 
     .seat-badge {
       font-size: 11px;
-      padding: 3px 8px;
+      padding: 3px 7px;
       border-radius: 20px;
       background: #e0e7ff;
       color: var(--primary);
       font-weight: 700;
+      white-space: nowrap;
     }
-
-    .seat-badge.full {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .admin-layout-grid, .att-layout-grid {
-      display: grid;
-      grid-template-columns: 380px 1fr !important;
-      gap: 25px;
-      align-items: start;
-    }
-
-    @media(max-width: 960px) {
-      .admin-layout-grid, .att-layout-grid {
-        grid-template-columns: 1fr !important;
-      }
-    }
+    .seat-badge.full { background: #fee2e2; color: #991b1b; }
 
     .admin-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-bottom: 25px;
     }
 
-    @media(max-width: 768px) {
-      .admin-stats { grid-template-columns: 1fr; }
+    @media(min-width: 768px) {
+      .admin-stats { grid-template-columns: repeat(3, 1fr); gap: 20px; }
     }
 
     .stat-card {
       background: #f8fafc;
       border: 1px solid var(--border-color);
       border-radius: 14px;
-      padding: 20px;
+      padding: 16px;
       text-align: center;
     }
 
-    .stat-card h4 {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
+    .stat-card h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+    .stat-card .number { font-size: 22px; font-weight: 700; color: var(--primary); }
+
+    /* 모바일 최적화 카드형 리스트 스타일 */
+    .mobile-card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .stat-card .number {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .data-card-item {
       background: white;
-      border-radius: 10px;
-      overflow: hidden;
       border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
-    th, td {
-      padding: 14px 16px;
-      text-align: left;
-      font-size: 14px;
+    .data-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
       border-bottom: 1px solid var(--border-color);
-      vertical-align: middle;
+      padding-bottom: 10px;
     }
 
-    th {
-      background: #f1f5f9;
+    .data-card-title {
+      font-weight: 700;
+      font-size: 15px;
       color: var(--text-main);
+    }
+
+    .data-card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .data-card-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .data-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .data-field span.label {
+      font-size: 11px;
+      color: var(--text-muted);
       font-weight: 600;
     }
 
+    .data-field span.value {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .data-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px dashed var(--border-color);
+      padding-top: 10px;
+      margin-top: 2px;
+    }
+
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
+    th, td { padding: 12px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    th { background: #f1f5f9; color: var(--text-main); font-weight: 600; }
     tr:last-child td { border-bottom: none; }
 
     .action-badge {
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       border: none;
-      margin-right: 3px;
     }
 
     .badge-del { background: #fee2e2; color: #991b1b; }
     .badge-del:hover { background: #fecaca; }
-
     .badge-edit { background: #fef3c7; color: #92400e; }
-    .badge-edit:hover { background: #fde68a; }
-
-    .badge-move { background: #e2e8f0; color: #334155; }
-    .badge-move:hover { background: #cbd5e1; }
-
     .badge-select { background: #e0e7ff; color: var(--primary); }
-    .badge-select:hover { background: #c7d2fe; }
 
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .auth-box {
-      max-width: 450px;
-      margin: 60px auto;
-      text-align: center;
-    }
+    .empty-state { text-align: center; padding: 35px; color: var(--text-muted); font-size: 13px; }
+    .auth-box { max-width: 420px; margin: 40px auto; text-align: center; }
 
     .admin-slot-builder {
       background: #f8fafc;
       border: 1px solid var(--border-color);
-      padding: 15px;
+      padding: 12px;
       border-radius: 10px;
       margin-bottom: 20px;
     }
@@ -466,17 +461,20 @@
     .slot-input-row {
       background: white;
       border: 1px solid var(--border-color);
-      padding: 12px;
+      padding: 10px;
       border-radius: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .slot-main-info {
       display: grid;
-      grid-template-columns: 2fr 1fr auto;
-      gap: 10px;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+    @media(min-width: 600px) {
+      .slot-main-info { grid-template-columns: 2fr 1fr auto; }
     }
 
     .date-picker-box {
@@ -493,18 +491,15 @@
     .date-tag {
       background: #e0e7ff;
       color: var(--primary);
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
-
-    .date-tag i {
-      cursor: pointer;
-    }
+    .date-tag i { cursor: pointer; }
     .date-tag i:hover { color: var(--danger); }
   </style>
 </head>
@@ -514,9 +509,9 @@
       <h1><i class="fa-solid fa-graduation-cap"></i> 스마트 학원 특강 신청 시스템</h1>
       <div class="tab-buttons">
         <button class="tab-btn active" onclick="switchTab('student')"><i class="fa-solid fa-user-pen"></i> 수강생 신청</button>
-        <button class="tab-btn" onclick="switchTab('mypage')"><i class="fa-solid fa-id-card"></i> 마이페이지(조회/취소)</button>
-        <button class="tab-btn" onclick="switchTab('attendance')"><i class="fa-solid fa-clipboard-user"></i> 출석부(선생님용)</button>
-        <button class="tab-btn" onclick="switchTab('admin')"><i class="fa-solid fa-lock"></i> 관리자 모드</button>
+        <button class="tab-btn" onclick="switchTab('mypage')"><i class="fa-solid fa-id-card"></i> 마이페이지</button>
+        <button class="tab-btn" onclick="switchTab('attendance')"><i class="fa-solid fa-clipboard-user"></i> 출석부</button>
+        <button class="tab-btn" onclick="switchTab('admin')"><i class="fa-solid fa-lock"></i> 관리자</button>
       </div>
     </header>
 
@@ -531,25 +526,20 @@
           </div>
           <div class="form-group">
             <label>학교 / 학년</label>
-            <input type="text" id="sSchool" class="form-control" placeholder="예: 청라고1">
+            <input type="text" id="sSchool" class="form-control" placeholder="예: 해원고1">
           </div>
           <div class="form-group">
             <label>전화번호 뒷 4자리</label>
             <input type="password" id="sPhone" class="form-control" maxlength="4" placeholder="예: 1234">
           </div>
-          
-          <button class="btn" onclick="applySelectedLectures()" style="margin-bottom: 15px;"><i class="fa-solid fa-check-double"></i> 선택한 일정 한 번에 신청하기</button>
-
-          <div style="background: #e0e7ff; padding: 15px; border-radius: 10px; font-size: 13px; color: var(--primary); line-height: 1.5;">
-            <i class="fa-solid fa-circle-info"></i> 우측 폴더를 클릭하여 펼치신 후, 원하시는 날짜들의 체크박스를 선택하고 위 <strong>[선택한 일정 한 번에 신청하기]</strong> 버튼을 누르세요!
-          </div>
+          <button class="btn" onclick="applySelectedLectures()" style="margin-top: 10px;"><i class="fa-solid fa-check-double"></i> 선택한 일정 한 번에 신청하기</button>
         </div>
 
         <div class="card">
           <h3><i class="fa-solid fa-book-open"></i> 개설된 특강 및 날짜 선택</h3>
           <div class="filter-container">
-            <label style="font-size:13px; font-weight:600; color:var(--text-muted);">폴더(분류) 필터:</label>
-            <select id="studentCategoryFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderStudentLectures()">
+            <label style="font-size:12px; font-weight:600; color:var(--text-muted);">분류 필터:</label>
+            <select id="studentCategoryFilter" class="form-control" style="width: auto; padding: 6px 10px; font-size: 13px;" onchange="renderStudentLectures()">
               <option value="전체">전체 보기</option>
             </select>
           </div>
@@ -562,14 +552,14 @@
     <div id="mypageView" class="view-section">
       <div class="card auth-box">
         <h3><i class="fa-solid fa-magnifying-glass"></i> 내 신청 내역 조회</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">학생 이름, 학교/학년, 그리고 전화번호 뒷 4자리를 입력하시면 내역을 확인하고 취소할 수 있습니다.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">정보를 입력하시면 내역 확인 및 수강 취소가 가능합니다.</p>
         <div class="form-group" style="text-align: left;">
           <label>학생 이름</label>
           <input type="text" id="mySearchName" class="form-control" placeholder="홍길동">
         </div>
         <div class="form-group" style="text-align: left;">
           <label>학교 / 학년</label>
-          <input type="text" id="mySearchSchool" class="form-control" placeholder="예: 청라고1">
+          <input type="text" id="mySearchSchool" class="form-control" placeholder="예: 해원고1">
         </div>
         <div class="form-group" style="text-align: left;">
           <label>전화번호 뒷 4자리</label>
@@ -578,22 +568,10 @@
         <button class="btn" onclick="loadMyApplications()"><i class="fa-solid fa-search"></i> 내역 조회하기</button>
       </div>
 
-      <div id="myResultContainer" style="display:none; margin-top:30px;">
+      <div id="myResultContainer" style="display:none; margin-top:20px;">
         <div class="card">
-          <h3><i class="fa-solid fa-list-check"></i> <span id="myResultTitle"></span>님의 신청 및 수강 취소 관리</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>신청 특강명</th>
-                <th>선택한 날짜 및 시간</th>
-                <th>학교/학년</th>
-                <th>강사</th>
-                <th>신청 일시</th>
-                <th>관리</th>
-              </tr>
-            </thead>
-            <tbody id="myTableBody"></tbody>
-          </table>
+          <h3><i class="fa-solid fa-list-check"></i> <span id="myResultTitle"></span>님의 신청 내역</h3>
+          <div id="myCardListContainer" class="mobile-card-list"></div>
         </div>
       </div>
     </div>
@@ -602,25 +580,25 @@
     <div id="attendanceView" class="view-section">
       <div id="attLoginBox" class="card auth-box">
         <h3><i class="fa-solid fa-shield-halved"></i> 출석부 접근 인증</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">선생님 전용 출석부입니다. 비밀번호를 입력해주세요.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">비밀번호를 입력해주세요.</p>
         <div class="form-group" style="text-align: left;">
           <label>비밀번호</label>
-          <input type="password" id="attPasswordInput" class="form-control" placeholder="비밀번호를 입력하세요">
+          <input type="password" id="attPasswordInput" class="form-control" placeholder="비밀번호 입력">
         </div>
         <button class="btn" onclick="checkAttPassword()">출석부 열기</button>
       </div>
 
       <div id="attDashboardBox" style="display: none;">
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-            <h3><i class="fa-solid fa-clipboard-user"></i> 출석부 관리 (특강 폴더 트리 선택)</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h3><i class="fa-solid fa-clipboard-user"></i> 출석부 관리</h3>
             <button class="btn btn-secondary btn-sm" onclick="logoutAttendance()"><i class="fa-solid fa-right-from-bracket"></i> 잠금</button>
           </div>
           
           <div class="att-layout-grid">
             <div>
-              <label style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px; display:block;">조회할 특강 및 날짜 선택 폴더:</label>
-              <div id="attTreeContainer" class="lecture-list" style="max-height: 500px;"></div>
+              <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">특강/날짜 선택 폴더:</label>
+              <div id="attTreeContainer" class="lecture-list" style="max-height: 400px;"></div>
             </div>
             <div>
               <div id="attTableContainer">
@@ -636,10 +614,10 @@
     <div id="adminView" class="view-section">
       <div id="adminLoginBox" class="card auth-box">
         <h3><i class="fa-solid fa-shield-halved"></i> 관리자 인증</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">관리자 전용 페이지입니다. 비밀번호를 입력해주세요.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">관리자 비밀번호를 입력해주세요.</p>
         <div class="form-group" style="text-align: left;">
           <label>관리자 비밀번호</label>
-          <input type="password" id="adminPasswordInput" class="form-control" placeholder="비밀번호를 입력하세요">
+          <input type="password" id="adminPasswordInput" class="form-control" placeholder="비밀번호 입력">
         </div>
         <button class="btn" onclick="checkAdminPassword()">로그인</button>
       </div>
@@ -647,108 +625,87 @@
       <div id="adminDashboardBox" style="display: none;">
         <div class="admin-stats">
           <div class="stat-card">
-            <h4>총 개설 특강 수</h4>
+            <h4>총 개설 특강</h4>
             <div class="number" id="statTotalLec">0개</div>
           </div>
           <div class="stat-card">
-            <h4>총 누적 신청 건수</h4>
+            <h4>총 누적 신청</h4>
             <div class="number" id="statTotalApp">0건</div>
           </div>
           <div class="stat-card">
             <h4>시스템 제어</h4>
-            <button class="btn btn-secondary" onclick="logoutAdmin()" style="margin-top: 5px; padding: 8px; font-size: 13px;"><i class="fa-solid fa-right-from-bracket"></i> 관리자 로그아웃</button>
+            <button class="btn btn-secondary" onclick="logoutAdmin()" style="margin-top: 5px; padding: 8px; font-size: 12px;"><i class="fa-solid fa-right-from-bracket"></i> 로그아웃</button>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
-          <div class="card" id="lectureFormCard">
-            <h3 id="formModeTitle"><i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (캘린더 일정 선택)</h3>
-            <input type="hidden" id="editLectureId" value="">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-              <div class="form-group">
-                <label>특강 폴더(분류)</label>
-                <input type="text" id="newCategory" class="form-control" placeholder="예: 국어, 수학 등">
-              </div>
-              <div class="form-group">
-                <label>특강명</label>
-                <input type="text" id="newTitle" class="form-control" placeholder="예: 한글 맞춤법">
-              </div>
+        <div class="card" id="lectureFormCard" style="margin-bottom: 20px;">
+          <h3 id="formModeTitle"><i class="fa-solid fa-circle-plus"></i> 새 특강 등록</h3>
+          <input type="hidden" id="editLectureId" value="">
+          <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>폴더(분류)</label>
+              <input type="text" id="newCategory" class="form-control" placeholder="예: 국어">
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-              <div class="form-group">
-                <label>특강 설명</label>
-                <input type="text" id="newDesc" class="form-control" placeholder="예: 놓치기 쉬운 맞춤법 완벽 교정">
-              </div>
-              <div class="form-group">
-                <label>강사명</label>
-                <input type="text" id="newInstructor" class="form-control" placeholder="예: 강윤지T">
-              </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>특강명</label>
+              <input type="text" id="newTitle" class="form-control" placeholder="예: 한글 맞춤법">
             </div>
-
-            <div class="form-group">
-              <label style="display: flex; justify-content: space-between; align-items: center;">
-                <span>수업 시간대 및 캘린더 날짜 설정 (다중 추가 가능)</span>
-                <button type="button" class="btn btn-sm" onclick="addSlotRow()"><i class="fa-solid fa-plus"></i> 시간대 슬롯 추가</button>
-              </label>
-              <div id="slotBuilderContainer" class="admin-slot-builder"></div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>특강 설명</label>
+              <input type="text" id="newDesc" class="form-control" placeholder="예: 맞춤법 완벽 교정">
             </div>
-
-            <div style="display: flex; gap: 10px;">
-              <button class="btn" id="submitLecBtn" onclick="saveOrUpdateLecture()"><i class="fa-solid fa-plus"></i> 특강 개설하기</button>
-              <button class="btn btn-secondary" id="cancelEditBtn" onclick="resetLectureForm()" style="display: none; width: auto; padding: 14px 20px;">수정 취소</button>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>강사명</label>
+              <input type="text" id="newInstructor" class="form-control" placeholder="예: 강윤지T">
             </div>
           </div>
 
-          <div class="card">
-            <h3><i class="fa-solid fa-folder-tree"></i> 개설된 특강 관리 (순서 변경 및 수정/삭제)</h3>
-            <div style="overflow-x: auto; margin-bottom: 30px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>순서</th>
-                    <th>폴더</th>
-                    <th>특강명 / 일정 슬롯 요약</th>
-                    <th>강사</th>
-                    <th>순서 이동</th>
-                    <th>관리</th>
-                  </tr>
-                </thead>
-                <tbody id="adminLectureTableBody"></tbody>
-              </table>
-            </div>
+          <div class="form-group" style="margin-top: 15px;">
+            <label style="display: flex; justify-content: space-between; align-items: center;">
+              <span>수업 시간 및 날짜 설정</span>
+              <button type="button" class="btn btn-sm" onclick="addSlotRow()"><i class="fa-solid fa-plus"></i> 슬롯 추가</button>
+            </label>
+            <div id="slotBuilderContainer" class="admin-slot-builder" style="margin-top:8px;"></div>
+          </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-              <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리 (폴더 트리 선택)</h3>
-              <div style="display: flex; gap: 10px; align-items: center;">
-                <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 현재 선택된 목록 엑셀 추출</button>
-              </div>
-            </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn" id="submitLecBtn" onclick="saveOrUpdateLecture()"><i class="fa-solid fa-plus"></i> 특강 개설하기</button>
+            <button class="btn btn-secondary" id="cancelEditBtn" onclick="resetLectureForm()" style="display: none; width: auto;">취소</button>
+          </div>
+        </div>
 
-            <div class="admin-layout-grid" style="margin-bottom: 20px;">
-              <div>
-                <label style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px; display:block;">조회 필터 폴더 트리:</label>
-                <div id="adminTreeContainer" class="lecture-list" style="max-height: 450px;"></div>
-              </div>
-              <div>
-                <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;" id="adminSelectedTitleInfo">선택된 필터: 전체 보기</div>
-                <div style="overflow-x: auto; max-height: 450px;">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>신청 특강명</th>
-                        <th>선택한 날짜 / 시간</th>
-                        <th>학생 이름</th>
-                        <th>학교/학년</th>
-                        <th>전화번호</th>
-                        <th>관리</th>
-                      </tr>
-                    </thead>
-                    <tbody id="adminTableBody"></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+        <div class="card">
+          <h3><i class="fa-solid fa-folder-tree"></i> 개설된 특강 관리</h3>
+          <div style="overflow-x: auto; margin-bottom: 25px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>순서</th>
+                  <th>폴더</th>
+                  <th>특강명</th>
+                  <th>강사</th>
+                  <th>이동</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="adminLectureTableBody"></tbody>
+            </table>
+          </div>
 
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
+            <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 엑셀(CSV) 다운로드</button>
+          </div>
+
+          <div class="admin-layout-grid">
+            <div>
+              <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">필터 폴더 트리:</label>
+              <div id="adminTreeContainer" class="lecture-list" style="max-height: 400px;"></div>
+            </div>
+            <div>
+              <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px;" id="adminSelectedTitleInfo">선택된 필터: 전체 보기</div>
+              <div id="adminCardListContainer" class="mobile-card-list" style="max-height: 450px; overflow-y:auto;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -775,11 +732,10 @@
     let applications = JSON.parse(localStorage.getItem('acad_apps')) || [];
     let attendanceData = JSON.parse(localStorage.getItem('acad_att')) || {}; 
     let attendanceMemo = JSON.parse(localStorage.getItem('acad_att_memo')) || {};
+    
     let isAdminLoggedIn = false;
     let isAttLoggedIn = false;
-
     let currentAdminFilter = 'all';
-    let currentAttFilter = '';
 
     function saveData() {
       localStorage.setItem('acad_lectures', JSON.stringify(lectures));
@@ -814,23 +770,13 @@
     function updateStudentCategoryFilter() {
       const filterSelect = document.getElementById('studentCategoryFilter');
       const categories = [...new Set(lectures.map(l => l.category || '기본'))];
-      
       let optionsHtml = '<option value="전체">전체 보기</option>';
-      categories.forEach(cat => {
-        optionsHtml += '<option value="' + cat + '">' + cat + '</option>';
-      });
+      categories.forEach(cat => { optionsHtml += '<option value="' + cat + '">' + cat + '</option>'; });
       filterSelect.innerHTML = optionsHtml;
     }
 
-    function toggleTreeFolder(headerEl) {
-      const folderEl = headerEl.parentElement;
-      folderEl.classList.toggle('open');
-    }
-
-    function toggleTreeSubfolder(headerEl) {
-      const subfolderEl = headerEl.parentElement;
-      subfolderEl.classList.toggle('open');
-    }
+    function toggleTreeFolder(headerEl) { headerEl.parentElement.classList.toggle('open'); }
+    function toggleTreeSubfolder(headerEl) { headerEl.parentElement.classList.toggle('open'); }
 
     function renderStudentLectures() {
       const listEl = document.getElementById('studentLectureList');
@@ -848,7 +794,6 @@
 
       listEl.innerHTML = filteredLectures.map(lec => {
         let subfoldersHtml = '';
-        
         lec.slots.forEach(slot => {
           let dateItemsHtml = '';
           if (slot.dates && slot.dates.length > 0) {
@@ -865,24 +810,12 @@
                 '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity) + '</span>' +
               '</div>';
             });
-          } else {
-            const currentCount = applications.filter(app => app.slotId === slot.slotId).length;
-            const remainingSeats = slot.capacity - currentCount;
-            const isFull = remainingSeats <= 0;
-
-            dateItemsHtml += '<div class="date-checkbox-item">' +
-              '<label>' +
-                '<input type="checkbox" class="student-date-chk" data-lec-id="' + lec.id + '" data-slot-id="' + slot.slotId + '" data-lec-title="' + lec.title + '" data-day-time="' + slot.dayTime + '" data-date="전체" ' + (isFull ? 'disabled' : '') + '> ' +
-                '<i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime +
-              '</label>' +
-              '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity) + '</span>' +
-            '</div>';
           }
 
           subfoldersHtml += '<div class="tree-subfolder">' +
             '<div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">' +
               '<span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span>' +
-              '<i class="fa-solid fa-chevron-down" style="font-size:12px;"></i>' +
+              '<i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>' +
             '</div>' +
             '<div class="tree-subfolder-body">' + dateItemsHtml + '</div>' +
           '</div>';
@@ -890,8 +823,8 @@
 
         return '<div class="tree-folder">' +
           '<div class="tree-folder-header" onclick="toggleTreeFolder(this)">' +
-            '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + ' <span style="font-size:12px; color:var(--text-muted); font-weight:500;">(' + lec.instructor + ')</span></span>' +
-            '<i class="fa-solid fa-chevron-down" style="font-size:14px;"></i>' +
+            '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + ' <span style="font-size:11px; color:var(--text-muted);">(' + lec.instructor + ')</span></span>' +
+            '<i class="fa-solid fa-chevron-down" style="font-size:13px;"></i>' +
           '</div>' +
           '<div class="tree-folder-body">' + subfoldersHtml + '</div>' +
         '</div>';
@@ -904,18 +837,13 @@
       const phone = document.getElementById('sPhone').value.trim();
 
       if (!name) { alert('학생 이름을 입력해주세요.'); document.getElementById('sName').focus(); return; }
-      if (!school) { alert('학교/학년을 입력해주세요 (예: 청라고1).'); document.getElementById('sSchool').focus(); return; }
-      if (phone.length !== 4 || isNaN(phone)) { alert('전화번호 뒷 4자리를 숫자로 정확히 입력해주세요.'); document.getElementById('sPhone').focus(); return; }
+      if (!school) { alert('학교/학년을 입력해주세요.'); document.getElementById('sSchool').focus(); return; }
+      if (phone.length !== 4 || isNaN(phone)) { alert('전화번호 뒷 4자리를 정확히 입력해주세요.'); document.getElementById('sPhone').focus(); return; }
 
       const checkedBoxes = document.querySelectorAll('.student-date-chk:checked');
-      if (checkedBoxes.length === 0) {
-        alert('신청할 날짜/시간대 체크박스를 하나 이상 선택해주세요.');
-        return;
-      }
+      if (checkedBoxes.length === 0) { alert('신청할 날짜/시간대 체크박스를 선택해주세요.'); return; }
 
       let successCount = 0;
-      let duplicateCount = 0;
-
       checkedBoxes.forEach(chk => {
         const lectureId = parseInt(chk.dataset.lecId);
         const slotId = parseInt(chk.dataset.slotId);
@@ -925,26 +853,13 @@
 
         const lectureObj = lectures.find(l => l.id === lectureId);
         if (!lectureObj) return;
-        const slotObj = lectureObj.slots.find(s => s.slotId === slotId);
-        if (!slotObj) return;
-
-        const currentCount = applications.filter(app => app.slotId === slotId && app.selectedDate === selectedDate).length;
-        if (currentCount >= slotObj.capacity) return;
-
-        const alreadyApplied = applications.some(app => app.slotId === slotId && app.selectedDate === selectedDate && app.name === name && app.phone === phone);
-        if (alreadyApplied) {
-          duplicateCount++;
-          return;
-        }
-
-        const displayInfo = selectedDate !== '전체' ? selectedDate + ' / ' + dayTime : dayTime;
 
         const newApp = {
           id: Date.now() + Math.floor(Math.random() * 10000),
           lectureId: lectureId,
           slotId: slotId,
           lectureTitle: lectureTitle,
-          dayTime: displayInfo,
+          dayTime: selectedDate + ' / ' + dayTime,
           selectedDate: selectedDate,
           name: name,
           school: school,
@@ -959,13 +874,7 @@
 
       saveData();
       renderStudentLectures();
-
-      let msg = successCount + '개의 일정이 성공적으로 신청되었습니다!';
-      if (duplicateCount > 0) {
-        msg += '\n(이미 중복 신청된 ' + duplicateCount + '건은 제외되었습니다)';
-      }
-      alert(msg);
-
+      alert(successCount + '개 일정이 정상적으로 신청되었습니다!');
       document.querySelectorAll('.student-date-chk').forEach(c => c.checked = false);
     }
 
@@ -974,37 +883,41 @@
       const school = document.getElementById('mySearchSchool').value.trim();
       const phone = document.getElementById('mySearchPhone').value.trim();
 
-      if (!name || !school || !phone) {
-        alert('이름, 학교/학년, 전화번호 뒷 4자리를 모두 입력해주세요.');
-        return;
-      }
+      if (!name || !school || !phone) { alert('모든 정보를 입력해주세요.'); return; }
 
       const myApps = applications.filter(app => app.name === name && app.school === school && app.phone === phone);
       const container = document.getElementById('myResultContainer');
-      const tbody = document.getElementById('myTableBody');
+      const listContainer = document.getElementById('myCardListContainer');
       document.getElementById('myResultTitle').innerText = name + ' (' + school + ')';
 
+      container.style.display = 'block';
       if (myApps.length === 0) {
-        container.style.display = 'block';
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">신청 내역이 존재하지 않습니다.</td></tr>';
+        listContainer.innerHTML = '<div class="empty-state">신청 내역이 없습니다.</div>';
         return;
       }
 
-      container.style.display = 'block';
-      tbody.innerHTML = myApps.map(app => 
-        '<tr>' +
-          '<td><strong>' + app.lectureTitle + '</strong></td>' +
-          '<td>' + app.dayTime + '</td>' +
-          '<td>' + app.school + '</td>' +
-          '<td>' + app.instructor + '</td>' +
-          '<td>' + app.appliedAt + '</td>' +
-          '<td><button class="action-badge badge-del" onclick="cancelApplication(' + app.id + ')">수강 취소</button></td>' +
-        '</tr>'
-      ).join('');
+      listContainer.innerHTML = myApps.map(app => {
+        return '<div class="data-card-item">' +
+          '<div class="data-card-header">' +
+            '<div>' +
+              '<div class="data-card-title">' + app.lectureTitle + '</div>' +
+              '<div class="data-card-sub"><i class="fa-regular fa-calendar"></i> ' + app.dayTime + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="data-card-body">' +
+            '<div class="data-field"><span class="label">강사</span><span class="value">' + app.instructor + '</span></div>' +
+            '<div class="data-field"><span class="label">신청일시</span><span class="value">' + app.appliedAt + '</span></div>' +
+          '</div>' +
+          '<div class="data-card-footer">' +
+            '<span style="font-size:11px; color:var(--text-muted);">학교: ' + app.school + '</span>' +
+            '<button class="action-badge badge-del" onclick="cancelApplication(' + app.id + ')">수강 취소</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
     }
 
     function cancelApplication(appId) {
-      if (!confirm('정말 이 수강 신청을 취소하시겠습니까?')) return;
+      if (!confirm('정말 취소하시겠습니까?')) return;
       applications = applications.filter(app => app.id !== appId);
       saveData();
       loadMyApplications();
@@ -1013,15 +926,12 @@
     }
 
     function checkAttPassword() {
-      const pw = document.getElementById('attPasswordInput').value;
-      if (pw === ADMIN_PW) {
+      if (document.getElementById('attPasswordInput').value === ADMIN_PW) {
         isAttLoggedIn = true;
         document.getElementById('attLoginBox').style.display = 'none';
         document.getElementById('attDashboardBox').style.display = 'block';
         updateAttendanceView();
-      } else {
-        alert('비밀번호가 일치하지 않습니다.');
-      }
+      } else { alert('비밀번호가 틀렸습니다.'); }
     }
 
     function logoutAttendance() {
@@ -1034,109 +944,71 @@
     function updateAttendanceView() {
       if (!isAttLoggedIn) return;
       const treeContainer = document.getElementById('attTreeContainer');
-      
-      if (lectures.length === 0) {
-        treeContainer.innerHTML = '<div class="empty-state">개설된 특강이 없습니다.</div>';
-        return;
-      }
+      if (lectures.length === 0) { treeContainer.innerHTML = '<div class="empty-state">개설된 특강이 없습니다.</div>'; return; }
 
       treeContainer.innerHTML = lectures.map(lec => {
         let subfoldersHtml = '';
         lec.slots.forEach(slot => {
           let dateItemsHtml = '';
-          if (slot.dates && slot.dates.length > 0) {
+          if (slot.dates) {
             slot.dates.forEach(d => {
               const filterKey = lec.id + '_' + slot.slotId + '_' + d;
-              dateItemsHtml += '<div class="tree-action-item" onclick="selectAttFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ' / ' + slot.dayTime + ')\')">' +
+              dateItemsHtml += '<div class="tree-action-item" onclick="selectAttFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ')\')">' +
                 '<span><i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + '</span>' +
                 '<button class="action-badge badge-select">조회</button>' +
               '</div>';
             });
-          } else {
-            const filterKey = lec.id + '_' + slot.slotId + '_전체';
-            dateItemsHtml += '<div class="tree-action-item" onclick="selectAttFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + slot.dayTime + ')\')">' +
-              '<span><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime + '</span>' +
-              '<button class="action-badge badge-select">조회</button>' +
-            '</div>';
           }
-
-          subfoldersHtml += '<div class="tree-subfolder">' +
-            '<div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">' +
-              '<span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span>' +
-              '<i class="fa-solid fa-chevron-down" style="font-size:12px;"></i>' +
-            '</div>' +
-            '<div class="tree-subfolder-body">' + dateItemsHtml + '</div>' +
-          '</div>';
+          subfoldersHtml += '<div class="tree-subfolder"><div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)"><span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span><i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div><div class="tree-subfolder-body">' + dateItemsHtml + '</div></div>';
         });
-
-        return '<div class="tree-folder">' +
-          '<div class="tree-folder-header" onclick="toggleTreeFolder(this)">' +
-            '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + '</span>' +
-            '<i class="fa-solid fa-chevron-down" style="font-size:14px;"></i>' +
-          '</div>' +
-          '<div class="tree-folder-body">' + subfoldersHtml + '</div>' +
-        '</div>';
+        return '<div class="tree-folder"><div class="tree-folder-header" onclick="toggleTreeFolder(this)"><span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + '</span><i class="fa-solid fa-chevron-down" style="font-size:13px;"></i></div><div class="tree-folder-body">' + subfoldersHtml + '</div></div>';
       }).join('');
     }
 
     function selectAttFilter(filterKey, titleInfo) {
-      currentAttFilter = filterKey;
       const parts = filterKey.split('_');
-      const lecId = parseInt(parts[0]);
-      const slotId = parseInt(parts[1]);
-      const targetDate = parts[2];
-
-      const filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && (targetDate === '전체' || app.selectedDate === targetDate));
+      const lecId = parseInt(parts[0]), slotId = parseInt(parts[1]), targetDate = parts[2];
+      const filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && app.selectedDate === targetDate);
       const container = document.getElementById('attTableContainer');
 
-      container.innerHTML = '<div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">조회 중인 일정: ' + titleInfo + ' (총 ' + filteredApps.length + '명)</div>' +
-        '<table>' +
-          '<thead>' +
-            '<tr>' +
-              '<th style="width: 70px; text-align: center;">출석</th>' +
-              '<th>학생 이름</th>' +
-              '<th>학교/학년</th>' +
-              '<th>비고 / 메모</th>' +
-            '</tr>' +
-          '</thead>' +
-          '<tbody>' +
-            (filteredApps.length === 0 ? '<tr><td colspan="4" class="empty-state">신청한 학생이 없습니다.</td></tr>' :
-              filteredApps.map(app => {
-                const attKey = filterKey + '_' + app.id;
-                const isChecked = attendanceData[attKey] ? 'checked' : '';
-                const memoVal = attendanceMemo[attKey] || '';
-                return '<tr>' +
-                  '<td style="text-align: center;"><input type="checkbox" style="width:18px;height:18px;cursor:pointer;" ' + isChecked + ' onchange="toggleAttendanceStatus(\'' + attKey + '\', this.checked)"></td>' +
-                  '<td><strong>' + app.name + '</strong></td>' +
-                  '<td>' + app.school + '</td>' +
-                  '<td><input type="text" class="form-control" style="padding:6px 10px; font-size:13px;" placeholder="메모 입력..." value="' + memoVal + '" oninput="updateAttendanceMemo(\'' + attKey + '\', this.value)"></td>' +
-                '</tr>';
-              }).join('')
-            ) +
-          '</tbody>' +
-        '</table>';
-    }
+      if (filteredApps.length === 0) {
+        container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">' + titleInfo + '</div><div class="empty-state">신청 학생이 없습니다.</div>';
+        return;
+      }
 
-    function toggleAttendanceStatus(attKey, status) {
-      attendanceData[attKey] = status;
-      saveData();
-    }
+      container.innerHTML = '<div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">조회: ' + titleInfo + ' (' + filteredApps.length + '명)</div>' +
+        '<div class="mobile-card-list">' +
+          filteredApps.map(app => {
+            const attKey = filterKey + '_' + app.id;
+            const isChecked = attendanceData[attKey] ? 'checked' : '';
+            const memoVal = attendanceMemo[attKey] || '';
 
-    function updateAttendanceMemo(attKey, memoText) {
-      attendanceMemo[attKey] = memoText;
-      saveData();
+            return '<div class="data-card-item">' +
+              '<div class="data-card-header">' +
+                '<div>' +
+                  '<div class="data-card-title">' + app.name + ' <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">(' + app.school + ')</span></div>' +
+                  '<div class="data-card-sub">연락처 뒷자리: ' + app.phone + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="data-card-body" style="grid-template-columns: 1fr;">' +
+                '<div style="display:flex; align-items:center; gap:8px;">' +
+                  '<input type="checkbox" style="width:18px;height:18px;cursor:pointer;" ' + isChecked + ' onchange="attendanceData[\'' + attKey + '\'] = this.checked; saveData();">' +
+                  '<span style="font-size:13px; font-weight:600;">출석 체크</span>' +
+                '</div>' +
+              '</div>' +
+              '<div><input type="text" class="form-control" style="padding:6px 10px; font-size:12px;" placeholder="메모 입력..." value="' + memoVal + '" oninput="attendanceMemo[\'' + attKey + '\'] = this.value; saveData();"></div>' +
+            '</div>';
+          }).join('') +
+        '</div>';
     }
 
     function checkAdminPassword() {
-      const pw = document.getElementById('adminPasswordInput').value;
-      if (pw === ADMIN_PW) {
+      if (document.getElementById('adminPasswordInput').value === ADMIN_PW) {
         isAdminLoggedIn = true;
         document.getElementById('adminLoginBox').style.display = 'none';
         document.getElementById('adminDashboardBox').style.display = 'block';
         updateAdminView();
-      } else {
-        alert('관리자 비밀번호가 틀렸습니다.');
-      }
+      } else { alert('비밀번호가 틀렸습니다.'); }
     }
 
     function logoutAdmin() {
@@ -1148,7 +1020,6 @@
 
     function updateAdminView() {
       if (!isAdminLoggedIn) return;
-
       document.getElementById('statTotalLec').innerText = lectures.length + '개';
       document.getElementById('statTotalApp').innerText = applications.length + '건';
 
@@ -1160,14 +1031,14 @@
           '<tr>' +
             '<td>' + (idx + 1) + '</td>' +
             '<td>' + (lec.category || '기본') + '</td>' +
-            '<td><strong>' + lec.title + '</strong><br><span style="font-size:12px;color:var(--text-muted);">' + lec.desc + '</span></td>' +
+            '<td><strong>' + lec.title + '</strong></td>' +
             '<td>' + lec.instructor + '</td>' +
             '<td>' +
-              '<button class="action-badge badge-move" onclick="moveLecture(' + lec.id + ', -1)" ' + (idx === 0 ? 'disabled' : '') + '>▲ 위로</button>' +
-              '<button class="action-badge badge-move" onclick="moveLecture(' + lec.id + ', 1)" ' + (idx === lectures.length - 1 ? 'disabled' : '') + '>▼ 아래로</button>' +
+              '<button class="action-badge badge-edit" onclick="moveLecture(' + lec.id + ', -1)" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>' +
+              '<button class="action-badge badge-edit" onclick="moveLecture(' + lec.id + ', 1)" ' + (idx === lectures.length - 1 ? 'disabled' : '') + '>▼</button>' +
             '</td>' +
             '<td>' +
-              '<button class="action-badge badge-edit" onclick="editLecture(' + lec.id + ')">수정</button>' +
+              '<button class="action-badge badge-edit" onclick="editLecture(' + lec.id + ')">수정</button> ' +
               '<button class="action-badge badge-del" onclick="deleteLecture(' + lec.id + ')">삭제</button>' +
             '</td>' +
           '</tr>'
@@ -1176,30 +1047,23 @@
 
       updateAdminTree();
       renderAdminApplications();
-      if (document.getElementById('slotBuilderContainer').children.length === 0) {
-        addSlotRow();
-      }
+      if (document.getElementById('slotBuilderContainer').children.length === 0) addSlotRow();
     }
 
     function addSlotRow() {
       const container = document.getElementById('slotBuilderContainer');
-      const rowId = Date.now() + Math.floor(Math.random() * 1000);
-
       const rowDiv = document.createElement('div');
       rowDiv.className = 'slot-input-row';
-      rowDiv.dataset.rowId = rowId;
       rowDiv.innerHTML = 
         '<div class="slot-main-info">' +
-          '<input type="text" class="form-control slot-daytime" placeholder="예: 수요일 오후 2-4시" style="font-size:14px; padding:8px 12px;">' +
-          '<input type="number" class="form-control slot-capacity" value="40" placeholder="정원" style="font-size:14px; padding:8px 12px;" min="1">' +
-          '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:10px 14px;">슬롯 삭제</button>' +
+          '<input type="text" class="form-control slot-daytime" placeholder="수요일 오후 2-4시" style="font-size:13px; padding:8px 10px;">' +
+          '<input type="number" class="form-control slot-capacity" value="40" placeholder="정원" style="font-size:13px; padding:8px 10px;" min="1">' +
+          '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:8px 10px;">삭제</button>' +
         '</div>' +
-        '<div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:5px;">수업 날짜들 추가:</div>' +
         '<div class="date-picker-box">' +
-          '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter (예: 7/22)" style="width:180px; font-size:13px; padding:6px 10px;" onkeydown="handleDateInputKey(event, this)">' +
-          '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:6px;"></div>' +
+          '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter (예: 7/22)" style="width:150px; font-size:12px; padding:5px 8px;" onkeydown="handleDateInputKey(event, this)">' +
+          '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:4px;"></div>' +
         '</div>';
-
       container.appendChild(rowDiv);
     }
 
@@ -1208,7 +1072,6 @@
         event.preventDefault();
         const val = inputEl.value.trim();
         if (!val) return;
-
         const container = inputEl.nextElementSibling;
         const tag = document.createElement('span');
         tag.className = 'date-tag';
@@ -1225,65 +1088,29 @@
       const desc = document.getElementById('newDesc').value.trim();
       const instructor = document.getElementById('newInstructor').value.trim();
 
-      if (!title) { alert('특강명을 입력해주세요.'); document.getElementById('newTitle').focus(); return; }
-      if (!instructor) { alert('강사명을 입력해주세요.'); document.getElementById('newInstructor').focus(); return; }
+      if (!title || !instructor) { alert('특강명과 강사명을 입력해주세요.'); return; }
 
       const slotRows = document.querySelectorAll('.slot-input-row');
-      if (slotRows.length === 0) {
-        alert('최소 1개 이상의 수업 시간대 슬롯을 추가해주세요.');
-        return;
-      }
-
       let slots = [];
-      let isValid = true;
-
       slotRows.forEach((row, idx) => {
         const dayTime = row.querySelector('.slot-daytime').value.trim();
         const capacity = parseInt(row.querySelector('.slot-capacity').value) || 40;
-        const dateTags = row.querySelectorAll('.date-tag');
-        
-        if (!dayTime) {
-          alert((idx + 1) + '번째 슬롯의 수업 시간대(예: 수요일 2-4시)를 입력해주세요.');
-          isValid = false;
-          return;
-        }
-
         let dates = [];
-        dateTags.forEach(t => {
-          dates.push(t.textContent.trim());
-        });
-
-        slots.push({
-          slotId: Date.now() + idx + Math.floor(Math.random() * 1000),
-          dayTime: dayTime,
-          capacity: capacity,
-          dates: dates
-        });
+        row.querySelectorAll('.date-tag').forEach(t => dates.push(t.textContent.trim()));
+        if (dayTime) {
+          slots.push({ slotId: Date.now() + idx, dayTime: dayTime, capacity: capacity, dates: dates });
+        }
       });
 
-      if (!isValid) return;
+      if (slots.length === 0) { alert('최소 1개의 수업 시간 슬롯을 추가해주세요.'); return; }
 
       if (editId) {
         const lec = lectures.find(l => l.id === parseInt(editId));
-        if (lec) {
-          lec.category = category;
-          lec.title = title;
-          lec.desc = desc;
-          lec.instructor = instructor;
-          lec.slots = slots;
-        }
-        alert('특강이 성공적으로 수정되었습니다.');
+        if (lec) { lec.category = category; lec.title = title; lec.desc = desc; lec.instructor = instructor; lec.slots = slots; }
+        alert('수정되었습니다.');
       } else {
-        const newLec = {
-          id: Date.now(),
-          category: category,
-          title: title,
-          desc: desc,
-          instructor: instructor,
-          slots: slots
-        };
-        lectures.push(newLec);
-        alert('새 특강이 성공적으로 개설되었습니다.');
+        lectures.push({ id: Date.now(), category, title, desc, instructor, slots });
+        alert('개설되었습니다.');
       }
 
       saveData();
@@ -1298,7 +1125,7 @@
       document.getElementById('newDesc').value = '';
       document.getElementById('newInstructor').value = '';
       document.getElementById('slotBuilderContainer').innerHTML = '';
-      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (캘린더 일정 선택)';
+      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록';
       document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-plus"></i> 특강 개설하기';
       document.getElementById('cancelEditBtn').style.display = 'none';
       addSlotRow();
@@ -1307,7 +1134,6 @@
     function editLecture(lecId) {
       const lec = lectures.find(l => l.id === lecId);
       if (!lec) return;
-
       document.getElementById('editLectureId').value = lec.id;
       document.getElementById('newCategory').value = lec.category || '';
       document.getElementById('newTitle').value = lec.title;
@@ -1316,104 +1142,71 @@
 
       const container = document.getElementById('slotBuilderContainer');
       container.innerHTML = '';
-
       lec.slots.forEach(slot => {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'slot-input-row';
         rowDiv.innerHTML = 
           '<div class="slot-main-info">' +
-            '<input type="text" class="form-control slot-daytime" value="' + slot.dayTime + '" placeholder="예: 수요일 오후 2-4시" style="font-size:14px; padding:8px 12px;">' +
-            '<input type="number" class="form-control slot-capacity" value="' + slot.capacity + '" placeholder="정원" style="font-size:14px; padding:8px 12px;" min="1">' +
-            '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:10px 14px;">슬롯 삭제</button>' +
+            '<input type="text" class="form-control slot-daytime" value="' + slot.dayTime + '" style="font-size:13px; padding:8px 10px;">' +
+            '<input type="number" class="form-control slot-capacity" value="' + slot.capacity + '" style="font-size:13px; padding:8px 10px;" min="1">' +
+            '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:8px 10px;">삭제</button>' +
           '</div>' +
-          '<div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:5px;">수업 날짜들 추가:</div>' +
           '<div class="date-picker-box">' +
-            '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter (예: 7/22)" style="width:180px; font-size:13px; padding:6px 10px;" onkeydown="handleDateInputKey(event, this)">' +
-            '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:6px;">' +
+            '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter" style="width:150px; font-size:12px; padding:5px 8px;" onkeydown="handleDateInputKey(event, this)">' +
+            '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:4px;">' +
               (slot.dates ? slot.dates.map(d => '<span class="date-tag">' + d + ' <i class="fa-solid fa-xmark" onclick="this.parentElement.remove()"></i></span>').join('') : '') +
             '</div>' +
           '</div>';
         container.appendChild(rowDiv);
       });
 
-      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 특강 정보 수정';
-      document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-check"></i> 수정 사항 저장';
+      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 특강 수정';
+      document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-check"></i> 수정 저장';
       document.getElementById('cancelEditBtn').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function deleteLecture(lecId) {
-      if (!confirm('정말 이 특강을 삭제하시겠습니까? 관련된 모든 신청 내역도 함께 삭제됩니다.')) return;
+      if (!confirm('삭제하시겠습니까?')) return;
       lectures = lectures.filter(l => l.id !== lecId);
       applications = applications.filter(app => app.lectureId !== lecId);
       saveData();
       updateAdminView();
-      alert('삭제되었습니다.');
     }
 
     function moveLecture(lecId, direction) {
       const idx = lectures.findIndex(l => l.id === lecId);
-      if (idx < 0) return;
       const targetIdx = idx + direction;
       if (targetIdx < 0 || targetIdx >= lectures.length) return;
-
       const temp = lectures[idx];
       lectures[idx] = lectures[targetIdx];
       lectures[targetIdx] = temp;
-
       saveData();
       updateAdminView();
     }
 
     function updateAdminTree() {
       const treeContainer = document.getElementById('adminTreeContainer');
-      
-      let html = '<div class="tree-folder open" onclick="selectAdminFilter(\'all\', \'전체 보기\')">' +
-        '<div class="tree-folder-header" style="background:#e0e7ff; color:var(--primary);">' +
-          '<span><i class="fa-solid fa-list"><b>전체 신청 명단 보기</b></i></span>' +
-        '</div>' +
-      '</div>';
+      let html = '<div class="tree-folder open" onclick="selectAdminFilter(\'all\', \'전체 신청 명단 보기\')"><div class="tree-folder-header" style="background:#e0e7ff; color:var(--primary);"><span><i class="fa-solid fa-list"></i> 전체 보기</span></div></div>';
 
       if (lectures.length > 0) {
         html += lectures.map(lec => {
           let subfoldersHtml = '';
           lec.slots.forEach(slot => {
             let dateItemsHtml = '';
-            if (slot.dates && slot.dates.length > 0) {
+            if (slot.dates) {
               slot.dates.forEach(d => {
                 const filterKey = lec.id + '_' + slot.slotId + '_' + d;
-                dateItemsHtml += '<div class="tree-action-item" onclick="selectAdminFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ' / ' + slot.dayTime + ')\')">' +
-                  '<span><i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + '</span>' +
-                  '<button class="action-badge badge-select">조회</button>' +
+                dateItemsHtml += '<div class="tree-action-item" onclick="selectAdminFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ')\')">' +
+                  '<span><i class="fa-regular fa-calendar"></i> ' + d + '</span><button class="action-badge badge-select">조회</button>' +
                 '</div>';
               });
-            } else {
-              const filterKey = lec.id + '_' + slot.slotId + '_전체';
-              dateItemsHtml += '<div class="tree-action-item" onclick="selectAdminFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + slot.dayTime + ')\')">' +
-                '<span><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime + '</span>' +
-                '<button class="action-badge badge-select">조회</button>' +
-              '</div>';
             }
-
-            subfoldersHtml += '<div class="tree-subfolder">' +
-              '<div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">' +
-                '<span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span>' +
-                '<i class="fa-solid fa-chevron-down" style="font-size:12px;"></i>' +
-              '</div>' +
-              '<div class="tree-subfolder-body">' + dateItemsHtml + '</div>' +
-            '</div>';
+            subfoldersHtml += '<div class="tree-subfolder"><div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)"><span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span><i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></div><div class="tree-subfolder-body">' + dateItemsHtml + '</div></div>';
           });
-
-          return '<div class="tree-folder">' +
-            '<div class="tree-folder-header" onclick="toggleTreeFolder(this)">' +
-              '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + '</span>' +
-              '<i class="fa-solid fa-chevron-down" style="font-size:14px;"></i>' +
-            '</div>' +
-            '<div class="tree-folder-body">' + subfoldersHtml + '</div>' +
-          '</div>';
+          return '<div class="tree-folder"><div class="tree-folder-header" onclick="toggleTreeFolder(this)"><span><i class="fa-solid fa-book"></i> ' + lec.title + '</span><i class="fa-solid fa-chevron-down" style="font-size:13px;"></i></div><div class="tree-folder-body">' + subfoldersHtml + '</div></div>';
         }).join('');
       }
-
       treeContainer.innerHTML = html;
     }
 
@@ -1424,60 +1217,51 @@
     }
 
     function renderAdminApplications() {
-      const tbody = document.getElementById('adminTableBody');
+      const container = document.getElementById('adminCardListContainer');
       let filteredApps = applications;
 
       if (currentAdminFilter !== 'all') {
         const parts = currentAdminFilter.split('_');
-        const lecId = parseInt(parts[0]);
-        const slotId = parseInt(parts[1]);
-        const targetDate = parts[2];
-
-        filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && (targetDate === '전체' || app.selectedDate === targetDate));
+        const lecId = parseInt(parts[0]), slotId = parseInt(parts[1]), targetDate = parts[2];
+        filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && app.selectedDate === targetDate);
       }
 
       if (filteredApps.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">신청 내역이 없습니다.</td></tr>';
+        container.innerHTML = '<div class="empty-state">신청 내역이 없습니다.</div>';
         return;
       }
 
-      tbody.innerHTML = filteredApps.map(app => 
-        '<tr>' +
-          '<td><strong>' + app.lectureTitle + '</strong></td>' +
-          '<td>' + app.dayTime + '</td>' +
-          '<td>' + app.name + '</td>' +
-          '<td>' + app.school + '</td>' +
-          '<td>' + app.phone + '</td>' +
-          '<td><button class="action-badge badge-del" onclick="adminDeleteApp(' + app.id + ')">삭제</button></td>' +
-        '</tr>'
-      ).join('');
+      container.innerHTML = filteredApps.map(app => {
+        return '<div class="data-card-item">' +
+          '<div class="data-card-header">' +
+            '<div>' +
+              '<div class="data-card-title">' + app.name + ' <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">(' + app.school + ')</span></div>' +
+              '<div class="data-card-sub">' + app.lectureTitle + ' / ' + app.dayTime + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="data-card-body">' +
+            '<div class="data-field"><span class="label">전화번호 뒷자리</span><span class="value">' + app.phone + '</span></div>' +
+            '<div class="data-field"><span class="label">신청일시</span><span class="value">' + app.appliedAt + '</span></div>' +
+          '</div>' +
+          '<div class="data-card-footer">' +
+            '<span></span>' +
+            '<button class="action-badge badge-del" onclick="adminDeleteApp(' + app.id + ')">삭제</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
     }
 
     function adminDeleteApp(appId) {
-      if (!confirm('해당 학생의 신청 내역을 관리자 권한으로 삭제하시겠습니까?')) return;
+      if (!confirm('삭제하시겠습니까?')) return;
       applications = applications.filter(app => app.id !== appId);
       saveData();
       updateAdminView();
-      alert('삭제되었습니다.');
     }
 
     function exportToExcel() {
-      let filteredApps = applications;
-      if (currentAdminFilter !== 'all') {
-        const parts = currentAdminFilter.split('_');
-        const lecId = parseInt(parts[0]);
-        const slotId = parseInt(parts[1]);
-        const targetDate = parts[2];
-        filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && (targetDate === '전체' || app.selectedDate === targetDate));
-      }
-
-      if (filteredApps.length === 0) {
-        alert('추출할 데이터가 없습니다.');
-        return;
-      }
-
+      if (applications.length === 0) { alert('데이터가 없습니다.'); return; }
       let csv = '\uFEFF특강명,일정/시간,학생이름,학교/학년,전화번호뒷4자리,신청일시\n';
-      filteredApps.forEach(app => {
+      applications.forEach(app => {
         csv += '"' + app.lectureTitle + '","' + app.dayTime + '","' + app.name + '","' + app.school + '","' + app.phone + '","' + app.appliedAt + '"\n';
       });
 
