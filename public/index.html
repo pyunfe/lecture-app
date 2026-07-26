@@ -177,15 +177,13 @@
     .btn:hover { background: var(--primary-hover); }
     .btn:active { transform: scale(0.98); }
 
-    .btn-secondary {
-      background: #64748b;
-    }
+    .btn-secondary { background: #64748b; }
     .btn-secondary:hover { background: #475569; }
 
-    .btn-warning {
-      background: var(--warning);
-      color: white;
-    }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; }
+
+    .btn-warning { background: var(--warning); color: white; }
     .btn-warning:hover { background: #d97706; }
 
     .btn-sm {
@@ -199,6 +197,7 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .lecture-list {
@@ -376,22 +375,13 @@
       margin-right: 3px;
     }
 
-    .badge-del {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+    .badge-del { background: #fee2e2; color: #991b1b; }
     .badge-del:hover { background: #fecaca; }
 
-    .badge-edit {
-      background: #fef3c7;
-      color: #92400e;
-    }
+    .badge-edit { background: #fef3c7; color: #92400e; }
     .badge-edit:hover { background: #fde68a; }
 
-    .badge-move {
-      background: #e2e8f0;
-      color: #334155;
-    }
+    .badge-move { background: #e2e8f0; color: #334155; }
     .badge-move:hover { background: #cbd5e1; }
 
     .empty-state {
@@ -586,7 +576,22 @@
               </table>
             </div>
 
-            <h3><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+              <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="adminDayFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderAdminApplications()">
+                  <option value="전체">요일별 필터: 전체 보기</option>
+                  <option value="월요일">월요일</option>
+                  <option value="화요일">화요일</option>
+                  <option value="수요일">수요일</option>
+                  <option value="목요일">목요일</option>
+                  <option value="금요일">금요일</option>
+                  <option value="토요일">토요일</option>
+                  <option value="일요일">일요일</option>
+                </select>
+                <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 엑셀로 추출</button>
+              </div>
+            </div>
             <div style="overflow-x: auto;">
               <table>
                 <thead>
@@ -855,13 +860,24 @@
         }).join('');
       }
 
+      renderAdminApplications();
+    }
+
+    function renderAdminApplications() {
       const tbody = document.getElementById('adminTableBody');
-      if (applications.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">아직 신청된 내역이 없습니다.</td></tr>';
+      const dayFilter = document.getElementById('adminDayFilter').value;
+
+      let filteredApps = applications;
+      if (dayFilter && dayFilter !== '전체') {
+        filteredApps = applications.filter(app => app.dayTime.includes(dayFilter));
+      }
+
+      if (filteredApps.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">조건에 일치하는 신청 내역이 없습니다.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = applications.map(app => 
+      tbody.innerHTML = filteredApps.map(app => 
         '<tr>' +
           '<td><strong>' + app.lectureTitle + '</strong></td>' +
           '<td><span style="color:var(--primary); font-weight:600;">' + app.dayTime + '</span></td>' +
@@ -871,6 +887,42 @@
           '<td><button class="action-badge badge-del" onclick="deleteAppAdmin(' + app.id + ')">강제취소</button></td>' +
         '</tr>'
       ).join('');
+    }
+
+    function exportToExcel() {
+      const dayFilter = document.getElementById('adminDayFilter').value;
+      let targetApps = applications;
+      if (dayFilter && dayFilter !== '전체') {
+        targetApps = applications.filter(app => app.dayTime.includes(dayFilter));
+      }
+
+      if (targetApps.length === 0) {
+        alert('추출할 신청 명단 데이터가 없습니다.');
+        return;
+      }
+
+      // CSV 파일 포맷 생성 (UTF-8 BOM 추가하여 엑셀에서 한글 깨짐 방지)
+      let csvContent = "\uFEFF" + "신청 특강명,요일/시간,학생 이름,전화번호 뒷4자리,신청일시\n";
+      
+      targetApps.forEach(app => {
+        let row = [
+          '"' + (app.lectureTitle || '').replace(/"/g, '""') + '"',
+          '"' + (app.dayTime || '').replace(/"/g, '""') + '"',
+          '"' + (app.name || '').replace(/"/g, '""') + '"',
+          '"' + (app.phone || '').replace(/"/g, '""') + '"',
+          '"' + (app.date || '').replace(/"/g, '""') + '"'
+        ].join(',');
+        csvContent += row + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', '학원특강_신청명단_' + (dayFilter === '전체' ? '전체' : dayFilter) + '.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function addSlotRow(dayTimeVal = '', capacityVal = 20) {
@@ -986,6 +1038,7 @@
     }
 
     function resetLectureForm() {
+      document.getElementById('editLectureId').value =ండి
       document.getElementById('editLectureId').value = '';
       document.getElementById('newCategory').value = '';
       document.getElementById('newTitle').value = '';
