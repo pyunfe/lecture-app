@@ -253,34 +253,59 @@
     .slots-container {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       border-top: 1px dashed var(--border-color);
       padding-top: 12px;
     }
 
-    .slot-row {
+    .slot-group-card {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+
+    .slot-group-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date-checkboxes {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-left: 5px;
+    }
+
+    .date-checkbox-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #f8fafc;
-      padding: 10px 14px;
+      font-size: 13px;
+      background: white;
+      padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
     }
 
-    .slot-info {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
+    .date-checkbox-item label {
       display: flex;
       align-items: center;
       gap: 8px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
     }
 
-    .slot-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .date-checkbox-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
     }
 
     .seat-badge {
@@ -296,19 +321,6 @@
       background: #fee2e2;
       color: #991b1b;
     }
-
-    .btn-apply-slot {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-apply-slot:hover { background: var(--primary-hover); }
-    .btn-apply-slot:disabled { background: #cbd5e1; cursor: default; }
 
     .admin-stats {
       display: grid;
@@ -484,14 +496,17 @@
             <label>전화번호 뒷 4자리</label>
             <input type="password" id="sPhone" class="form-control" maxlength="4" placeholder="예: 1234">
           </div>
+          
+          <!-- 좌측에 배치된 일괄 신청 버튼 -->
+          <button class="btn" onclick="applySelectedLectures()" style="margin-bottom: 15px;"><i class="fa-solid fa-check-double"></i> 선택한 일정 한 번에 신청하기</button>
+
           <div style="background: #e0e7ff; padding: 15px; border-radius: 10px; font-size: 13px; color: var(--primary); line-height: 1.5;">
-            <i class="fa-solid fa-circle-info"></i> 우측 특강 목록에서 원하시는 <strong>날짜 및 요일/시간대</strong>의 <strong>[신청하기]</strong> 버튼을 누르면 위 정보와 함께 즉시 접수됩니다!<br><br>
-            📌 <strong>안내:</strong> 하루만 들으려면 원하는 날짜의 일정만 선택하시고, 2일 모두 들으려면 각각 신청하여 2개 모두 선택하셔야 합니다.
+            <i class="fa-solid fa-circle-info"></i> 우측 목록에서 원하시는 날짜들의 체크박스를 여러 개 선택하신 후, 위 <strong>[선택한 일정 한 번에 신청하기]</strong> 버튼을 누르면 일괄 접수됩니다!
           </div>
         </div>
 
         <div class="card">
-          <h3><i class="fa-solid fa-book-open"></i> 개설된 특강 및 일정별 신청</h3>
+          <h3><i class="fa-solid fa-book-open"></i> 개설된 특강 및 날짜 선택</h3>
           <div class="filter-container">
             <label style="font-size:13px; font-weight:600; color:var(--text-muted);">폴더(분류) 필터:</label>
             <select id="studentCategoryFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderStudentLectures()">
@@ -508,7 +523,6 @@
       <div class="card auth-box">
         <h3><i class="fa-solid fa-magnifying-glass"></i> 내 신청 내역 조회</h3>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">학생 이름, 학교/학년, 그리고 전화번호 뒷 4자리를 입력하시면 내역을 확인하고 취소할 수 있습니다.</p>
-        <!-- 요구사항 1 반영: 이름이 먼저 오고 학교/학년이 그 아래로 오도록 위치 교체 -->
         <div class="form-group" style="text-align: left;">
           <label>학생 이름</label>
           <input type="text" id="mySearchName" class="form-control" placeholder="홍길동">
@@ -561,7 +575,6 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
             <h3><i class="fa-solid fa-clipboard-user"></i> 특강 날짜/시간대별 출석부 관리</h3>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <!-- 요구사항 3 반영: 출석부 필터에 개별 날짜별 옵션 제공 -->
               <select id="attLectureFilter" class="form-control" style="width: auto; padding: 8px 12px; font-size: 14px;" onchange="renderAttendanceSheet()">
                 <option value="">특강 및 날짜/시간대를 선택하세요</option>
               </select>
@@ -702,7 +715,8 @@
         desc: '놓치기 쉬운 맞춤법 완벽 교정!', 
         instructor: '강윤지T', 
         slots: [
-          { slotId: 101, dates: ['7/22', '8/5'], dayTime: '수요일 2-4시', capacity: 40 }
+          { slotId: 101, dates: ['7/22', '8/5'], dayTime: '수요일 2-4시', capacity: 40 },
+          { slotId: 102, dates: ['7/23', '8/6'], dayTime: '목요일 4-6시', capacity: 40 }
         ]
       }
     ];
@@ -819,19 +833,19 @@
         let slotsHtml = '';
         
         lec.slots.forEach(slot => {
+          let dateCheckboxesHtml = '';
           if (slot.dates && slot.dates.length > 0) {
             slot.dates.forEach(d => {
               const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
               const remainingSeats = slot.capacity - currentCount;
               const isFull = remainingSeats <= 0;
-              const displayInfo = d + ' / ' + slot.dayTime;
 
-              slotsHtml += '<div class="slot-row">' +
-                '<div class="slot-info"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + displayInfo + '</div>' +
-                '<div class="slot-right">' +
-                  '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여석 ' + remainingSeats + ' / 정원 ' + slot.capacity) + '</span>' +
-                  '<button class="btn-apply-slot" ' + (isFull ? 'disabled' : '') + ' onclick="applyLectureSlot(' + lec.id + ', ' + slot.slotId + ', \'' + lec.title + '\', \'' + displayInfo + '\', \'' + d + '\')">' + (isFull ? '마감' : '신청하기') + '</button>' +
-                '</div>' +
+              dateCheckboxesHtml += '<div class="date-checkbox-item">' +
+                '<label>' +
+                  '<input type="checkbox" class="student-date-chk" data-lec-id="' + lec.id + '" data-slot-id="' + slot.slotId + '" data-lec-title="' + lec.title + '" data-day-time="' + slot.dayTime + '" data-date="' + d + '" ' + (isFull ? 'disabled' : '') + '> ' +
+                  '<i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + (isFull ? ' (마감)' : '') +
+                '</label>' +
+                '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity) + '</span>' +
               '</div>';
             });
           } else {
@@ -839,14 +853,19 @@
             const remainingSeats = slot.capacity - currentCount;
             const isFull = remainingSeats <= 0;
 
-            slotsHtml += '<div class="slot-row">' +
-              '<div class="slot-info"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime + '</div>' +
-              '<div class="slot-right">' +
-                '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여석 ' + remainingSeats + ' / 정원 ' + slot.capacity) + '</span>' +
-                '<button class="btn-apply-slot" ' + (isFull ? 'disabled' : '') + ' onclick="applyLectureSlot(' + lec.id + ', ' + slot.slotId + ', \'' + lec.title + '\', \'' + slot.dayTime + '\', \'전체\')">' + (isFull ? '마감' : '신청하기') + '</button>' +
-              '</div>' +
+            dateCheckboxesHtml += '<div class="date-checkbox-item">' +
+              '<label>' +
+                '<input type="checkbox" class="student-date-chk" data-lec-id="' + lec.id + '" data-slot-id="' + slot.slotId + '" data-lec-title="' + lec.title + '" data-day-time="' + slot.dayTime + '" data-date="전체" ' + (isFull ? 'disabled' : '') + '> ' +
+                '<i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime +
+              '</label>' +
+              '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity) + '</span>' +
             '</div>';
           }
+
+          slotsHtml += '<div class="slot-group-card">' +
+            '<div class="slot-group-header"><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</div>' +
+            '<div class="date-checkboxes">' + dateCheckboxesHtml + '</div>' +
+          '</div>';
         });
 
         return '<div class="lecture-item">' +
@@ -860,7 +879,7 @@
       }).join('');
     }
 
-    function applyLectureSlot(lectureId, slotId, lectureTitle, displayInfo, selectedDate) {
+    function applySelectedLectures() {
       const name = document.getElementById('sName').value.trim();
       const school = document.getElementById('sSchool').value.trim();
       const phone = document.getElementById('sPhone').value.trim();
@@ -869,42 +888,63 @@
       if (!school) { alert('학교/학년을 입력해주세요 (예: 청라고1).'); document.getElementById('sSchool').focus(); return; }
       if (phone.length !== 4 || isNaN(phone)) { alert('전화번호 뒷 4자리를 숫자로 정확히 입력해주세요.'); document.getElementById('sPhone').focus(); return; }
 
-      const lectureObj = lectures.find(l => l.id === lectureId);
-      if(!lectureObj) { alert('존재하지 않는 특강입니다.'); return; }
-      const slotObj = lectureObj.slots.find(s => s.slotId === slotId);
-      if(!slotObj) { alert('존재하지 않는 일정입니다.'); return; }
-
-      const currentCount = applications.filter(app => app.slotId === slotId && app.selectedDate === selectedDate).length;
-      if (currentCount >= slotObj.capacity) {
-        alert('죄송합니다. 해당 날짜/시간대 슬롯은 정원이 마감되었습니다.');
-        renderStudentLectures();
+      const checkedBoxes = document.querySelectorAll('.student-date-chk:checked');
+      if (checkedBoxes.length === 0) {
+        alert('신청할 날짜/시간대 체크박스를 하나 이상 선택해주세요.');
         return;
       }
 
-      const alreadyApplied = applications.some(app => app.slotId === slotId && app.selectedDate === selectedDate && app.name === name && app.phone === phone);
-      if (alreadyApplied) { alert('이미 해당 날짜 및 시간대로 신청된 내역이 존재합니다!'); return; }
+      let successCount = 0;
+      let duplicateCount = 0;
 
-      const newApp = {
-        id: Date.now(),
-        lectureId: lectureId,
-        slotId: slotId,
-        lectureTitle: lectureTitle,
-        dayTime: displayInfo,
-        selectedDate: selectedDate,
-        instructor: lectureObj.instructor,
-        name: name,
-        school: school,
-        phone: phone,
-        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-      };
+      checkedBoxes.forEach(chk => {
+        const lectureId = parseInt(chk.dataset.lecId);
+        const slotId = parseInt(chk.dataset.slotId);
+        const lectureTitle = chk.dataset.lecTitle;
+        const dayTime = chk.dataset.dayTime;
+        const selectedDate = chk.dataset.date;
 
-      applications.push(newApp);
+        const lectureObj = lectures.find(l => l.id === lectureId);
+        if (!lectureObj) return;
+        const slotObj = lectureObj.slots.find(s => s.slotId === slotId);
+        if (!slotObj) return;
+
+        const currentCount = applications.filter(app => app.slotId === slotId && app.selectedDate === selectedDate).length;
+        if (currentCount >= slotObj.capacity) return;
+
+        const alreadyApplied = applications.some(app => app.slotId === slotId && app.selectedDate === selectedDate && app.name === name && app.phone === phone);
+        if (alreadyApplied) {
+          duplicateCount++;
+          return;
+        }
+
+        const displayInfo = selectedDate !== '전체' ? selectedDate + ' / ' + dayTime : dayTime;
+
+        const newApp = {
+          id: Date.now() + Math.floor(Math.random() * 10000),
+          lectureId: lectureId,
+          slotId: slotId,
+          lectureTitle: lectureTitle,
+          dayTime: displayInfo,
+          selectedDate: selectedDate,
+          instructor: lectureObj.instructor,
+          name: name,
+          school: school,
+          phone: phone,
+          date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        };
+
+        applications.push(newApp);
+        successCount++;
+      });
+
       saveData();
 
-      alert('[' + lectureTitle + ' - ' + displayInfo + '] 신청이 완료되었습니다!');
-      document.getElementById('sName').value = '';
-      document.getElementById('sSchool').value = '';
-      document.getElementById('sPhone').value = '';
+      let msg = '';
+      if (successCount > 0) msg += successCount + '개의 일정이 성공적으로 신청되었습니다!\n';
+      if (duplicateCount > 0) msg += duplicateCount + '개의 항목은 이미 신청된 내역이어서 제외되었습니다.';
+      
+      alert(msg);
       renderStudentLectures();
     }
 
