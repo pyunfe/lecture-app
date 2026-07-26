@@ -225,6 +225,7 @@
       padding-right: 2px;
     }
 
+    /* 트리 구조 스타일 */
     .tree-folder {
       background: white;
       border: 1px solid var(--border-color);
@@ -514,8 +515,8 @@
             <div style="font-size:12px; color:var(--text-muted);">현재 보유 포인트</div>
             <div style="font-size:24px; font-weight:700; color:var(--primary);"><span id="applyUserPoints">0</span>원</div>
           </div>
-          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">우측에서 원하는 특강과 날짜를 선택한 뒤 아래 버튼을 눌러주세요. (신청 시 1일정당 10,000포인트 소모)</p>
-          <button class="btn" onclick="applySelectedLectures()"><i class="fa-solid fa-check-double"></i> 선택한 일정 포인트로 신청하기</button>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">우측에서 원하는 특강과 일정(또는 통특강)을 선택한 뒤 아래 버튼을 눌러주세요.</p>
+          <button class="btn" onclick="applySelectedLectures()"><i class="fa-solid fa-check-double"></i> 선택한 항목 포인트로 신청하기</button>
         </div>
 
         <div class="card">
@@ -578,12 +579,12 @@
           </div>
           <div class="att-layout-grid">
             <div>
-              <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">특강 폴더 트리:</label>
+              <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">폴더 및 특강 트리 (고1 &rarr; 특강 &rarr; 일정):</label>
               <div id="attTreeContainer" class="lecture-list" style="max-height: 400px;"></div>
             </div>
             <div>
               <div id="attTableContainer">
-                <div class="empty-state">좌측 폴더 트리에서 조회할 세부 날짜를 선택해주세요.</div>
+                <div class="empty-state">좌측 폴더 트리에서 조회할 세부 날짜 또는 통특강을 선택해주세요.</div>
               </div>
             </div>
           </div>
@@ -633,15 +634,19 @@
           <h3 id="formModeTitle"><i class="fa-solid fa-circle-plus"></i> 새 특강 등록</h3>
           <input type="hidden" id="editLectureId" value="">
           <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-            <div class="form-group" style="margin-bottom:0;"><label>폴더(분류)</label><input type="text" id="newCategory" class="form-control" placeholder="국어"></div>
+            <div class="form-group" style="margin-bottom:0;"><label>폴더(학년 등, 예: 고1)</label><input type="text" id="newCategory" class="form-control" placeholder="고1"></div>
             <div class="form-group" style="margin-bottom:0;"><label>특강명</label><input type="text" id="newTitle" class="form-control" placeholder="한글 맞춤법"></div>
             <div class="form-group" style="margin-bottom:0;"><label>특강 설명</label><input type="text" id="newDesc" class="form-control" placeholder="맞춤법 교정"></div>
             <div class="form-group" style="margin-bottom:0;"><label>강사명</label><input type="text" id="newInstructor" class="form-control" placeholder="강윤지T"></div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>필요 포인트 설정 (원)</label>
+              <input type="number" id="newPoints" class="form-control" placeholder="10000" value="10000">
+            </div>
             <div class="form-group" style="margin-bottom:0;"><label>신청/취소 마감 기한</label><input type="datetime-local" id="newDeadline" class="form-control"></div>
           </div>
           <div class="form-group" style="margin-top: 15px;">
             <label style="display: flex; justify-content: space-between; align-items: center;">
-              <span>수업 시간 및 날짜 설정</span>
+              <span>수업 시간 및 날짜 설정 (통특강인 경우 슬롯을 비워두세요)</span>
               <button type="button" class="btn btn-sm" onclick="addSlotRow()"><i class="fa-solid fa-plus"></i> 슬롯 추가</button>
             </label>
             <div id="slotBuilderContainer" class="admin-slot-builder" style="margin-top:8px;"></div>
@@ -656,7 +661,7 @@
           <h3><i class="fa-solid fa-folder-tree"></i> 개설 특강 및 회원 관리</h3>
           <div style="overflow-x: auto; margin-bottom: 25px;">
             <table>
-              <thead><tr><th>순서</th><th>폴더</th><th>특강명</th><th>강사</th><th>마감기한</th><th>관리</th></tr></thead>
+              <thead><tr><th>순서</th><th>폴더</th><th>특강명</th><th>강사</th><th>필요포인트</th><th>마감기한</th><th>관리</th></tr></thead>
               <tbody id="adminLectureTableBody"></tbody>
             </table>
           </div>
@@ -678,10 +683,11 @@
     let lectures = JSON.parse(localStorage.getItem('acad_lectures')) || [
       { 
         id: 1, 
-        category: '국어', 
+        category: '고1', 
         title: '한글 맞춤법', 
         desc: '놓치기 쉬운 맞춤법 완벽 교정!', 
         instructor: '강윤지T', 
+        requiredPoints: 10000,
         deadline: '2026-12-31T23:59',
         slots: [
           { slotId: 101, dates: ['7/22', '8/5'], dayTime: '수요일 2-4시', capacity: 40 },
@@ -902,40 +908,59 @@
       }
 
       listEl.innerHTML = filteredLectures.map(lec => {
-        let subfoldersHtml = '';
-        lec.slots.forEach(slot => {
-          let dateItemsHtml = '';
-          if (slot.dates) {
-            slot.dates.forEach(d => {
-              const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
-              const remainingSeats = slot.capacity - currentCount;
-              const isFull = remainingSeats <= 0;
+        const reqPts = lec.requiredPoints !== undefined ? lec.requiredPoints : 10000;
+        let bodyContent = '';
 
-              dateItemsHtml += `<div class="date-checkbox-item">
-                <label>
-                  <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="${slot.slotId}" data-lec-title="${lec.title}" data-day-time="${slot.dayTime}" data-date="${d}" ${isFull ? 'disabled' : ''}> 
-                  <i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${d} ${isFull ? '(마감)' : ''}
-                </label>
-                <span class="seat-badge ${isFull ? 'full' : ''}">${isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity}</span>
-              </div>`;
-            });
-          }
-
-          subfoldersHtml += `<div class="tree-subfolder">
-            <div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">
-              <span><i class="fa-solid fa-clock"></i> ${slot.dayTime}</span>
-              <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+        if (!lec.slots || lec.slots.length === 0) {
+          // 통특강 (일정 없음)
+          const currentCount = applications.filter(app => app.lectureId === lec.id && app.slotId === 0).length;
+          bodyContent = `<div style="padding: 10px;">
+            <div class="date-checkbox-item">
+              <label>
+                <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="0" data-lec-title="${lec.title}" data-day-time="방학 통특강 (전체 일정)" data-date="통특강"> 
+                <i class="fa-solid fa-calendar-check" style="color:var(--primary);"></i> 방학 기간 통틀어 수강 (일정 없음)
+              </label>
+              <span class="seat-badge">신청자 ${currentCount}명</span>
             </div>
-            <div class="tree-subfolder-body">${dateItemsHtml}</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">* 필요 포인트: <strong>${reqPts.toLocaleString()}원</strong></div>
           </div>`;
-        });
+        } else {
+          let subfoldersHtml = '';
+          lec.slots.forEach(slot => {
+            let dateItemsHtml = '';
+            if (slot.dates) {
+              slot.dates.forEach(d => {
+                const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
+                const remainingSeats = slot.capacity - currentCount;
+                const isFull = remainingSeats <= 0;
+
+                dateItemsHtml += `<div class="date-checkbox-item">
+                  <label>
+                    <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="${slot.slotId}" data-lec-title="${lec.title}" data-day-time="${slot.dayTime}" data-date="${d}" ${isFull ? 'disabled' : ''}> 
+                    <i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${d} ${isFull ? '(마감)' : ''}
+                  </label>
+                  <span class="seat-badge ${isFull ? 'full' : ''}">${isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity}</span>
+                </div>`;
+              });
+            }
+
+            subfoldersHtml += `<div class="tree-subfolder">
+              <div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">
+                <span><i class="fa-solid fa-clock"></i> ${slot.dayTime}</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+              </div>
+              <div class="tree-subfolder-body">${dateItemsHtml}</div>
+            </div>`;
+          });
+          bodyContent = `<div style="font-size:11px; color:var(--primary); font-weight:600; margin-bottom:8px;">* 회차(일정)당 필요 포인트: ${reqPts.toLocaleString()}원</div>` + subfoldersHtml;
+        }
 
         return `<div class="tree-folder">
           <div class="tree-folder-header" onclick="toggleTreeFolder(this)">
             <span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ${lec.title} <span style="font-size:11px; color:var(--text-muted);">(${lec.instructor})</span></span>
             <i class="fa-solid fa-chevron-down" style="font-size:13px;"></i>
           </div>
-          <div class="tree-folder-body">${subfoldersHtml}</div>
+          <div class="tree-folder-body">${bodyContent}</div>
         </div>`;
       }).join('');
     }
@@ -943,26 +968,38 @@
     function applySelectedLectures() {
       const checkedBoxes = document.querySelectorAll('.student-date-chk:checked');
       if (checkedBoxes.length === 0) {
-        alert('신청할 날짜/시간대 체크박스를 선택해주세요.');
+        alert('신청할 항목 체크박스를 선택해주세요.');
         return;
       }
 
-      const requiredPoints = checkedBoxes.length * 10000;
-      if (currentUser.points < requiredPoints) {
-        alert(`포인트가 부족합니다! (필요 포인트: ${requiredPoints.toLocaleString()}원, 보유 포인트: ${currentUser.points.toLocaleString()}원)\n마이페이지에서 포인트를 충전해주세요.`);
+      // 총 필요 포인트 계산 (각 특강별 requiredPoints 반영)
+      let totalRequiredPoints = 0;
+      let itemsToApply = [];
+
+      for (let chk of checkedBoxes) {
+        const lectureId = parseInt(chk.dataset.lecId);
+        const lectureObj = lectures.find(l => l.id === lectureId);
+        if (!lectureObj) continue;
+
+        const reqPts = lectureObj.requiredPoints !== undefined ? lectureObj.requiredPoints : 10000;
+        totalRequiredPoints += reqPts;
+        itemsToApply.push({ chk, reqPts, lectureObj });
+      }
+
+      if (currentUser.points < totalRequiredPoints) {
+        alert(`포인트가 부족합니다! (필요 포인트: ${totalRequiredPoints.toLocaleString()}원, 보유 포인트: ${currentUser.points.toLocaleString()}원)\n마이페이지에서 포인트를 충전해주세요.`);
         return;
       }
 
       let successCount = 0;
-      checkedBoxes.forEach(chk => {
+      itemsToApply.forEach(item => {
+        const chk = item.chk;
         const lectureId = parseInt(chk.dataset.lecId);
         const slotId = parseInt(chk.dataset.slotId);
         const lectureTitle = chk.dataset.lecTitle;
         const dayTime = chk.dataset.dayTime;
         const selectedDate = chk.dataset.date;
-
-        const lectureObj = lectures.find(l => l.id === lectureId);
-        if (!lectureObj) return;
+        const lectureObj = item.lectureObj;
 
         if (lectureObj.deadline && new Date() > new Date(lectureObj.deadline)) {
           alert(`'${lectureTitle}' 특강은 신청 마감 기한이 지났습니다.`);
@@ -972,8 +1009,9 @@
         const newApp = {
           id: Date.now() + Math.floor(Math.random() * 10000),
           lectureId, slotId, lectureTitle,
-          dayTime: `${selectedDate} / ${dayTime}`,
+          dayTime: selectedDate === '통특강' ? '방학 통특강 (전체 일정)' : `${selectedDate} / ${dayTime}`,
           selectedDate,
+          cost: item.reqPts,
           userName: currentUser.name,
           school: currentUser.school,
           phone: currentUser.phone,
@@ -989,8 +1027,7 @@
       });
 
       if (successCount > 0) {
-        const totalCost = successCount * 10000;
-        currentUser.points -= totalCost;
+        currentUser.points -= totalRequiredPoints;
         const idx = users.findIndex(u => u.id === currentUser.id);
         if (idx !== -1) users[idx] = currentUser;
 
@@ -998,7 +1035,7 @@
         syncLoginState();
         document.getElementById('applyUserPoints').innerText = currentUser.points.toLocaleString();
         renderStudentLectures();
-        alert(`${successCount}개 일정이 신청되었습니다! (포인트 ${totalCost.toLocaleString()}원 차감)`);
+        alert(`${successCount}개 항목이 신청되었습니다! (포인트 ${totalRequiredPoints.toLocaleString()}원 차감)`);
       }
     }
 
@@ -1023,6 +1060,7 @@
         if (lectureObj && lectureObj.deadline && new Date() > new Date(lectureObj.deadline)) {
           isDeadlinePassed = true;
         }
+        const appCost = app.cost || 10000;
 
         return `<div class="data-card-item">
           <div class="data-card-header">
@@ -1030,7 +1068,7 @@
               <div class="data-card-title">${app.lectureTitle}</div>
               <div class="data-card-sub"><i class="fa-regular fa-calendar"></i> ${app.dayTime}</div>
             </div>
-            <span class="seat-badge">10,000포인트 차감됨</span>
+            <span class="seat-badge">${appCost.toLocaleString()}포인트 차감됨</span>
           </div>
           <div class="data-card-body">
             <div class="data-field"><span class="label">강사</span><span class="value">${app.instructor}</span></div>
@@ -1056,9 +1094,10 @@
         return;
       }
 
-      if (confirm('해당 수강을 취소하시겠습니까? 10,000포인트가 즉시 원복됩니다.')) {
+      const appCost = app.cost || 10000;
+      if (confirm(`해당 수강을 취소하시겠습니까? ${appCost.toLocaleString()}포인트가 즉시 원복됩니다.`)) {
         applications = applications.filter(a => a.id !== appId);
-        currentUser.points += 10000;
+        currentUser.points += appCost;
 
         const idx = users.findIndex(u => u.id === currentUser.id);
         if (idx !== -1) users[idx] = currentUser;
@@ -1097,29 +1136,64 @@
         return;
       }
 
-      treeContainer.innerHTML = lectures.map(lec => {
-        let subfoldersHtml = '';
-        lec.slots.forEach(slot => {
-          let dateItemsHtml = '';
-          if (slot.dates) {
-            slot.dates.forEach(d => {
-              dateItemsHtml += `<div class="tree-subfolder-header" style="cursor:pointer; background:white; margin-bottom:4px; border-radius:6px;" onclick="loadAttendanceTable(${lec.id}, '${d}', '${slot.dayTime}', '${lec.title}')">
-                <span><i class="fa-regular fa-calendar"></i> ${d}</span>
-                <span style="font-size:11px; color:var(--primary);">조회 &rarr;</span>
+      // 학년(폴더)별로 그룹화
+      let categoryMap = {};
+      lectures.forEach(lec => {
+        const cat = lec.category || '기본폴더';
+        if (!categoryMap[cat]) categoryMap[cat] = [];
+        categoryMap[cat].push(lec);
+      });
+
+      let categoryHtml = '';
+      for (let cat in categoryMap) {
+        let lecturesHtml = '';
+        categoryMap[cat].forEach(lec => {
+          let slotsHtml = '';
+          if (!lec.slots || lec.slots.length === 0) {
+            slotsHtml = `<div class="tree-subfolder-header" style="cursor:pointer; background:white; margin-bottom:4px; border-radius:6px;" onclick="loadAttendanceTable(${lec.id}, '통특강', '방학 통특강', '${lec.title}')">
+              <span><i class="fa-solid fa-calendar-check"></i> 통특강 (일정 없음)</span>
+              <span style="font-size:11px; color:var(--primary);">조회 &rarr;</span>
+            </div>`;
+          } else {
+            lec.slots.forEach(slot => {
+              let dateItemsHtml = '';
+              if (slot.dates) {
+                slot.dates.forEach(d => {
+                  dateItemsHtml += `<div class="tree-subfolder-header" style="cursor:pointer; background:white; margin-bottom:4px; border-radius:6px;" onclick="loadAttendanceTable(${lec.id}, '${d}', '${slot.dayTime}', '${lec.title}')">
+                    <span><i class="fa-regular fa-calendar"></i> ${d}</span>
+                    <span style="font-size:11px; color:var(--primary);">조회 &rarr;</span>
+                  </div>`;
+                });
+              }
+              slotsHtml += `<div class="tree-subfolder">
+                <div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">
+                  <span><i class="fa-solid fa-clock"></i> ${slot.dayTime}</span>
+                  <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+                </div>
+                <div class="tree-subfolder-body">${dateItemsHtml}</div>
               </div>`;
             });
           }
-          subfoldersHtml += `<div class="tree-subfolder open">
-            <div class="tree-subfolder-header"><span>${slot.dayTime}</span></div>
-            <div class="tree-subfolder-body" style="display:flex;">${dateItemsHtml}</div>
+
+          lecturesHtml += `<div class="tree-folder">
+            <div class="tree-folder-header" onclick="toggleTreeFolder(this)">
+              <span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ${lec.title} <span style="font-size:11px; color:var(--text-muted);">(${lec.instructor})</span></span>
+              <i class="fa-solid fa-chevron-down" style="font-size:13px;"></i>
+            </div>
+            <div class="tree-folder-body">${slotsHtml}</div>
           </div>`;
         });
 
-        return `<div class="tree-folder open">
-          <div class="tree-folder-header"><span>${lec.title}</span></div>
-          <div class="tree-folder-body" style="display:flex;">${subfoldersHtml}</div>
+        categoryHtml += `<div class="tree-folder">
+          <div class="tree-folder-header" onclick="toggleTreeFolder(this)">
+            <span><i class="fa-solid fa-folder" style="color:var(--warning);"></i> ${cat}</span>
+            <i class="fa-solid fa-chevron-down" style="font-size:13px;"></i>
+          </div>
+          <div class="tree-folder-body">${lecturesHtml}</div>
         </div>`;
-      }).join('');
+      }
+
+      treeContainer.innerHTML = categoryHtml;
     }
 
     function loadAttendanceTable(lecId, dateStr, dayTimeStr, lecTitle) {
@@ -1127,7 +1201,7 @@
       const targetApps = applications.filter(app => app.lectureId === lecId && app.selectedDate === dateStr);
 
       if (targetApps.length === 0) {
-        container.innerHTML = '<div class="empty-state">해당 날짜에 신청한 학생이 없습니다.</div>';
+        container.innerHTML = '<div class="empty-state">해당 항목에 신청한 학생이 없습니다.</div>';
         return;
       }
 
@@ -1189,14 +1263,16 @@
 
       const tbody = document.getElementById('adminLectureTableBody');
       if (lectures.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">개설된 특강이 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">개설된 특강이 없습니다.</td></tr>';
       } else {
         tbody.innerHTML = lectures.map((lec, index) => {
+          const reqPts = lec.requiredPoints !== undefined ? lec.requiredPoints : 10000;
           return `<tr>
             <td>${index + 1}</td>
             <td>${lec.category || '기본'}</td>
             <td><strong>${lec.title}</strong></td>
             <td>${lec.instructor}</td>
+            <td>${reqPts.toLocaleString()}원</td>
             <td style="font-size:11px; color:var(--text-muted);">${lec.deadline ? lec.deadline.replace('T', ' ') : '기한 없음'}</td>
             <td>
               <button class="action-badge badge-edit" onclick="editLecture(${lec.id})">수정</button> 
@@ -1332,10 +1408,11 @@
 
     function saveOrUpdateLecture() {
       const editId = document.getElementById('editLectureId').value;
-      const category = document.getElementById('newCategory').value.trim() || '기본';
+      const category = document.getElementById('newCategory').value.trim() || '고1';
       const title = document.getElementById('newTitle').value.trim();
       const desc = document.getElementById('newDesc').value.trim();
       const instructor = document.getElementById('newInstructor').value.trim();
+      const requiredPoints = parseInt(document.getElementById('newPoints').value, 10) || 10000;
       const deadline = document.getElementById('newDeadline').value;
 
       if (!title || !instructor) {
@@ -1357,11 +1434,6 @@
         }
       });
 
-      if (slots.length === 0) {
-        alert('최소 1개 이상의 수업 시간 슬롯과 날짜를 추가해주세요.');
-        return;
-      }
-
       if (editId) {
         const lec = lectures.find(l => l.id === parseInt(editId));
         if (lec) {
@@ -1369,12 +1441,13 @@
           lec.title = title;
           lec.desc = desc;
           lec.instructor = instructor;
+          lec.requiredPoints = requiredPoints;
           lec.deadline = deadline;
           lec.slots = slots;
         }
         alert('특강이 수정되었습니다.');
       } else {
-        lectures.push({ id: Date.now(), category, title, desc, instructor, deadline, slots });
+        lectures.push({ id: Date.now(), category, title, desc, instructor, requiredPoints, deadline, slots });
         alert('새 특강이 개설되었습니다.');
       }
 
@@ -1392,11 +1465,16 @@
       document.getElementById('newTitle').value = lec.title || '';
       document.getElementById('newDesc').value = lec.desc || '';
       document.getElementById('newInstructor').value = lec.instructor || '';
+      document.getElementById('newPoints').value = lec.requiredPoints !== undefined ? lec.requiredPoints : 10000;
       document.getElementById('newDeadline').value = lec.deadline || '';
 
       const slotContainer = document.getElementById('slotBuilderContainer');
       slotContainer.innerHTML = '';
-      lec.slots.forEach(slot => addSlotRow(slot));
+      if (lec.slots && lec.slots.length > 0) {
+        lec.slots.forEach(slot => addSlotRow(slot));
+      } else {
+        addSlotRow();
+      }
 
       document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 특강 정보 수정';
       document.getElementById('submitLecBtn').innerText = '수정 완료';
@@ -1410,6 +1488,7 @@
       document.getElementById('newTitle').value = '';
       document.getElementById('newDesc').value = '';
       document.getElementById('newInstructor').value = '';
+      document.getElementById('newPoints').value = '10000';
       document.getElementById('newDeadline').value = '';
       document.getElementById('slotBuilderContainer').innerHTML = '';
       addSlotRow();
