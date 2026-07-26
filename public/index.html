@@ -901,7 +901,6 @@
         return;
       }
 
-      // CSV 파일 포맷 생성 (UTF-8 BOM 추가하여 엑셀에서 한글 깨짐 방지)
       let csvContent = "\uFEFF" + "신청 특강명,요일/시간,학생 이름,전화번호 뒷4자리,신청일시\n";
       
       targetApps.forEach(app => {
@@ -1038,7 +1037,6 @@
     }
 
     function resetLectureForm() {
-      document.getElementById('editLectureId').value =ండి
       document.getElementById('editLectureId').value = '';
       document.getElementById('newCategory').value = '';
       document.getElementById('newTitle').value = '';
