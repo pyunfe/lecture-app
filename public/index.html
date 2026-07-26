@@ -183,11 +183,18 @@
     .btn-secondary:hover { background: #475569; }
 
     /* Lectures List for Students */
+    .filter-container {
+      margin-bottom: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
     .lecture-list {
       display: flex;
       flex-direction: column;
       gap: 15px;
-      max-height: 550px;
+      max-height: 500px;
       overflow-y: auto;
       padding-right: 5px;
     }
@@ -217,6 +224,18 @@
       font-size: 16px;
       color: var(--text-main);
       margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .category-tag {
+      font-size: 11px;
+      background: #e2e8f0;
+      color: #334155;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 500;
     }
 
     .lecture-desc {
@@ -286,12 +305,6 @@
       color: var(--primary);
     }
 
-    .admin-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 30px;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -317,12 +330,13 @@
     tr:last-child td { border-bottom: none; }
 
     .action-badge {
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       border: none;
+      margin-right: 3px;
     }
 
     .badge-del {
@@ -330,6 +344,12 @@
       color: #991b1b;
     }
     .badge-del:hover { background: #fecaca; }
+
+    .badge-move {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .badge-move:hover { background: #cbd5e1; }
 
     .empty-state {
       text-align: center;
@@ -377,7 +397,13 @@
         </div>
 
         <div class="card">
-          <h3><i class="fa-solid fa-book-open"></i> 개설된 특강 목록 (정원 / 잔여석)</h3>
+          <h3><i class="fa-solid fa-book-open"></i> 개설된 특강 목록 (잔여석 / 정원)</h3>
+          <div class="filter-container">
+            <label style="font-size:13px; font-weight:600; color:var(--text-muted);">폴더(분류) 필터:</label>
+            <select id="studentCategoryFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderStudentLectures()">
+              <option value="전체">전체 보기</option>
+            </select>
+          </div>
           <div id="studentLectureList" class="lecture-list"></div>
         </div>
       </div>
@@ -447,37 +473,48 @@
           </div>
         </div>
 
-        <div class="admin-grid">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
           <div class="card">
-            <h3><i class="fa-solid fa-circle-plus"></i> 새 특강 등록</h3>
-            <div class="form-group">
-              <label>특강명</label>
-              <input type="text" id="newTitle" class="form-control" placeholder="예: 고등 미적분 집중반">
+            <h3><i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (폴더 지정)</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div class="form-group">
+                <label>특강 폴더(분류)</label>
+                <input type="text" id="newCategory" class="form-control" placeholder="예: 수학, 영어, 특별반 등">
+              </div>
+              <div class="form-group">
+                <label>특강명</label>
+                <input type="text" id="newTitle" class="form-control" placeholder="예: 고등 미적분 집중반">
+              </div>
             </div>
-            <div class="form-group">
-              <label>특강 설명</label>
-              <input type="text" id="newDesc" class="form-control" placeholder="예: 함수의 극한부터 미분법 마스터">
-            </div>
-            <div class="form-group">
-              <label>강사명 / 일정</label>
-              <input type="text" id="newInstructor" class="form-control" placeholder="예: 김철수 선생님">
-            </div>
-            <div class="form-group">
-              <label>총 정원 (명)</label>
-              <input type="number" id="newCapacity" class="form-control" value="20" min="1">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+              <div class="form-group">
+                <label>특강 설명</label>
+                <input type="text" id="newDesc" class="form-control" placeholder="예: 함수의 극한 마스터">
+              </div>
+              <div class="form-group">
+                <label>강사명 / 일정</label>
+                <input type="text" id="newInstructor" class="form-control" placeholder="예: 김철수 선생님">
+              </div>
+              <div class="form-group">
+                <label>총 정원 (명)</label>
+                <input type="number" id="newCapacity" class="form-control" value="20" min="1">
+              </div>
             </div>
             <button class="btn" onclick="addNewLecture()"><i class="fa-solid fa-plus"></i> 특강 개설하기</button>
           </div>
 
           <div class="card">
-            <h3><i class="fa-solid fa-list"></i> 개설된 특강 관리 (특강 삭제)</h3>
+            <h3><i class="fa-solid fa-folder-tree"></i> 개설된 특강 관리 (순서 변경 및 폴더/삭제 관리)</h3>
             <div style="overflow-x: auto; margin-bottom: 30px;">
               <table>
                 <thead>
                   <tr>
-                    <th>특강명</th>
-                    <th>강사 / 일정</th>
+                    <th>순서</th>
+                    <th>폴더</th>
+                    <th>특강명 / 설명</th>
+                    <th>강사</th>
                     <th>정원</th>
+                    <th>순서 이동</th>
                     <th>관리</th>
                   </tr>
                 </thead>
@@ -510,8 +547,8 @@
     const ADMIN_PW = "8566"; // 필요시 비밀번호 변경
 
     let lectures = JSON.parse(localStorage.getItem('acad_lectures')) || [
-      { id: 1, title: '고등 수학 미적분 집중반', desc: '함수의 극한부터 미분법 마스터', instructor: '김철수 선생님', capacity: 20 },
-      { id: 2, title: '실전 영문법 마스터클래스', desc: '수능 및 내신 고득점 서술형 대비', instructor: 'Sarah 쌤', capacity: 15 }
+      { id: 1, category: '수학', title: '고등 수학 미적분 집중반', desc: '함수의 극한부터 미분법 마스터', instructor: '김철수 선생님', capacity: 20 },
+      { id: 2, category: '영어', title: '실전 영문법 마스터클래스', desc: '수능 및 내신 고득점 서술형 대비', instructor: 'Sarah 쌤', capacity: 15 }
     ];
 
     let applications = JSON.parse(localStorage.getItem('acad_apps')) || [];
@@ -530,6 +567,7 @@
       if (tabName === 'student') {
         document.querySelector('.tab-buttons button:nth-child(1)').classList.add('active');
         document.getElementById('studentView').classList.add('active');
+        updateStudentCategoryFilter();
         renderStudentLectures();
       } else if (tabName === 'mypage') {
         document.querySelector('.tab-buttons button:nth-child(2)').classList.add('active');
@@ -541,26 +579,47 @@
       }
     }
 
+    function updateStudentCategoryFilter() {
+      const filterSelect = document.getElementById('studentCategoryFilter');
+      const categories = [...new Set(lectures.map(l => l.category || '기본'))];
+      
+      let optionsHtml = '<option value="전체">전체 보기</option>';
+      categories.forEach(cat => {
+        optionsHtml += `<option value="${cat}">${cat}</option>`;
+      });
+      filterSelect.innerHTML = optionsHtml;
+    }
+
     function renderStudentLectures() {
       const listEl = document.getElementById('studentLectureList');
-      if (lectures.length === 0) {
-        listEl.innerHTML = '<div class="empty-state">현재 개설된 특강이 없습니다.</div>';
+      const selectedCategory = document.getElementById('studentCategoryFilter').value;
+
+      let filteredLectures = lectures;
+      if (selectedCategory && selectedCategory !== '전체') {
+        filteredLectures = lectures.filter(lec => (lec.category || '기본') === selectedCategory);
+      }
+
+      if (filteredLectures.length === 0) {
+        listEl.innerHTML = '<div class="empty-state">해당 폴더에 개설된 특강이 없습니다.</div>';
         return;
       }
 
-      listEl.innerHTML = lectures.map(lec => {
+      listEl.innerHTML = filteredLectures.map(lec => {
         const currentCount = applications.filter(app => app.lectureId === lec.id).length;
         const remainingSeats = lec.capacity - currentCount;
         const isFull = remainingSeats <= 0;
 
         return `
           <div class="lecture-item ${selectedLectureId === lec.id ? 'selected' : ''}" onclick="${isFull ? "alert('정원이 마감된 특강입니다.');" : `selectLecture(${lec.id})`}">
-            <div class="lecture-title">${lec.title}</div>
+            <div class="lecture-title">
+              <span>${lec.title}</span>
+              <span class="category-tag">${lec.category || '기본'}</span>
+            </div>
             <div class="lecture-desc">${lec.desc}</div>
             <div class="lecture-footer">
               <div class="lecture-meta"><i class="fa-solid fa-chalkboard-user"></i> ${lec.instructor}</div>
               <div class="seat-badge ${isFull ? 'full' : ''}">
-                ${isFull ? '마감됨' : `정원 ${lec.capacity} / 잔여석 ${remainingSeats}`}
+                ${isFull ? '마감됨' : `잔여석 ${remainingSeats} / 정원 ${lec.capacity}`}
               </div>
             </div>
           </div>
@@ -694,22 +753,26 @@
       document.getElementById('statTotalLec').innerText = lectures.length + '개';
       document.getElementById('statTotalApp').innerText = applications.length + '건';
 
-      // 1. 개설된 특강 관리 테이블 렌더링
       const lecTbody = document.getElementById('adminLectureTableBody');
       if (lectures.length === 0) {
-        lecTbody.innerHTML = `<tr><td colspan="4" class="empty-state">등록된 특강이 없습니다.</td></tr>`;
+        lecTbody.innerHTML = `<tr><td colspan="7" class="empty-state">등록된 특강이 없습니다.</td></tr>`;
       } else {
-        lecTbody.innerHTML = lectures.map(lec => `
+        lecTbody.innerHTML = lectures.map((lec, index) => `
           <tr>
+            <td style="font-weight:700; color:var(--primary);">${index + 1}</td>
+            <td><span class="category-tag">${lec.category || '기본'}</span></td>
             <td><strong>${lec.title}</strong><br><span style="font-size:12px; color:var(--text-muted);">${lec.desc}</span></td>
             <td>${lec.instructor}</td>
             <td>${lec.capacity}명</td>
+            <td>
+              <button class="action-badge badge-move" onclick="moveLecture(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+              <button class="action-badge badge-move" onclick="moveLecture(${index}, 1)" ${index === lectures.length - 1 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+            </td>
             <td><button class="action-badge badge-del" onclick="deleteLecture(${lec.id})">특강 삭제</button></td>
           </tr>
         `).join('');
       }
 
-      // 2. 전체 신청 명단 테이블 렌더링
       const tbody = document.getElementById('adminTableBody');
       if (applications.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="empty-state">아직 신청된 내역이 없습니다.</td></tr>`;
@@ -728,6 +791,7 @@
     }
 
     function addNewLecture() {
+      const category = document.getElementById('newCategory').value.trim() || '기본';
       const title = document.getElementById('newTitle').value.trim();
       const desc = document.getElementById('newDesc').value.trim();
       const instructor = document.getElementById('newInstructor').value.trim();
@@ -738,26 +802,38 @@
         return;
       }
 
-      lectures.push({ id: Date.now(), title, desc, instructor, capacity });
+      lectures.push({ id: Date.now(), category, title, desc, instructor, capacity });
       saveData();
 
       alert('새로운 특강이 성공적으로 개설되었습니다!');
+      document.getElementById('newCategory').value = '';
       document.getElementById('newTitle').value = '';
       document.getElementById('newDesc').value = '';
       document.getElementById('newInstructor').value = '';
       document.getElementById('newCapacity').value = '20';
       renderAdminDashboard();
+      updateStudentCategoryFilter();
       renderStudentLectures();
     }
 
-    // 특강 삭제 함수 (연관된 신청 내역도 함께 정리)
+    function moveLecture(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= lectures.length) return;
+
+      const temp = lectures[index];
+      lectures[index] = lectures[targetIndex];
+      lectures[targetIndex] = temp;
+
+      saveData();
+      renderAdminDashboard();
+      renderStudentLectures();
+    }
+
     function deleteLecture(lectureId) {
       if (confirm('정말로 이 특강을 삭제하시겠습니까? 이 특강에 신청했던 학생들의 내역도 함께 삭제됩니다.')) {
         lectures = lectures.filter(l => l.id !== lectureId);
-        // 삭제된 특강을 신청했던 내역들도 함께 제거
         applications = applications.filter(app => app.lectureId !== lectureId);
         
-        // 만약 현재 수강생 신청 화면에서 선택 중이던 특강이었다면 선택 초기화
         if (selectedLectureId === lectureId) {
           selectedLectureId = null;
           document.getElementById('selectedLecDisplay').value = '';
@@ -765,6 +841,7 @@
 
         saveData();
         renderAdminDashboard();
+        updateStudentCategoryFilter();
         renderStudentLectures();
         alert('특강이 성공적으로 삭제되었습니다.');
       }
@@ -779,6 +856,7 @@
       }
     }
 
+    updateStudentCategoryFilter();
     renderStudentLectures();
   </script>
 </body>
