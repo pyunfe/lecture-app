@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학원 특강 신청 시스템</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+        h1 { text-align: center; color: #333; }
+        .lecture-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .sold-out { color: red; font-weight: bold; }
+        .available { color: green; font-weight: bold; }
+        input, button { padding: 8px; margin-right: 5px; margin-top: 5px; }
+        button { cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; }
+        button.cancel-btn { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <h1>✨ 학원 특강 신청 시스템</h1>
+    <div id="lecture-list">목록을 불러오는 중...</div>
+
+    <script>
+        async function fetchLectures() {
+            const response = await fetch('/api/lectures');
+            const lectures = await response.json();
+            const container = document.getElementById('lecture-list');
+            container.innerHTML = '';
+
+            lectures.forEach(lec => {
+                const card = document.createElement('div');
+                card.className = 'lecture-card';
+                
+                const isFull = lec.remaining <= 0;
+                
+                card.innerHTML = `
+                    <h3>${lec.title}</h3>
+                    <p>정원: ${lec.capacity}명 | 잔여석: <span class="${isFull ? 'sold-out' : 'available'}">${lec.remaining}명</span> ${isFull ? '(마감)' : ''}</p>
+                    <div>
+                        <input type="text" id="name-${lec.id}" placeholder="이름 (또는 닉네임)">
+                        ${isFull ? '' : `<button onclick="applyLecture(${lec.id})">신청하기</button>`}
+                        <button class="cancel-btn" onclick="cancelLecture(${lec.id})">취소하기</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function applyLecture(lectureId) {
+            const nameInput = document.getElementById(`name-${lectureId}`);
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('이름을 입력해주세요!');
+                return;
+            }
+
+            const response = await fetch('/api/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lectureId, name })
+            });
+
+            const result = await response.json();
+            alert(result.message);
+            if (result.success) {
+                nameInput.value = '';
+                fetchLectures();
+            }
+        }
+
+        async function cancelLecture(lectureId) {
+            const nameInput = document.getElementById(`name-${lectureId}`);
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('취소할 이름(닉네임)을 입력해주세요!');
+                return;
+            }
+
+            const response = await fetch('/api/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lectureId, name })
+            });
+
+            const result = await response.json();
+            alert(result.message);
+            if (result.success) {
+                nameInput.value = '';
+                fetchLectures();
+            }
+        }
+
+        // 페이지를 열면 바로 목록 불러오기
+        fetchLectures();
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "lecture-app",
+  "version": "1.0.0",
+  "description": "학원 특강 신청 사이트",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
