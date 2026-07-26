@@ -485,12 +485,13 @@
             <input type="password" id="sPhone" class="form-control" maxlength="4" placeholder="예: 1234">
           </div>
           <div style="background: #e0e7ff; padding: 15px; border-radius: 10px; font-size: 13px; color: var(--primary); line-height: 1.5;">
-            <i class="fa-solid fa-circle-info"></i> 우측 특강 목록에서 원하시는 <strong>요일/시간대</strong>의 <strong>[신청하기]</strong> 버튼을 누르면 위 정보와 함께 즉시 접수됩니다!
+            <i class="fa-solid fa-circle-info"></i> 우측 특강 목록에서 원하시는 <strong>날짜 및 요일/시간대</strong>의 <strong>[신청하기]</strong> 버튼을 누르면 위 정보와 함께 즉시 접수됩니다!<br><br>
+            📌 <strong>안내:</strong> 하루만 들으려면 원하는 날짜의 일정만 선택하시고, 2일 모두 들으려면 각각 신청하여 2개 모두 선택하셔야 합니다.
           </div>
         </div>
 
         <div class="card">
-          <h3><i class="fa-solid fa-book-open"></i> 개설된 특강 및 시간대 선택</h3>
+          <h3><i class="fa-solid fa-book-open"></i> 개설된 특강 및 일정별 신청</h3>
           <div class="filter-container">
             <label style="font-size:13px; font-weight:600; color:var(--text-muted);">폴더(분류) 필터:</label>
             <select id="studentCategoryFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderStudentLectures()">
@@ -506,14 +507,15 @@
     <div id="mypageView" class="view-section">
       <div class="card auth-box">
         <h3><i class="fa-solid fa-magnifying-glass"></i> 내 신청 내역 조회</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">학교/학년, 이름, 그리고 전화번호 뒷 4자리를 입력하시면 내역을 확인하고 취소할 수 있습니다.</p>
-        <div class="form-group" style="text-align: left;">
-          <label>학교 / 학년</label>
-          <input type="text" id="mySearchSchool" class="form-control" placeholder="예: 청라고1">
-        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">학생 이름, 학교/학년, 그리고 전화번호 뒷 4자리를 입력하시면 내역을 확인하고 취소할 수 있습니다.</p>
+        <!-- 요구사항 1 반영: 이름이 먼저 오고 학교/학년이 그 아래로 오도록 위치 교체 -->
         <div class="form-group" style="text-align: left;">
           <label>학생 이름</label>
           <input type="text" id="mySearchName" class="form-control" placeholder="홍길동">
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label>학교 / 학년</label>
+          <input type="text" id="mySearchSchool" class="form-control" placeholder="예: 청라고1">
         </div>
         <div class="form-group" style="text-align: left;">
           <label>전화번호 뒷 4자리</label>
@@ -529,7 +531,7 @@
             <thead>
               <tr>
                 <th>신청 특강명</th>
-                <th>선택한 일정 / 시간</th>
+                <th>선택한 날짜 및 시간</th>
                 <th>학교/학년</th>
                 <th>강사</th>
                 <th>신청 일시</th>
@@ -557,16 +559,17 @@
       <div id="attDashboardBox" style="display: none;">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-            <h3><i class="fa-solid fa-clipboard-user"></i> 특강 시간대별 출석부 관리</h3>
+            <h3><i class="fa-solid fa-clipboard-user"></i> 특강 날짜/시간대별 출석부 관리</h3>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <!-- 요구사항 3 반영: 출석부 필터에 개별 날짜별 옵션 제공 -->
               <select id="attLectureFilter" class="form-control" style="width: auto; padding: 8px 12px; font-size: 14px;" onchange="renderAttendanceSheet()">
-                <option value="">특강 및 시간대를 선택하세요</option>
+                <option value="">특강 및 날짜/시간대를 선택하세요</option>
               </select>
               <button class="btn btn-secondary btn-sm" onclick="logoutAttendance()"><i class="fa-solid fa-right-from-bracket"></i> 잠금</button>
             </div>
           </div>
           <div id="attTableContainer">
-            <div class="empty-state">상단에서 조회할 특강 시간대를 선택해주세요.</div>
+            <div class="empty-state">상단에서 조회할 특강 날짜 및 시간대를 선택해주세요.</div>
           </div>
         </div>
       </div>
@@ -671,7 +674,7 @@
                 <thead>
                   <tr>
                     <th>신청 특강명</th>
-                    <th>선택한 시간 / 날짜</th>
+                    <th>선택한 날짜 / 시간</th>
                     <th>학생 이름</th>
                     <th>학교/학년</th>
                     <th>번호(뒤 4자리)</th>
@@ -776,15 +779,22 @@
 
     function updateAttendanceFilter() {
       const filterSelect = document.getElementById('attLectureFilter');
-      let optionsHtml = '<option value="">특강 및 시간대를 선택하세요</option>';
+      let optionsHtml = '<option value="">특강 및 날짜/시간대를 선택하세요</option>';
       
       lectures.forEach(lec => {
         if (lec.slots && lec.slots.length > 0) {
           lec.slots.forEach(slot => {
-            const filterVal = lec.id + "_" + slot.slotId;
-            const dateStr = slot.dates && slot.dates.length > 0 ? '(' + slot.dates.join(', ') + ') ' : '';
-            const filterText = "[" + lec.category + "] " + lec.title + " - " + dateStr + slot.dayTime + " (강사: " + lec.instructor + ")";
-            optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
+            if (slot.dates && slot.dates.length > 0) {
+              slot.dates.forEach(d => {
+                const filterVal = lec.id + "_" + slot.slotId + "_" + d;
+                const filterText = "[" + lec.category + "] " + lec.title + " - 날짜: " + d + " (" + slot.dayTime + ") [강사: " + lec.instructor + "]";
+                optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
+              });
+            } else {
+              const filterVal = lec.id + "_" + slot.slotId + "_all";
+              const filterText = "[" + lec.category + "] " + lec.title + " - " + slot.dayTime + " [강사: " + lec.instructor + "]";
+              optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
+            }
           });
         }
       });
@@ -806,20 +816,38 @@
       }
 
       listEl.innerHTML = filteredLectures.map(lec => {
-        const slotsHtml = lec.slots.map(slot => {
-          const currentCount = applications.filter(app => app.slotId === slot.slotId).length;
-          const remainingSeats = slot.capacity - currentCount;
-          const isFull = remainingSeats <= 0;
-          const dateStr = slot.dates && slot.dates.length > 0 ? slot.dates.join(', ') + ' / ' : '';
+        let slotsHtml = '';
+        
+        lec.slots.forEach(slot => {
+          if (slot.dates && slot.dates.length > 0) {
+            slot.dates.forEach(d => {
+              const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
+              const remainingSeats = slot.capacity - currentCount;
+              const isFull = remainingSeats <= 0;
+              const displayInfo = d + ' / ' + slot.dayTime;
 
-          return '<div class="slot-row">' +
-            '<div class="slot-info"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + dateStr + slot.dayTime + '</div>' +
-            '<div class="slot-right">' +
-              '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여석 ' + remainingSeats + ' / 정원 ' + slot.capacity) + '</span>' +
-              '<button class="btn-apply-slot" ' + (isFull ? 'disabled' : '') + ' onclick="applyLectureSlot(' + lec.id + ', ' + slot.slotId + ', \'' + lec.title + '\', \'' + (dateStr + slot.dayTime) + '\')">' + (isFull ? '마감' : '신청하기') + '</button>' +
-            '</div>' +
-          '</div>';
-        }).join('');
+              slotsHtml += '<div class="slot-row">' +
+                '<div class="slot-info"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + displayInfo + '</div>' +
+                '<div class="slot-right">' +
+                  '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여석 ' + remainingSeats + ' / 정원 ' + slot.capacity) + '</span>' +
+                  '<button class="btn-apply-slot" ' + (isFull ? 'disabled' : '') + ' onclick="applyLectureSlot(' + lec.id + ', ' + slot.slotId + ', \'' + lec.title + '\', \'' + displayInfo + '\', \'' + d + '\')">' + (isFull ? '마감' : '신청하기') + '</button>' +
+                '</div>' +
+              '</div>';
+            });
+          } else {
+            const currentCount = applications.filter(app => app.slotId === slot.slotId).length;
+            const remainingSeats = slot.capacity - currentCount;
+            const isFull = remainingSeats <= 0;
+
+            slotsHtml += '<div class="slot-row">' +
+              '<div class="slot-info"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime + '</div>' +
+              '<div class="slot-right">' +
+                '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여석 ' + remainingSeats + ' / 정원 ' + slot.capacity) + '</span>' +
+                '<button class="btn-apply-slot" ' + (isFull ? 'disabled' : '') + ' onclick="applyLectureSlot(' + lec.id + ', ' + slot.slotId + ', \'' + lec.title + '\', \'' + slot.dayTime + '\', \'전체\')">' + (isFull ? '마감' : '신청하기') + '</button>' +
+              '</div>' +
+            '</div>';
+          }
+        });
 
         return '<div class="lecture-item">' +
           '<div class="lecture-title-area">' +
@@ -832,7 +860,7 @@
       }).join('');
     }
 
-    function applyLectureSlot(lectureId, slotId, lectureTitle, dayTime) {
+    function applyLectureSlot(lectureId, slotId, lectureTitle, displayInfo, selectedDate) {
       const name = document.getElementById('sName').value.trim();
       const school = document.getElementById('sSchool').value.trim();
       const phone = document.getElementById('sPhone').value.trim();
@@ -846,22 +874,23 @@
       const slotObj = lectureObj.slots.find(s => s.slotId === slotId);
       if(!slotObj) { alert('존재하지 않는 일정입니다.'); return; }
 
-      const currentCount = applications.filter(app => app.slotId === slotId).length;
+      const currentCount = applications.filter(app => app.slotId === slotId && app.selectedDate === selectedDate).length;
       if (currentCount >= slotObj.capacity) {
-        alert('죄송합니다. 해당 시간대 슬롯은 정원이 마감되었습니다.');
+        alert('죄송합니다. 해당 날짜/시간대 슬롯은 정원이 마감되었습니다.');
         renderStudentLectures();
         return;
       }
 
-      const alreadyApplied = applications.some(app => app.slotId === slotId && app.name === name && app.phone === phone);
-      if (alreadyApplied) { alert('이미 해당 요일/시간대로 신청된 내역이 존재합니다!'); return; }
+      const alreadyApplied = applications.some(app => app.slotId === slotId && app.selectedDate === selectedDate && app.name === name && app.phone === phone);
+      if (alreadyApplied) { alert('이미 해당 날짜 및 시간대로 신청된 내역이 존재합니다!'); return; }
 
       const newApp = {
         id: Date.now(),
         lectureId: lectureId,
         slotId: slotId,
         lectureTitle: lectureTitle,
-        dayTime: dayTime,
+        dayTime: displayInfo,
+        selectedDate: selectedDate,
         instructor: lectureObj.instructor,
         name: name,
         school: school,
@@ -872,7 +901,7 @@
       applications.push(newApp);
       saveData();
 
-      alert('[' + lectureTitle + ' - ' + dayTime + '] 신청이 완료되었습니다!');
+      alert('[' + lectureTitle + ' - ' + displayInfo + '] 신청이 완료되었습니다!');
       document.getElementById('sName').value = '';
       document.getElementById('sSchool').value = '';
       document.getElementById('sPhone').value = '';
@@ -880,16 +909,16 @@
     }
 
     function loadMyApplications() {
-      const school = document.getElementById('mySearchSchool').value.trim();
       const name = document.getElementById('mySearchName').value.trim();
+      const school = document.getElementById('mySearchSchool').value.trim();
       const phone = document.getElementById('mySearchPhone').value.trim();
 
-      if (!school || !name || phone.length !== 4) {
-        alert('학교/학년, 이름, 전화번호 뒷 4자리를 모두 정확히 입력해주세요.');
+      if (!name || !school || phone.length !== 4) {
+        alert('학생 이름, 학교/학년, 전화번호 뒷 4자리를 모두 정확히 입력해주세요.');
         return;
       }
 
-      const myApps = applications.filter(app => app.school === school && app.name === name && app.phone === phone);
+      const myApps = applications.filter(app => app.name === name && app.school === school && app.phone === phone);
       const container = document.getElementById('myResultContainer');
       const tbody = document.getElementById('myTableBody');
       document.getElementById('myResultTitle').innerText = school + ' ' + name;
@@ -897,7 +926,7 @@
       container.style.display = 'block';
 
       if (myApps.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">조회된 신청 내역이 없습니다. (학교명, 이름, 번호가 정확한지 확인해주세요.)</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">조회된 신청 내역이 없습니다. (이름, 학교명, 번호가 정확한지 확인해주세요.)</td></tr>';
         return;
       }
 
@@ -958,60 +987,59 @@
       const container = document.getElementById('attTableContainer');
 
       if (!filterVal) {
-        container.innerHTML = '<div class="empty-state">상단에서 조회할 특강 시간대를 선택해주세요.</div>';
+        container.innerHTML = '<div class="empty-state">상단에서 조회할 특강 날짜 및 시간대를 선택해주세요.</div>';
         return;
       }
 
       const parts = filterVal.split('_');
       const targetLectureId = parts[0];
       const targetSlotId = parts[1];
+      const targetDate = parts[2];
 
       const lectureObj = lectures.find(l => String(l.id) === String(targetLectureId));
       if (!lectureObj) return;
       const slotObj = lectureObj.slots.find(s => String(s.slotId) === String(targetSlotId));
       if (!slotObj) return;
 
-      const targetApps = applications.filter(app => String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId));
+      const targetApps = applications.filter(app => {
+        if (String(app.lectureId) !== String(targetLectureId) || String(app.slotId) !== String(targetSlotId)) return false;
+        if (targetDate !== 'all' && app.selectedDate !== targetDate) return false;
+        return true;
+      });
 
       if (targetApps.length === 0) {
-        container.innerHTML = '<div class="empty-state">해당 시간대에 신청한 학생이 없습니다.</div>';
+        container.innerHTML = '<div class="empty-state">선택한 날짜/시간대에 신청한 학생이 없습니다.</div>';
         return;
       }
 
-      const datesList = slotObj.dates && slotObj.dates.length > 0 ? slotObj.dates : ['일정미지정'];
+      const columnDateLabel = targetDate !== 'all' ? targetDate : '일정';
 
       let html = '<table>' +
         '<thead>' +
           '<tr>' +
             '<th>학생 이름</th>' +
-            '<th>학교/학년</th>';
-      
-      datesList.forEach(d => {
-        html += '<th style="text-align:center; min-width: 180px;">' + d + ' 출석 / 메모</th>';
-      });
-
-      html += '</tr></thead><tbody>';
+            '<th>학교/학년</th>' +
+            '<th style="text-align:center; min-width: 220px;">' + columnDateLabel + ' 출석 / 메모</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
 
       targetApps.forEach(app => {
+        const key = targetSlotId + '_' + (app.selectedDate || 'all') + '_' + app.phone;
+        const attInfo = attendanceData[key] || { checked: false, memo: '' };
+
         html += '<tr>' +
           '<td><strong>' + app.name + '</strong></td>' +
-          '<td>' + (app.school || '-') + '</td>';
-
-        datesList.forEach(d => {
-          const key = targetSlotId + '_' + app.phone + '_' + d;
-          const attInfo = attendanceData[key] || { checked: false, memo: '' };
-
-          html += '<td style="text-align:center; background: #f8fafc; border-left: 1px solid var(--border-color);">' +
+          '<td>' + (app.school || '-') + '</td>' +
+          '<td style="text-align:center; background: #f8fafc; border-left: 1px solid var(--border-color);">' +
             '<div style="display: flex; gap: 8px; align-items: center; justify-content: center;">' +
               '<label style="font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px;">' +
                 '<input type="checkbox" style="width: 18px; height: 18px; cursor:pointer;" ' + (attInfo.checked ? 'checked' : '') + ' onchange="updateAttendanceStatus(\'' + key + '\', this.checked)"> 출석' +
               '</label>' +
-              '<input type="text" class="form-control" style="padding: 6px 8px; font-size: 12px; width: 110px;" placeholder="메모..." value="' + (attInfo.memo || '') + '" oninput="updateAttendanceMemo(\'' + key + '\', this.value)">' +
+              '<input type="text" class="form-control" style="padding: 6px 8px; font-size: 12px; width: 140px;" placeholder="메모..." value="' + (attInfo.memo || '') + '" oninput="updateAttendanceMemo(\'' + key + '\', this.value)">' +
             '</div>' +
-          '</td>';
-        });
-
-        html += '</tr>';
+          '</td>' +
+        '</tr>';
       });
 
       html += '</tbody></table>';
@@ -1109,14 +1137,8 @@
         filteredApps = applications.filter(app => {
           const matchLecSlot = String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId);
           if (!matchLecSlot) return false;
-
           if (targetDate === 'all') return true;
-
-          const lecObj = lectures.find(l => String(l.id) === String(targetLectureId));
-          const slotObj = lecObj ? lecObj.slots.find(s => String(s.slotId) === String(targetSlotId)) : null;
-          if (slotObj && slotObj.dates && slotObj.dates.includes(targetDate)) {
-            return true;
-          }
+          if (app.selectedDate === targetDate) return true;
           return false;
         });
       }
@@ -1154,9 +1176,7 @@
           const matchLecSlot = String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId);
           if (!matchLecSlot) return false;
           if (targetDate === 'all') return true;
-          const lecObj = lectures.find(l => String(l.id) === String(targetLectureId));
-          const slotObj = lecObj ? lecObj.slots.find(s => String(s.slotId) === String(targetSlotId)) : null;
-          return slotObj && slotObj.dates && slotObj.dates.includes(targetDate);
+          return app.selectedDate === targetDate;
         });
         
         const foundLec = lectures.find(l => String(l.id) === String(targetLectureId));
