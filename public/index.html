@@ -288,12 +288,8 @@
 
     .admin-grid {
       display: grid;
-      grid-template-columns: 1fr 2fr;
+      grid-template-columns: 1fr;
       gap: 30px;
-    }
-
-    @media(max-width: 1000px) {
-      .admin-grid { grid-template-columns: 1fr; }
     }
 
     table {
@@ -342,7 +338,6 @@
       font-size: 14px;
     }
 
-    /* Admin Password Modal / Screen */
     .auth-box {
       max-width: 450px;
       margin: 60px auto;
@@ -475,6 +470,21 @@
           </div>
 
           <div class="card">
+            <h3><i class="fa-solid fa-list"></i> 개설된 특강 관리 (특강 삭제)</h3>
+            <div style="overflow-x: auto; margin-bottom: 30px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>특강명</th>
+                    <th>강사 / 일정</th>
+                    <th>정원</th>
+                    <th>관리</th>
+                  </tr>
+                </thead>
+                <tbody id="adminLectureTableBody"></tbody>
+              </table>
+            </div>
+
             <h3><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
             <div style="overflow-x: auto;">
               <table>
@@ -497,8 +507,7 @@
   </div>
 
   <script>
-    // 관리자 기본 비밀번호 (원하시는 비밀번호로 변경 가능합니다)
-    const ADMIN_PW = "8566";
+    const ADMIN_PW = "8566"; // 필요시 비밀번호 변경
 
     let lectures = JSON.parse(localStorage.getItem('acad_lectures')) || [
       { id: 1, title: '고등 수학 미적분 집중반', desc: '함수의 극한부터 미분법 마스터', instructor: '김철수 선생님', capacity: 20 },
@@ -532,7 +541,6 @@
       }
     }
 
-    // --- 수강생 관련 로직 ---
     function renderStudentLectures() {
       const listEl = document.getElementById('studentLectureList');
       if (lectures.length === 0) {
@@ -541,7 +549,6 @@
       }
 
       listEl.innerHTML = lectures.map(lec => {
-        // 현재 특강에 신청된 인원 계산
         const currentCount = applications.filter(app => app.lectureId === lec.id).length;
         const remainingSeats = lec.capacity - currentCount;
         const isFull = remainingSeats <= 0;
@@ -579,8 +586,8 @@
       if (!selectedLectureId) { alert('신청할 특강을 목록에서 선택해주세요.'); return; }
 
       const lectureObj = lectures.find(l => l.id === selectedLectureId);
+      if(!lectureObj) { alert('존재하지 않는 특강입니다.'); return; }
       
-      // 정원 초과 체크
       const currentCount = applications.filter(app => app.lectureId === selectedLectureId).length;
       if (currentCount >= lectureObj.capacity) {
         alert('죄송합니다. 해당 특강은 정원이 마감되었습니다.');
@@ -588,7 +595,6 @@
         return;
       }
 
-      // 중복 신청 방지 체크
       const alreadyApplied = applications.some(app => app.lectureId === selectedLectureId && app.name === name && app.phone === phone);
       if (alreadyApplied) { alert('이미 해당 특강으로 신청된 내역이 존재합니다!'); return; }
 
@@ -613,7 +619,6 @@
       renderStudentLectures();
     }
 
-    // --- 마이페이지 (조회 및 취소) 로직 ---
     function loadMyApplications() {
       const name = document.getElementById('mySearchName').value.trim();
       const phone = document.getElementById('mySearchPhone').value.trim();
@@ -650,12 +655,11 @@
         applications = applications.filter(app => app.id !== appId);
         saveData();
         alert('신청이 취소되었습니다.');
-        loadMyApplications(); // 목록 새로고침
+        loadMyApplications();
         renderStudentLectures();
       }
     }
 
-    // --- 관리자 모드 로직 ---
     function checkAdminPassword() {
       const pwInput = document.getElementById('adminPasswordInput').value;
       if (pwInput === ADMIN_PW) {
@@ -690,6 +694,22 @@
       document.getElementById('statTotalLec').innerText = lectures.length + '개';
       document.getElementById('statTotalApp').innerText = applications.length + '건';
 
+      // 1. 개설된 특강 관리 테이블 렌더링
+      const lecTbody = document.getElementById('adminLectureTableBody');
+      if (lectures.length === 0) {
+        lecTbody.innerHTML = `<tr><td colspan="4" class="empty-state">등록된 특강이 없습니다.</td></tr>`;
+      } else {
+        lecTbody.innerHTML = lectures.map(lec => `
+          <tr>
+            <td><strong>${lec.title}</strong><br><span style="font-size:12px; color:var(--text-muted);">${lec.desc}</span></td>
+            <td>${lec.instructor}</td>
+            <td>${lec.capacity}명</td>
+            <td><button class="action-badge badge-del" onclick="deleteLecture(${lec.id})">특강 삭제</button></td>
+          </tr>
+        `).join('');
+      }
+
+      // 2. 전체 신청 명단 테이블 렌더링
       const tbody = document.getElementById('adminTableBody');
       if (applications.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="empty-state">아직 신청된 내역이 없습니다.</td></tr>`;
@@ -730,6 +750,26 @@
       renderStudentLectures();
     }
 
+    // 특강 삭제 함수 (연관된 신청 내역도 함께 정리)
+    function deleteLecture(lectureId) {
+      if (confirm('정말로 이 특강을 삭제하시겠습니까? 이 특강에 신청했던 학생들의 내역도 함께 삭제됩니다.')) {
+        lectures = lectures.filter(l => l.id !== lectureId);
+        // 삭제된 특강을 신청했던 내역들도 함께 제거
+        applications = applications.filter(app => app.lectureId !== lectureId);
+        
+        // 만약 현재 수강생 신청 화면에서 선택 중이던 특강이었다면 선택 초기화
+        if (selectedLectureId === lectureId) {
+          selectedLectureId = null;
+          document.getElementById('selectedLecDisplay').value = '';
+        }
+
+        saveData();
+        renderAdminDashboard();
+        renderStudentLectures();
+        alert('특강이 성공적으로 삭제되었습니다.');
+      }
+    }
+
     function deleteAppAdmin(appId) {
       if (confirm('정말 해당 신청 내역을 강제로 취소하시겠습니까?')) {
         applications = applications.filter(app => app.id !== appId);
@@ -739,7 +779,6 @@
       }
     }
 
-    // 초기 실행
     renderStudentLectures();
   </script>
 </body>
