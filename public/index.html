@@ -6,6 +6,8 @@
   <title>스마트 학원 특강 신청 및 포인트 시스템</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Supabase JS SDK CDN 추가 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #4f46e5;
@@ -677,24 +679,17 @@
   </div>
 
   <script>
+    // Supabase 설정 및 초기화 (제공된 URL 및 Anon Key 적용)
+    const SUPABASE_URL = 'https://eghuxciqydcpiausyamy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnaHV4Y2lxeWRjcGlhdXN5YW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwODExNTgsImV4cCI6MjEwMDY1NzE1OH0.f1vngIfuoaRB_ZRVHI4al1JMX4W0EIEbOHLVtvv_vGU';
+    
+    const { createClient } = supabase;
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const ADMIN_PW = "8566";
 
-    let users = JSON.parse(localStorage.getItem('acad_users')) || [];
-    let lectures = JSON.parse(localStorage.getItem('acad_lectures')) || [
-      { 
-        id: 1, 
-        category: '고1', 
-        title: '한글 맞춤법', 
-        desc: '놓치기 쉬운 맞춤법 완벽 교정!', 
-        instructor: '강윤지T', 
-        requiredPoints: 10000,
-        deadline: '2026-12-31T23:59',
-        slots: [
-          { slotId: 101, dates: ['7/22', '8/5'], dayTime: '수요일 2-4시', capacity: 40 },
-          { slotId: 102, dates: ['7/23', '8/6'], dayTime: '목요일 4-6시', capacity: 40 }
-        ]
-      }
-    ];
+    let users = [];
+    let lectures = [];
     let applications = JSON.parse(localStorage.getItem('acad_apps')) || [];
     let attendanceData = JSON.parse(localStorage.getItem('acad_att')) || {}; 
     let attendanceMemo = JSON.parse(localStorage.getItem('acad_att_memo')) || {};
@@ -702,13 +697,84 @@
     let currentUser = JSON.parse(localStorage.getItem('acad_current_user')) || null;
     let isAttLoggedIn = false;
 
-    function saveData() {
-      localStorage.setItem('acad_users', JSON.stringify(users));
-      localStorage.setItem('acad_lectures', JSON.stringify(lectures));
+    // Supabase 데이터 동기화 함수 (lectures, students 테이블의 id, data 구조 활용)
+    async function loadDataFromSupabase() {
+      try {
+        // 1. lectures 테이블 로드
+        const { data: lecData, error: lecErr } = await _supabase.from('lectures').select('*');
+        if (lecErr) throw lecErr;
+        if (lecData && lecData.length > 0) {
+          lectures = lecData.map(row => ({ id: row.id, ...row.data }));
+        } else {
+          // 기본 데이터 세팅
+          lectures = [
+            { 
+              id: 1, 
+              category: '고1', 
+              title: '한글 맞춤법', 
+              desc: '놓치기 쉬운 맞춤법 완벽 교정!', 
+              instructor: '강윤지T', 
+              requiredPoints: 10000,
+              deadline: '2026-12-31T23:59',
+              slots: [
+                { slotId: 101, dates: ['7/22', '8/5'], dayTime: '수요일 2-4시', capacity: 40 },
+                { slotId: 102, dates: ['7/23', '8/6'], dayTime: '목요일 4-6시', capacity: 40 }
+              ]
+            }
+          ];
+          for(let l of lectures) {
+            await _supabase.from('lectures').upsert({ id: l.id, data: l });
+          }
+        }
+
+        // 2. students 테이블 로드
+        const { data: stdData, error: stdErr } = await _supabase.from('students').select('*');
+        if (stdErr) throw stdErr;
+        if (stdData) {
+          users = stdData.map(row => ({ id: row.id, ...row.data }));
+        }
+      } catch (err) {
+        console.error('Supabase 데이터 로드 실패:', err);
+      }
+    }
+
+    async function saveData() {
       localStorage.setItem('acad_apps', JSON.stringify(applications));
       localStorage.setItem('acad_att', JSON.stringify(attendanceData));
       localStorage.setItem('acad_att_memo', JSON.stringify(attendanceMemo));
       localStorage.setItem('acad_current_user', JSON.stringify(currentUser));
+    }
+
+    async function syncUserToSupabase(userObj) {
+      try {
+        await _supabase.from('students').upsert({ id: userObj.id, data: userObj });
+      } catch(err) {
+        console.error('학생 정보 동기화 오류:', err);
+      }
+    }
+
+    async function deleteUserFromSupabase(userId) {
+      try {
+        await _supabase.from('students').delete().eq('id', userId);
+      } catch(err) {
+        console.error('학생 정보 삭제 오류:', err);
+      }
+    }
+
+    async function syncLectureToSupabase(lecObj) {
+      try {
+        await _supabase.from('lectures').upsert({ id: lecObj.id, data: lecObj });
+      } catch(err) {
+        console.error('특강 정보 동기화 오류:', err);
+      }
+    }
+
+    async function deleteLectureFromSupabase(lecId) {
+      try {
+        await _supabase.from('lectures').delete().eq('id', lecId);
+      } catch(err) {
+        console.error('특강 정보 삭제 오류:', err);
+      }
     }
 
     function syncLoginState() {
@@ -738,7 +804,7 @@
       }
     }
 
-    function switchTab(tabName) {
+    async function switchTab(tabName) {
       if ((tabName === 'student' || tabName === 'mypage') && !currentUser) {
         alert('로그인 후 이용할 수 있는 메뉴입니다.');
         switchTab('auth');
@@ -771,7 +837,7 @@
       }
     }
 
-    function handleRegister() {
+    async function handleRegister() {
       const name = document.getElementById('regName').value.trim();
       const school = document.getElementById('regSchool').value.trim();
       const phone = document.getElementById('regPhone').value.trim();
@@ -802,6 +868,7 @@
       };
 
       users.push(newUser);
+      await syncUserToSupabase(newUser);
       saveData();
       alert('회원가입이 완료되었습니다! 로그인 후 포인트를 충전해주세요.');
       
@@ -846,7 +913,7 @@
       alert(`[포인트 충전 안내]\n\n박윤철 신한 111111 계좌로 ${amount.toLocaleString()}원을 송금해 주세요.\n반드시 입금하실 때 성함 뒤에 번호 4자리를 붙여주세요 (예: ${currentUser.name}${currentUser.phone})\n정확히 입금하시면 자동으로 포인트가 충전됩니다.`);
     }
 
-    function simulateSmsWebhook() {
+    async function simulateSmsWebhook() {
       const smsText = document.getElementById('simSmsText').value.trim();
       if (!smsText) {
         alert('입금 문자 내용을 입력해주세요.');
@@ -871,6 +938,7 @@
       }
 
       user.points += addAmount;
+      await syncUserToSupabase(user);
       saveData();
       updateAdminView();
       if (currentUser && currentUser.id === user.id) {
@@ -912,7 +980,6 @@
         let bodyContent = '';
 
         if (!lec.slots || lec.slots.length === 0) {
-          // 통특강 (일정 없음)
           const currentCount = applications.filter(app => app.lectureId === lec.id && app.slotId === 0).length;
           bodyContent = `<div style="padding: 10px;">
             <div class="date-checkbox-item">
@@ -965,14 +1032,13 @@
       }).join('');
     }
 
-    function applySelectedLectures() {
+    async function applySelectedLectures() {
       const checkedBoxes = document.querySelectorAll('.student-date-chk:checked');
       if (checkedBoxes.length === 0) {
         alert('신청할 항목 체크박스를 선택해주세요.');
         return;
       }
 
-      // 총 필요 포인트 계산 (각 특강별 requiredPoints 반영)
       let totalRequiredPoints = 0;
       let itemsToApply = [];
 
@@ -1031,6 +1097,7 @@
         const idx = users.findIndex(u => u.id === currentUser.id);
         if (idx !== -1) users[idx] = currentUser;
 
+        await syncUserToSupabase(currentUser);
         saveData();
         syncLoginState();
         document.getElementById('applyUserPoints').innerText = currentUser.points.toLocaleString();
@@ -1084,7 +1151,7 @@
       }).join('');
     }
 
-    function cancelApplication(appId) {
+    async function cancelApplication(appId) {
       const app = applications.find(a => a.id === appId);
       if (!app) return;
 
@@ -1102,6 +1169,7 @@
         const idx = users.findIndex(u => u.id === currentUser.id);
         if (idx !== -1) users[idx] = currentUser;
 
+        await syncUserToSupabase(currentUser);
         saveData();
         syncLoginState();
         renderMyPage();
@@ -1136,7 +1204,6 @@
         return;
       }
 
-      // 학년(폴더)별로 그룹화
       let categoryMap = {};
       lectures.forEach(lec => {
         const cat = lec.category || '기본폴더';
@@ -1316,7 +1383,7 @@
       }
     }
 
-    function adminManualAddPoints(userId) {
+    async function adminManualAddPoints(userId) {
       const targetUser = users.find(u => u.id === userId);
       if (!targetUser) return;
 
@@ -1329,6 +1396,7 @@
         }
 
         targetUser.points += addAmount;
+        await syncUserToSupabase(targetUser);
         saveData();
         updateAdminView();
         if (currentUser && currentUser.id === targetUser.id) {
@@ -1339,7 +1407,7 @@
       }
     }
 
-    function adminDeleteUser(userId) {
+    async function adminDeleteUser(userId) {
       const targetUser = users.find(u => u.id === userId);
       if (!targetUser) return;
 
@@ -1349,6 +1417,7 @@
         }
 
         users = users.filter(u => u.id !== userId);
+        await deleteUserFromSupabase(userId);
         applications = applications.filter(app => !(app.userName === targetUser.name && app.school === targetUser.school && app.phone === targetUser.phone));
 
         saveData();
@@ -1406,7 +1475,7 @@
       container.appendChild(span);
     }
 
-    function saveOrUpdateLecture() {
+    async function saveOrUpdateLecture() {
       const editId = document.getElementById('editLectureId').value;
       const category = document.getElementById('newCategory').value.trim() || '고1';
       const title = document.getElementById('newTitle').value.trim();
@@ -1434,6 +1503,7 @@
         }
       });
 
+      let targetLec;
       if (editId) {
         const lec = lectures.find(l => l.id === parseInt(editId));
         if (lec) {
@@ -1444,13 +1514,16 @@
           lec.requiredPoints = requiredPoints;
           lec.deadline = deadline;
           lec.slots = slots;
+          targetLec = lec;
         }
         alert('특강이 수정되었습니다.');
       } else {
-        lectures.push({ id: Date.now(), category, title, desc, instructor, requiredPoints, deadline, slots });
+        targetLec = { id: Date.now(), category, title, desc, instructor, requiredPoints, deadline, slots };
+        lectures.push(targetLec);
         alert('새 특강이 개설되었습니다.');
       }
 
+      await syncLectureToSupabase(targetLec);
       saveData();
       resetLectureForm();
       updateAdminView();
@@ -1482,6 +1555,16 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    async function deleteLecture(id) {
+      if (confirm('특강을 삭제하시겠습니까?')) {
+        lectures = lectures.filter(l => l.id !== id);
+        await deleteLectureFromSupabase(id);
+        applications = applications.filter(a => a.lectureId !== id);
+        saveData();
+        updateAdminView();
+      }
+    }
+
     function resetLectureForm() {
       document.getElementById('editLectureId').value = '';
       document.getElementById('newCategory').value = '';
@@ -1496,15 +1579,6 @@
       document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록';
       document.getElementById('submitLecBtn').innerText = '특강 개설하기';
       document.getElementById('cancelEditBtn').style.display = 'none';
-    }
-
-    function deleteLecture(id) {
-      if (confirm('특강을 삭제하시겠습니까?')) {
-        lectures = lectures.filter(l => l.id !== id);
-        applications = applications.filter(a => a.lectureId !== id);
-        saveData();
-        updateAdminView();
-      }
     }
 
     function exportToExcel() {
@@ -1526,7 +1600,14 @@
       document.body.removeChild(a);
     }
 
-    syncLoginState();
+    // 초기화 시 Supabase에서 데이터를 비동기로 불러온 후 UI 동기화 수행
+    async function initApp() {
+      await loadDataFromSupabase();
+      syncLoginState();
+      updateAdminView();
+    }
+
+    initApp();
   </script>
 </body>
 </html>
