@@ -580,7 +580,7 @@
               <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
               <div style="display: flex; gap: 10px; align-items: center;">
                 <select id="adminLectureFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderAdminApplications()">
-                  <option value="전체">특강별 필터: 전체 보기</option>
+                  <option value="전체">특강/시간대별 필터: 전체 보기</option>
                 </select>
                 <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 엑셀로 추출</button>
               </div>
@@ -673,9 +673,17 @@
 
     function updateAdminLectureFilter() {
       const filterSelect = document.getElementById('adminLectureFilter');
-      let optionsHtml = '<option value="전체">특강별 필터: 전체 보기</option>';
+      let optionsHtml = '<option value="전체">특강/시간대별 필터: 전체 보기</option>';
+      
       lectures.forEach(lec => {
-        optionsHtml += '<option value="' + lec.id + '">' + lec.title + '</option>';
+        if (lec.slots && lec.slots.length > 0) {
+          lec.slots.forEach(slot => {
+            // value 예: "1_101" (lectureId_slotId) 형식으로 조합하여 세부 구분
+            const filterVal = lec.id + "_" + slot.slotId;
+            const filterText = "[" + lec.title + "] " + slot.dayTime;
+            optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
+          });
+        }
       });
       filterSelect.innerHTML = optionsHtml;
     }
@@ -868,11 +876,15 @@
 
     function renderAdminApplications() {
       const tbody = document.getElementById('adminTableBody');
-      const lectureFilter = document.getElementById('adminLectureFilter').value;
+      const filterVal = document.getElementById('adminLectureFilter').value;
 
       let filteredApps = applications;
-      if (lectureFilter && lectureFilter !== '전체') {
-        filteredApps = applications.filter(app => String(app.lectureId) === String(lectureFilter));
+      if (filterVal && filterVal !== '전체') {
+        const parts = filterVal.split('_');
+        const targetLectureId = parts[0];
+        const targetSlotId = parts[1];
+        
+        filteredApps = applications.filter(app => String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId));
       }
 
       if (filteredApps.length === 0) {
@@ -893,14 +905,23 @@
     }
 
     function exportToExcel() {
-      const lectureFilter = document.getElementById('adminLectureFilter').value;
+      const filterVal = document.getElementById('adminLectureFilter').value;
       let targetApps = applications;
       let filterName = '전체';
 
-      if (lectureFilter && lectureFilter !== '전체') {
-        targetApps = applications.filter(app => String(app.lectureId) === String(lectureFilter));
-        const foundLec = lectures.find(l => String(l.id) === String(lectureFilter));
-        if (foundLec) filterName = foundLec.title.replace(/[/\\?%*:|"<>]/g, '');
+      if (filterVal && filterVal !== '전체') {
+        const parts = filterVal.split('_');
+        const targetLectureId = parts[0];
+        const targetSlotId = parts[1];
+
+        targetApps = applications.filter(app => String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId));
+        
+        const foundLec = lectures.find(l => String(l.id) === String(targetLectureId));
+        const foundSlot = foundLec ? foundLec.slots.find(s => String(s.slotId) === String(targetSlotId)) : null;
+        
+        if (foundLec && foundSlot) {
+          filterName = (foundLec.title + '_' + foundSlot.dayTime).replace(/[/\\?%*:|"<>]/g, '');
+        }
       }
 
       if (targetApps.length === 0) {
