@@ -18,6 +18,7 @@
       --danger: #ef4444;
       --danger-hover: #dc2626;
       --success: #10b981;
+      --warning: #f59e0b;
     }
 
     * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -182,6 +183,12 @@
     }
     .btn-secondary:hover { background: #475569; }
 
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+    .btn-warning:hover { background: #d97706; }
+
     /* Lectures List for Students */
     .filter-container {
       margin-bottom: 15px;
@@ -345,6 +352,12 @@
     }
     .badge-del:hover { background: #fecaca; }
 
+    .badge-edit {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .badge-edit:hover { background: #fde68a; }
+
     .badge-move {
       background: #e2e8f0;
       color: #334155;
@@ -474,8 +487,9 @@
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
-          <div class="card">
-            <h3><i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (폴더 지정)</h3>
+          <div class="card" id="lectureFormCard">
+            <h3 id="formModeTitle"><i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (폴더 지정)</h3>
+            <input type="hidden" id="editLectureId" value="">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
               <div class="form-group">
                 <label>특강 폴더(분류)</label>
@@ -500,11 +514,14 @@
                 <input type="number" id="newCapacity" class="form-control" value="20" min="1">
               </div>
             </div>
-            <button class="btn" onclick="addNewLecture()"><i class="fa-solid fa-plus"></i> 특강 개설하기</button>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn" id="submitLecBtn" onclick="saveOrUpdateLecture()"><i class="fa-solid fa-plus"></i> 특강 개설하기</button>
+              <button class="btn btn-secondary" id="cancelEditBtn" onclick="resetLectureForm()" style="display: none; width: auto; padding: 14px 20px;">수정 취소</button>
+            </div>
           </div>
 
           <div class="card">
-            <h3><i class="fa-solid fa-folder-tree"></i> 개설된 특강 관리 (순서 변경 및 폴더/삭제 관리)</h3>
+            <h3><i class="fa-solid fa-folder-tree"></i> 개설된 특강 관리 (순서 변경 및 수정/삭제)</h3>
             <div style="overflow-x: auto; margin-bottom: 30px;">
               <table>
                 <thead>
@@ -768,7 +785,10 @@
               <button class="action-badge badge-move" onclick="moveLecture(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
               <button class="action-badge badge-move" onclick="moveLecture(${index}, 1)" ${index === lectures.length - 1 ? 'disabled style="opacity:0.3; cursor:default;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
             </td>
-            <td><button class="action-badge badge-del" onclick="deleteLecture(${lec.id})">특강 삭제</button></td>
+            <td>
+              <button class="action-badge badge-edit" onclick="editLecture(${lec.id})">수정</button>
+              <button class="action-badge badge-del" onclick="deleteLecture(${lec.id})">삭제</button>
+            </td>
           </tr>
         `).join('');
       }
@@ -790,7 +810,8 @@
       `).join('');
     }
 
-    function addNewLecture() {
+    function saveOrUpdateLecture() {
+      const editId = document.getElementById('editLectureId').value;
       const category = document.getElementById('newCategory').value.trim() || '기본';
       const title = document.getElementById('newTitle').value.trim();
       const desc = document.getElementById('newDesc').value.trim();
@@ -802,18 +823,72 @@
         return;
       }
 
-      lectures.push({ id: Date.now(), category, title, desc, instructor, capacity });
-      saveData();
+      if (editId) {
+        // 수정 모드
+        const lecIndex = lectures.findIndex(l => l.id == editId);
+        if (lecIndex !== -1) {
+          lectures[lecIndex].category = category;
+          lectures[lecIndex].title = title;
+          lectures[lecIndex].desc = desc;
+          lectures[lecIndex].instructor = instructor;
+          lectures[lecIndex].capacity = capacity;
 
-      alert('새로운 특강이 성공적으로 개설되었습니다!');
+          // 이미 신청된 내역들의 특강명/강사명 동기화 업데이트
+          applications.forEach(app => {
+            if (app.lectureId == editId) {
+              app.lectureTitle = title;
+              app.instructor = instructor;
+            }
+          });
+
+          alert('특강 정보가 성공적으로 수정되었습니다.');
+        }
+      } else {
+        // 신규 등록 모드
+        lectures.push({ id: Date.now(), category, title, desc, instructor, capacity });
+        alert('새로운 특강이 성공적으로 개설되었습니다!');
+      }
+
+      saveData();
+      resetLectureForm();
+      renderAdminDashboard();
+      updateStudentCategoryFilter();
+      renderStudentLectures();
+    }
+
+    function editLecture(id) {
+      const found = lectures.find(l => l.id === id);
+      if (!found) return;
+
+      document.getElementById('editLectureId').value = found.id;
+      document.getElementById('newCategory').value = found.category || '';
+      document.getElementById('newTitle').value = found.title;
+      document.getElementById('newDesc').value = found.desc;
+      document.getElementById('newInstructor').value = found.instructor;
+      document.getElementById('newCapacity').value = found.capacity;
+
+      // 폼 타이틀 및 버튼 변경
+      document.getElementById('formModeTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> 특강 정보 수정`;
+      document.getElementById('submitLecBtn').innerHTML = `<i class="fa-solid fa-check"></i> 수정 완료하기`;
+      document.getElementById('submitLecBtn').className = `btn btn-warning`;
+      document.getElementById('cancelEditBtn').style.display = 'block';
+
+      // 상단 입력 폼으로 부드럽게 스크롤
+      document.getElementById('lectureFormCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetLectureForm() {
+      document.getElementById('editLectureId').value = '';
       document.getElementById('newCategory').value = '';
       document.getElementById('newTitle').value = '';
       document.getElementById('newDesc').value = '';
       document.getElementById('newInstructor').value = '';
       document.getElementById('newCapacity').value = '20';
-      renderAdminDashboard();
-      updateStudentCategoryFilter();
-      renderStudentLectures();
+
+      document.getElementById('formModeTitle').innerHTML = `<i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (폴더 지정)`;
+      document.getElementById('submitLecBtn').innerHTML = `<i class="fa-solid fa-plus"></i> 특강 개설하기`;
+      document.getElementById('submitLecBtn').className = `btn`;
+      document.getElementById('cancelEditBtn').style.display = 'none';
     }
 
     function moveLecture(index, direction) {
