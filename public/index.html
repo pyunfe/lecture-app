@@ -704,12 +704,14 @@
         const { data: lecData, error: lecErr } = await _supabase.from('lectures').select('*');
         if (lecErr) throw lecErr;
         if (lecData && lecData.length > 0) {
-          lectures = lecData.map(row => ({ id: row.id, ...row.data }));
+          lectures = lecData.map(row => ({ id: row.id, ...row.data }))
+                            .sort((a, b) => (a.order || 0) - (b.order || 0));
         } else {
           // 기본 데이터 세팅
           lectures = [
             { 
               id: 1, 
+              order: 0,
               category: '고1', 
               title: '한글 맞춤법', 
               desc: '놓치기 쉬운 맞춤법 완벽 교정!', 
@@ -775,6 +777,36 @@
       } catch(err) {
         console.error('특강 정보 삭제 오류:', err);
       }
+    }
+
+    // 순서 위로 이동
+    async function moveLectureUp(index) {
+      if (index <= 0) return;
+      const temp = lectures[index];
+      lectures[index] = lectures[index - 1];
+      lectures[index - 1] = temp;
+      await updateAllLecturesOrder();
+    }
+
+    // 순서 아래로 이동
+    async function moveLectureDown(index) {
+      if (index >= lectures.length - 1) return;
+      const temp = lectures[index];
+      lectures[index] = lectures[index + 1];
+      lectures[index + 1] = temp;
+      await updateAllLecturesOrder();
+    }
+
+    // 변경된 전체 순서를 DB에 반영
+    async function updateAllLecturesOrder() {
+      for (let i = 0; i < lectures.length; i++) {
+        lectures[i].order = i;
+        await _supabase.from('lectures').upsert({
+          id: lectures[i].id,
+          data: lectures[i]
+        });
+      }
+      updateAdminView();
     }
 
     function syncLoginState() {
@@ -1335,7 +1367,13 @@
         tbody.innerHTML = lectures.map((lec, index) => {
           const reqPts = lec.requiredPoints !== undefined ? lec.requiredPoints : 10000;
           return `<tr>
-            <td>${index + 1}</td>
+            <td>
+              ${index + 1}
+              <div style="display:inline-flex; gap:3px; margin-left:5px;">
+                <button class="action-badge" style="padding:2px 6px; background:#e0e7ff; color:var(--primary);" onclick="moveLectureUp(${index})">▲</button>
+                <button class="action-badge" style="padding:2px 6px; background:#e0e7ff; color:var(--primary);" onclick="moveLectureDown(${index})">▼</button>
+              </div>
+            </td>
             <td>${lec.category || '기본'}</td>
             <td><strong>${lec.title}</strong></td>
             <td>${lec.instructor}</td>
@@ -1518,7 +1556,7 @@
         }
         alert('특강이 수정되었습니다.');
       } else {
-        targetLec = { id: Date.now(), category, title, desc, instructor, requiredPoints, deadline, slots };
+        targetLec = { id: Date.now(), order: lectures.length, category, title, desc, instructor, requiredPoints, deadline, slots };
         lectures.push(targetLec);
         alert('새 특강이 개설되었습니다.');
       }
@@ -1560,8 +1598,8 @@
         lectures = lectures.filter(l => l.id !== id);
         await deleteLectureFromSupabase(id);
         applications = applications.filter(a => a.lectureId !== id);
-        saveData();
-        updateAdminView();
+        // 삭제 후 전체 순서 재정렬 동기화
+        await updateAllLecturesOrder();
       }
     }
 
