@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>스마트 학원 특강 신청 및 관리자 시스템</title>
+  <title>스마트 학원 특강 신청 및 관리자/출석부 시스템</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -407,7 +407,7 @@
 
     .slot-input-row {
       display: grid;
-      grid-template-columns: 2fr 2fr 1.5fr auto;
+      grid-template-columns: 1.5fr 1.5fr 1fr 1fr auto;
       gap: 10px;
       align-items: center;
       margin-bottom: 10px;
@@ -424,10 +424,12 @@
       <div class="tab-buttons">
         <button class="tab-btn active" onclick="switchTab('student')"><i class="fa-solid fa-user-pen"></i> 수강생 신청</button>
         <button class="tab-btn" onclick="switchTab('mypage')"><i class="fa-solid fa-id-card"></i> 마이페이지(조회/취소)</button>
+        <button class="tab-btn" onclick="switchTab('attendance')"><i class="fa-solid fa-clipboard-user"></i> 출석부(선생님용)</button>
         <button class="tab-btn" onclick="switchTab('admin')"><i class="fa-solid fa-lock"></i> 관리자 모드</button>
       </div>
     </header>
 
+    <!-- 수강생 신청 뷰 -->
     <div id="studentView" class="view-section active">
       <div class="student-grid">
         <div class="card">
@@ -438,7 +440,7 @@
           </div>
           <div class="form-group">
             <label>전화번호 뒷 4자리</label>
-            <input type="password" id="sPhone" class="form-control" maxlength="4" placeholder="예: 1234">
+            <input type="password" id="sPhone" class="form-control" maxlength="4" placeholder="예: 8566">
           </div>
           <div style="background: #e0e7ff; padding: 15px; border-radius: 10px; font-size: 13px; color: var(--primary); line-height: 1.5;">
             <i class="fa-solid fa-circle-info"></i> 우측 특강 목록에서 원하시는 <strong>요일/시간대</strong>의 <strong>[신청하기]</strong> 버튼을 누르면 위 정보와 함께 즉시 접수됩니다!
@@ -458,6 +460,7 @@
       </div>
     </div>
 
+    <!-- 마이페이지 뷰 -->
     <div id="mypageView" class="view-section">
       <div class="card auth-box">
         <h3><i class="fa-solid fa-magnifying-glass"></i> 내 신청 내역 조회</h3>
@@ -468,7 +471,7 @@
         </div>
         <div class="form-group" style="text-align: left;">
           <label>전화번호 뒷 4자리</label>
-          <input type="password" id="mySearchPhone" class="form-control" maxlength="4" placeholder="1234">
+          <input type="password" id="mySearchPhone" class="form-control" maxlength="4" placeholder="8566">
         </div>
         <button class="btn" onclick="loadMyApplications()"><i class="fa-solid fa-search"></i> 내역 조회하기</button>
       </div>
@@ -480,7 +483,7 @@
             <thead>
               <tr>
                 <th>신청 특강명</th>
-                <th>선택한 요일 / 시간</th>
+                <th>선택한 요일/일정 / 시간</th>
                 <th>강사</th>
                 <th>신청 일시</th>
                 <th>관리</th>
@@ -492,6 +495,37 @@
       </div>
     </div>
 
+    <!-- 선생님용 출석부 뷰 -->
+    <div id="attendanceView" class="view-section">
+      <div id="attLoginBox" class="card auth-box">
+        <h3><i class="fa-solid fa-shield-halved"></i> 출석부 접근 인증</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">선생님 전용 출석부입니다. 비밀번호를 입력해주세요.</p>
+        <div class="form-group" style="text-align: left;">
+          <label>비밀번호</label>
+          <input type="password" id="attPasswordInput" class="form-control" placeholder="비밀번호를 입력하세요">
+        </div>
+        <button class="btn" onclick="checkAttPassword()">출석부 열기</button>
+      </div>
+
+      <div id="attDashboardBox" style="display: none;">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h3><i class="fa-solid fa-clipboard-user"></i> 특강 시간대별 출석부 관리</h3>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <select id="attLectureFilter" class="form-control" style="width: auto; padding: 8px 12px; font-size: 14px;" onchange="renderAttendanceSheet()">
+                <option value="">특강 및 시간대를 선택하세요</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="logoutAttendance()"><i class="fa-solid fa-right-from-bracket"></i> 잠금</button>
+            </div>
+          </div>
+          <div id="attTableContainer">
+            <div class="empty-state">상단에서 조회할 특강 시간대를 선택해주세요.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 관리자 모드 뷰 -->
     <div id="adminView" class="view-section">
       <div id="adminLoginBox" class="card auth-box">
         <h3><i class="fa-solid fa-shield-halved"></i> 관리자 인증</h3>
@@ -521,7 +555,7 @@
 
         <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
           <div class="card" id="lectureFormCard">
-            <h3 id="formModeTitle"><i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (요일/시간 다중 설정)</h3>
+            <h3 id="formModeTitle"><i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (날짜/요일/시간 다중 설정)</h3>
             <input type="hidden" id="editLectureId" value="">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
               <div class="form-group">
@@ -530,23 +564,23 @@
               </div>
               <div class="form-group">
                 <label>특강명</label>
-                <input type="text" id="newTitle" class="form-control" placeholder="예: 고등 미적분 집중반">
+                <input type="text" id="newTitle" class="form-control" placeholder="예: 한글 맞춤법">
               </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
               <div class="form-group">
                 <label>특강 설명</label>
-                <input type="text" id="newDesc" class="form-control" placeholder="예: 함수의 극한 마스터">
+                <input type="text" id="newDesc" class="form-control" placeholder="예: 놓치기 쉬운 맞춤법 완벽 교정">
               </div>
               <div class="form-group">
                 <label>강사명</label>
-                <input type="text" id="newInstructor" class="form-control" placeholder="예: 김철수 선생님">
+                <input type="text" id="newInstructor" class="form-control" placeholder="예: 강윤지T">
               </div>
             </div>
 
             <div class="form-group">
               <label style="display: flex; justify-content: space-between; align-items: center;">
-                <span>요일 및 시간대 설정 (여러 개 추가 가능)</span>
+                <span>날짜 및 요일/시간대 설정 (여러 개 추가 가능)</span>
                 <button type="button" class="btn btn-sm" onclick="addSlotRow()"><i class="fa-solid fa-plus"></i> 일정 추가</button>
               </label>
               <div id="slotBuilderContainer" class="admin-slot-builder"></div>
@@ -590,7 +624,7 @@
                 <thead>
                   <tr>
                     <th>신청 특강명</th>
-                    <th>선택한 요일/시간</th>
+                    <th>선택한 날짜/요일/시간</th>
                     <th>학생 이름</th>
                     <th>번호(뒤 4자리)</th>
                     <th>신청 일시</th>
@@ -612,33 +646,27 @@
     let lectures = JSON.parse(localStorage.getItem('acad_lectures')) || [
       { 
         id: 1, 
-        category: '수학', 
-        title: '고등 수학 미적분 집중반', 
-        desc: '함수의 극한부터 미분법 마스터', 
-        instructor: '김철수 선생님', 
+        category: '국어', 
+        title: '한글 맞춤법', 
+        desc: '놓치기 쉬운 맞춤법 완벽 교정!', 
+        instructor: '강윤지T', 
         slots: [
-          { slotId: 101, dayTime: '월요일 14:00~16:00', capacity: 15 },
-          { slotId: 102, dayTime: '수요일 14:00~16:00', capacity: 15 }
-        ]
-      },
-      { 
-        id: 2, 
-        category: '영어', 
-        title: '실전 영문법 마스터클래스', 
-        desc: '수능 및 내신 고득점 서술형 대비', 
-        instructor: 'Sarah 쌤', 
-        slots: [
-          { slotId: 201, dayTime: '토요일 10:00~13:00', capacity: 20 }
+          { slotId: 101, dates: '7/22, 8/5', dayTime: '수요일 2-4시', capacity: 40 },
+          { slotId: 102, dates: '7/23, 8/6', dayTime: '목요일 4-6시', capacity: 40 },
+          { slotId: 103, dates: '7/24, 8/7', dayTime: '금요일 6-8시', capacity: 40 }
         ]
       }
     ];
 
     let applications = JSON.parse(localStorage.getItem('acad_apps')) || [];
+    let attendanceData = JSON.parse(localStorage.getItem('acad_att')) || {}; // { slotId_phone: { checked: true, memo: '출석 완료' } }
     let isAdminLoggedIn = false;
+    let isAttLoggedIn = false;
 
     function saveData() {
       localStorage.setItem('acad_lectures', JSON.stringify(lectures));
       localStorage.setItem('acad_apps', JSON.stringify(applications));
+      localStorage.setItem('acad_att', JSON.stringify(attendanceData));
     }
 
     function switchTab(tabName) {
@@ -653,8 +681,12 @@
       } else if (tabName === 'mypage') {
         document.querySelector('.tab-buttons button:nth-child(2)').classList.add('active');
         document.getElementById('mypageView').classList.add('active');
-      } else if (tabName === 'admin') {
+      } else if (tabName === 'attendance') {
         document.querySelector('.tab-buttons button:nth-child(3)').classList.add('active');
+        document.getElementById('attendanceView').classList.add('active');
+        updateAttendanceView();
+      } else if (tabName === 'admin') {
+        document.querySelector('.tab-buttons button:nth-child(4)').classList.add('active');
         document.getElementById('adminView').classList.add('active');
         updateAdminView();
       }
@@ -678,9 +710,26 @@
       lectures.forEach(lec => {
         if (lec.slots && lec.slots.length > 0) {
           lec.slots.forEach(slot => {
-            // value 예: "1_101" (lectureId_slotId) 형식으로 조합하여 세부 구분
             const filterVal = lec.id + "_" + slot.slotId;
-            const filterText = "[" + lec.title + "] " + slot.dayTime;
+            const dateStr = slot.dates ? '(' + slot.dates + ') ' : '';
+            const filterText = "[" + lec.title + "] " + dateStr + slot.dayTime;
+            optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
+          });
+        }
+      });
+      filterSelect.innerHTML = optionsHtml;
+    }
+
+    function updateAttendanceFilter() {
+      const filterSelect = document.getElementById('attLectureFilter');
+      let optionsHtml = '<option value="">특강 및 시간대를 선택하세요</option>';
+      
+      lectures.forEach(lec => {
+        if (lec.slots && lec.slots.length > 0) {
+          lec.slots.forEach(slot => {
+            const filterVal = lec.id + "_" + slot.slotId;
+            const dateStr = slot.dates ? '(' + slot.dates + ') ' : '';
+            const filterText = "[" + lec.category + "] " + lec.title + " - " + dateStr + slot.dayTime + " (강사: " + lec.instructor + ")";
             optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
           });
         }
@@ -707,12 +756,13 @@
           const currentCount = applications.filter(app => app.slotId === slot.slotId).length;
           const remainingSeats = slot.capacity - currentCount;
           const isFull = remainingSeats <= 0;
+          const dateStr = slot.dates ? slot.dates + ' / ' : '';
 
           return '<div class="slot-row">' +
-            '<div class="slot-info"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime + '</div>' +
+            '<div class="slot-info"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + dateStr + slot.dayTime + '</div>' +
             '<div class="slot-right">' +
               '<span class="seat-badge ' + (isFull ? 'full' : '') + '">' + (isFull ? '마감됨' : '잔여석 ' + remainingSeats + ' / 정원 ' + slot.capacity) + '</span>' +
-              '<button class="btn-apply-slot" ' + (isFull ? 'disabled' : '') + ' onclick="applyLectureSlot(' + lec.id + ', ' + slot.slotId + ', \'' + lec.title + '\', \'' + slot.dayTime + '\')">' + (isFull ? '마감' : '신청하기') + '</button>' +
+              '<button class="btn-apply-slot" ' + (isFull ? 'disabled' : '') + ' onclick="applyLectureSlot(' + lec.id + ', ' + slot.slotId + ', \'' + lec.title + '\', \'' + (dateStr + slot.dayTime) + '\')">' + (isFull ? '마감' : '신청하기') + '</button>' +
             '</div>' +
           '</div>';
         }).join('');
@@ -813,6 +863,103 @@
       }
     }
 
+    // 출석부 인증 및 렌더링
+    function checkAttPassword() {
+      const pwInput = document.getElementById('attPasswordInput').value;
+      if (pwInput === ADMIN_PW) {
+        isAttLoggedIn = true;
+        updateAttendanceView();
+        document.getElementById('attPasswordInput').value = '';
+      } else {
+        alert('비밀번호가 틀렸습니다.');
+      }
+    }
+
+    function logoutAttendance() {
+      isAttLoggedIn = false;
+      updateAttendanceView();
+    }
+
+    function updateAttendanceView() {
+      const loginBox = document.getElementById('attLoginBox');
+      const dashBox = document.getElementById('attDashboardBox');
+
+      if (isAttLoggedIn) {
+        loginBox.style.display = 'none';
+        dashBox.style.display = 'block';
+        updateAttendanceFilter();
+      } else {
+        loginBox.style.display = 'block';
+        dashBox.style.display = 'none';
+      }
+    }
+
+    function renderAttendanceSheet() {
+      const filterVal = document.getElementById('attLectureFilter').value;
+      const container = document.getElementById('attTableContainer');
+
+      if (!filterVal) {
+        container.innerHTML = '<div class="empty-state">상단에서 조회할 특강 시간대를 선택해주세요.</div>';
+        return;
+      }
+
+      const parts = filterVal.split('_');
+      const targetLectureId = parts[0];
+      const targetSlotId = parts[1];
+
+      const targetApps = applications.filter(app => String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId));
+
+      if (targetApps.length === 0) {
+        container.innerHTML = '<div class="empty-state">해당 시간대에 신청한 학생이 없습니다.</div>';
+        return;
+      }
+
+      let html = '<table>' +
+        '<thead>' +
+          '<tr>' +
+            '<th style="width: 80px; text-align:center;">출석체크</th>' +
+            '<th>학생 이름</th>' +
+            '<th>전화번호 뒷 4자리</th>' +
+            '<th>신청 일시</th>' +
+            '<th>특이사항 / 메모</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+      targetApps.forEach(app => {
+        const key = targetSlotId + '_' + app.phone + '_' + app.name;
+        const attInfo = attendanceData[key] || { checked: false, memo: '' };
+
+        html += '<tr>' +
+          '<td style="text-align:center;">' +
+            '<input type="checkbox" style="width: 20px; height: 20px; cursor:pointer;" ' + (attInfo.checked ? 'checked' : '') + ' onchange="updateAttendanceStatus(\'' + key + '\', this.checked)">' +
+          '</td>' +
+          '<td><strong>' + app.name + '</strong></td>' +
+          '<td>' + app.phone + '</td>' +
+          '<td>' + app.date + '</td>' +
+          '<td>' +
+            '<input type="text" class="form-control" style="padding: 6px 10px; font-size: 13px;" placeholder="메모 입력..." value="' + (attInfo.memo || '') + '" oninput="updateAttendanceMemo(\'' + key + '\', this.value)">' +
+          '</td>' +
+        '</tr>';
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function updateAttendanceStatus(key, isChecked) {
+      if (!attendanceData[key]) attendanceData[key] = { checked: false, memo: '' };
+      attendanceData[key].checked = isChecked;
+      saveData();
+    }
+
+    function updateAttendanceMemo(key, memoText) {
+      if (!attendanceData[key]) attendanceData[key] = { checked: false, memo: '' };
+      attendanceData[key].memo = memoText;
+      saveData();
+    }
+
+    // 관리자 인증 및 대시보드
     function checkAdminPassword() {
       const pwInput = document.getElementById('adminPasswordInput').value;
       if (pwInput === ADMIN_PW) {
@@ -853,7 +1000,7 @@
         lecTbody.innerHTML = '<tr><td colspan="6" class="empty-state">등록된 특강이 없습니다.</td></tr>';
       } else {
         lecTbody.innerHTML = lectures.map((lec, index) => {
-          const slotsSummary = lec.slots.map(s => '[' + s.dayTime + ' / 정원:' + s.capacity + ']').join(', ');
+          const slotsSummary = lec.slots.map(s => '[' + (s.dates ? s.dates + ' ' : '') + s.dayTime + ' / 정원:' + s.capacity + ']').join(', ');
           return '<tr>' +
             '<td style="font-weight:700; color:var(--primary);">' + (index + 1) + '</td>' +
             '<td><span class="category-tag">' + (lec.category || '기본') + '</span></td>' +
@@ -929,7 +1076,7 @@
         return;
       }
 
-      let csvContent = "\uFEFF" + "신청 특강명,요일/시간,학생 이름,전화번호 뒷4자리,신청일시\n";
+      let csvContent = "\uFEFF" + "신청 특강명,날짜/요일/시간,학생 이름,전화번호 뒷4자리,신청일시\n";
       
       targetApps.forEach(app => {
         let row = [
@@ -952,7 +1099,7 @@
       document.body.removeChild(link);
     }
 
-    function addSlotRow(dayTimeVal = '', capacityVal = 20) {
+    function addSlotRow(datesVal = '', dayTimeVal = '', capacityVal = 40) {
       const container = document.getElementById('slotBuilderContainer');
       const rowId = 'slot_' + Date.now() + Math.random().toString(36).substr(2, 5);
       
@@ -960,7 +1107,8 @@
       rowDiv.className = 'slot-input-row';
       rowDiv.id = rowId;
       rowDiv.innerHTML = 
-        '<input type="text" class="form-control slot-daytime-input" placeholder="예: 월요일 14:00~16:00" value="' + dayTimeVal + '">' +
+        '<input type="text" class="form-control slot-dates-input" placeholder="날짜 (예: 7/22, 8/5)" value="' + datesVal + '">' +
+        '<input type="text" class="form-control slot-daytime-input" placeholder="요일/시간 (예: 수요일 2-4시)" value="' + dayTimeVal + '">' +
         '<input type="number" class="form-control slot-cap-input" placeholder="정원" value="' + capacityVal + '" min="1">' +
         '<span style="font-size:13px; color:var(--text-muted); font-weight:600;">명</span>' +
         '<button type="button" class="action-badge badge-del" style="padding: 10px;" onclick="document.getElementById(\'' + rowId + '\').remove()"><i class="fa-solid fa-trash"></i></button>';
@@ -981,13 +1129,14 @@
 
       const slotRows = document.querySelectorAll('.slot-input-row');
       if (slotRows.length === 0) {
-        alert('최소 하나 이상의 요일/시간대 슬롯을 추가해주세요.');
+        alert('최소 하나 이상의 날짜 및 시간대 슬롯을 추가해주세요.');
         return;
       }
 
       let slots = [];
       let isValid = true;
       slotRows.forEach(row => {
+        const dates = row.querySelector('.slot-dates-input').value.trim();
         const dayTime = row.querySelector('.slot-daytime-input').value.trim();
         const capacity = parseInt(row.querySelector('.slot-cap-input').value);
         if (!dayTime || isNaN(capacity) || capacity <= 0) {
@@ -995,6 +1144,7 @@
         } else {
           slots.push({
             slotId: Date.now() + Math.floor(Math.random() * 1000),
+            dates: dates,
             dayTime: dayTime,
             capacity: capacity
           });
@@ -1051,7 +1201,7 @@
       container.innerHTML = '';
       if (found.slots && found.slots.length > 0) {
         found.slots.forEach(s => {
-          addSlotRow(s.dayTime, s.capacity);
+          addSlotRow(s.dates || '', s.dayTime, s.capacity);
         });
       } else {
         addSlotRow();
@@ -1074,9 +1224,9 @@
       
       const container = document.getElementById('slotBuilderContainer');
       container.innerHTML = '';
-      addSlotRow('', 20);
+      addSlotRow('', '', 40);
 
-      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (요일/시간 다중 설정)';
+      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (날짜/요일/시간 다중 설정)';
       document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-plus"></i> 특강 개설하기';
       document.getElementById('submitLecBtn').className = 'btn';
       document.getElementById('cancelEditBtn').style.display = 'none';
@@ -1119,7 +1269,7 @@
       }
     }
 
-    addSlotRow('', 20);
+    addSlotRow('7/22, 8/5', '수요일 2-4시', 40);
     updateStudentCategoryFilter();
     updateAdminLectureFilter();
     renderStudentLectures();
