@@ -35,7 +35,7 @@
 
     .app-container {
       width: 100%;
-      max-width: 1320px;
+      max-width: 1400px;
       background: var(--card-bg);
       border-radius: 20px;
       padding: 40px;
@@ -204,93 +204,122 @@
       display: flex;
       flex-direction: column;
       gap: 15px;
-      max-height: 550px;
+      max-height: 600px;
       overflow-y: auto;
       padding-right: 5px;
     }
 
-    .lecture-item {
+    .tree-folder {
       background: white;
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 20px;
+      margin-bottom: 10px;
+      overflow: hidden;
       transition: all 0.2s;
+      flex-shrink: 0;
     }
 
-    .lecture-item:hover {
-      border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-
-    .lecture-title-area {
+    .tree-folder-header {
+      padding: 16px 20px;
+      background: #f8fafc;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 5px;
-    }
-
-    .lecture-title {
+      cursor: pointer;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text-main);
+      user-select: none;
+      border-bottom: 1px solid transparent;
     }
 
-    .category-tag {
-      font-size: 11px;
-      background: #e2e8f0;
-      color: #334155;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-weight: 500;
+    .tree-folder.open .tree-folder-header {
+      border-bottom-color: var(--border-color);
+      background: #f1f5f9;
     }
 
-    .lecture-desc {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+    .tree-folder-header:hover {
+      background: #f1f5f9;
     }
 
-    .slots-container {
-      display: flex;
+    .tree-folder-header .fa-chevron-down {
+      transition: transform 0.2s ease;
+    }
+    .tree-folder.open .tree-folder-header .fa-chevron-down {
+      transform: rotate(180deg);
+    }
+
+    .tree-folder-body {
+      display: none; 
+      padding: 15px;
+      background: white;
       flex-direction: column;
-      gap: 10px;
-      border-top: 1px dashed var(--border-color);
-      padding-top: 12px;
+      gap: 12px;
     }
 
-    .slot-group-card {
-      background: #f8fafc;
+    .tree-folder.open .tree-folder-body {
+      display: flex; 
+    }
+
+    .tree-subfolder {
       border: 1px solid var(--border-color);
       border-radius: 10px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .tree-subfolder-header {
       padding: 12px 16px;
-    }
-
-    .slot-group-header {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 8px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--primary);
+      background: #f8fafc;
+      user-select: none;
     }
 
-    .date-checkboxes {
-      display: flex;
+    .tree-subfolder.open .tree-subfolder-header {
+      border-bottom: 1px solid var(--border-color);
+      background: #eff6ff;
+    }
+
+    .tree-subfolder-header .fa-chevron-down {
+      transition: transform 0.2s ease;
+    }
+    .tree-subfolder.open .tree-subfolder-header .fa-chevron-down {
+      transform: rotate(180deg);
+    }
+
+    .tree-subfolder-body {
+      display: none; 
+      padding: 12px;
+      background: white;
       flex-direction: column;
-      gap: 6px;
-      padding-left: 5px;
+      gap: 8px;
     }
 
-    .date-checkbox-item {
+    .tree-subfolder.open .tree-subfolder-body {
+      display: flex; 
+    }
+
+    .date-checkbox-item, .tree-action-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 13px;
-      background: white;
-      padding: 8px 12px;
+      background: #f8fafc;
+      padding: 10px 14px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+
+    .date-checkbox-item:hover, .tree-action-item:hover {
+      background: #f1f5f9;
     }
 
     .date-checkbox-item label {
@@ -320,6 +349,19 @@
     .seat-badge.full {
       background: #fee2e2;
       color: #991b1b;
+    }
+
+    .admin-layout-grid, .att-layout-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr !important;
+      gap: 25px;
+      align-items: start;
+    }
+
+    @media(max-width: 960px) {
+      .admin-layout-grid, .att-layout-grid {
+        grid-template-columns: 1fr !important;
+      }
     }
 
     .admin-stats {
@@ -397,6 +439,9 @@
     .badge-move { background: #e2e8f0; color: #334155; }
     .badge-move:hover { background: #cbd5e1; }
 
+    .badge-select { background: #e0e7ff; color: var(--primary); }
+    .badge-select:hover { background: #c7d2fe; }
+
     .empty-state {
       text-align: center;
       padding: 40px;
@@ -461,10 +506,6 @@
       cursor: pointer;
     }
     .date-tag i:hover { color: var(--danger); }
-
-    @media(max-width: 768px) {
-      .slot-main-info { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 <body>
@@ -497,11 +538,10 @@
             <input type="password" id="sPhone" class="form-control" maxlength="4" placeholder="예: 1234">
           </div>
           
-          <!-- 좌측에 배치된 일괄 신청 버튼 -->
           <button class="btn" onclick="applySelectedLectures()" style="margin-bottom: 15px;"><i class="fa-solid fa-check-double"></i> 선택한 일정 한 번에 신청하기</button>
 
           <div style="background: #e0e7ff; padding: 15px; border-radius: 10px; font-size: 13px; color: var(--primary); line-height: 1.5;">
-            <i class="fa-solid fa-circle-info"></i> 우측 목록에서 원하시는 날짜들의 체크박스를 여러 개 선택하신 후, 위 <strong>[선택한 일정 한 번에 신청하기]</strong> 버튼을 누르면 일괄 접수됩니다!
+            <i class="fa-solid fa-circle-info"></i> 우측 폴더를 클릭하여 펼치신 후, 원하시는 날짜들의 체크박스를 선택하고 위 <strong>[선택한 일정 한 번에 신청하기]</strong> 버튼을 누르세요!
           </div>
         </div>
 
@@ -573,16 +613,20 @@
       <div id="attDashboardBox" style="display: none;">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-            <h3><i class="fa-solid fa-clipboard-user"></i> 특강 날짜/시간대별 출석부 관리</h3>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <select id="attLectureFilter" class="form-control" style="width: auto; padding: 8px 12px; font-size: 14px;" onchange="renderAttendanceSheet()">
-                <option value="">특강 및 날짜/시간대를 선택하세요</option>
-              </select>
-              <button class="btn btn-secondary btn-sm" onclick="logoutAttendance()"><i class="fa-solid fa-right-from-bracket"></i> 잠금</button>
-            </div>
+            <h3><i class="fa-solid fa-clipboard-user"></i> 출석부 관리 (특강 폴더 트리 선택)</h3>
+            <button class="btn btn-secondary btn-sm" onclick="logoutAttendance()"><i class="fa-solid fa-right-from-bracket"></i> 잠금</button>
           </div>
-          <div id="attTableContainer">
-            <div class="empty-state">상단에서 조회할 특강 날짜 및 시간대를 선택해주세요.</div>
+          
+          <div class="att-layout-grid">
+            <div>
+              <label style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px; display:block;">조회할 특강 및 날짜 선택 폴더:</label>
+              <div id="attTreeContainer" class="lecture-list" style="max-height: 500px;"></div>
+            </div>
+            <div>
+              <div id="attTableContainer">
+                <div class="empty-state">좌측 폴더 트리에서 조회할 세부 날짜를 선택해주세요.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -674,30 +718,37 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-              <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <select id="adminLectureFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderAdminApplications()">
-                  <option value="전체">특강/시간대/날짜별 필터: 전체 보기</option>
-                </select>
-                <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 엑셀로 추출</button>
+              <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리 (폴더 트리 선택)</h3>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 현재 선택된 목록 엑셀 추출</button>
               </div>
             </div>
-            <div style="overflow-x: auto;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>신청 특강명</th>
-                    <th>선택한 날짜 / 시간</th>
-                    <th>학생 이름</th>
-                    <th>학교/학년</th>
-                    <th>번호(뒤 4자리)</th>
-                    <th>신청 일시</th>
-                    <th>관리</th>
-                  </tr>
-                </thead>
-                <tbody id="adminTableBody"></tbody>
-              </table>
+
+            <div class="admin-layout-grid" style="margin-bottom: 20px;">
+              <div>
+                <label style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px; display:block;">조회 필터 폴더 트리:</label>
+                <div id="adminTreeContainer" class="lecture-list" style="max-height: 450px;"></div>
+              </div>
+              <div>
+                <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;" id="adminSelectedTitleInfo">선택된 필터: 전체 보기</div>
+                <div style="overflow-x: auto; max-height: 450px;">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>신청 특강명</th>
+                        <th>선택한 날짜 / 시간</th>
+                        <th>학생 이름</th>
+                        <th>학교/학년</th>
+                        <th>전화번호</th>
+                        <th>관리</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -723,13 +774,18 @@
 
     let applications = JSON.parse(localStorage.getItem('acad_apps')) || [];
     let attendanceData = JSON.parse(localStorage.getItem('acad_att')) || {}; 
+    let attendanceMemo = JSON.parse(localStorage.getItem('acad_att_memo')) || {};
     let isAdminLoggedIn = false;
     let isAttLoggedIn = false;
+
+    let currentAdminFilter = 'all';
+    let currentAttFilter = '';
 
     function saveData() {
       localStorage.setItem('acad_lectures', JSON.stringify(lectures));
       localStorage.setItem('acad_apps', JSON.stringify(applications));
       localStorage.setItem('acad_att', JSON.stringify(attendanceData));
+      localStorage.setItem('acad_att_memo', JSON.stringify(attendanceMemo));
     }
 
     function switchTab(tabName) {
@@ -766,53 +822,14 @@
       filterSelect.innerHTML = optionsHtml;
     }
 
-    function updateAdminLectureFilter() {
-      const filterSelect = document.getElementById('adminLectureFilter');
-      let optionsHtml = '<option value="전체">특강/시간대/날짜별 필터: 전체 보기</option>';
-      
-      lectures.forEach(lec => {
-        if (lec.slots && lec.slots.length > 0) {
-          lec.slots.forEach(slot => {
-            const filterVal = lec.id + "_" + slot.slotId + "_all";
-            const dateStr = slot.dates && slot.dates.length > 0 ? '(' + slot.dates.join(', ') + ') ' : '';
-            const filterText = "[" + lec.title + "] " + dateStr + slot.dayTime + " (전체 날짜)";
-            optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
-
-            if (slot.dates && slot.dates.length > 0) {
-              slot.dates.forEach(d => {
-                const dateFilterVal = lec.id + "_" + slot.slotId + "_" + d;
-                const dateFilterText = "  ┗ [" + lec.title + "] 날짜: " + d + " (" + slot.dayTime + ")";
-                optionsHtml += '<option value="' + dateFilterVal + '">' + dateFilterText + '</option>';
-              });
-            }
-          });
-        }
-      });
-      filterSelect.innerHTML = optionsHtml;
+    function toggleTreeFolder(headerEl) {
+      const folderEl = headerEl.parentElement;
+      folderEl.classList.toggle('open');
     }
 
-    function updateAttendanceFilter() {
-      const filterSelect = document.getElementById('attLectureFilter');
-      let optionsHtml = '<option value="">특강 및 날짜/시간대를 선택하세요</option>';
-      
-      lectures.forEach(lec => {
-        if (lec.slots && lec.slots.length > 0) {
-          lec.slots.forEach(slot => {
-            if (slot.dates && slot.dates.length > 0) {
-              slot.dates.forEach(d => {
-                const filterVal = lec.id + "_" + slot.slotId + "_" + d;
-                const filterText = "[" + lec.category + "] " + lec.title + " - 날짜: " + d + " (" + slot.dayTime + ") [강사: " + lec.instructor + "]";
-                optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
-              });
-            } else {
-              const filterVal = lec.id + "_" + slot.slotId + "_all";
-              const filterText = "[" + lec.category + "] " + lec.title + " - " + slot.dayTime + " [강사: " + lec.instructor + "]";
-              optionsHtml += '<option value="' + filterVal + '">' + filterText + '</option>';
-            }
-          });
-        }
-      });
-      filterSelect.innerHTML = optionsHtml;
+    function toggleTreeSubfolder(headerEl) {
+      const subfolderEl = headerEl.parentElement;
+      subfolderEl.classList.toggle('open');
     }
 
     function renderStudentLectures() {
@@ -830,17 +847,17 @@
       }
 
       listEl.innerHTML = filteredLectures.map(lec => {
-        let slotsHtml = '';
+        let subfoldersHtml = '';
         
         lec.slots.forEach(slot => {
-          let dateCheckboxesHtml = '';
+          let dateItemsHtml = '';
           if (slot.dates && slot.dates.length > 0) {
             slot.dates.forEach(d => {
               const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
               const remainingSeats = slot.capacity - currentCount;
               const isFull = remainingSeats <= 0;
 
-              dateCheckboxesHtml += '<div class="date-checkbox-item">' +
+              dateItemsHtml += '<div class="date-checkbox-item">' +
                 '<label>' +
                   '<input type="checkbox" class="student-date-chk" data-lec-id="' + lec.id + '" data-slot-id="' + slot.slotId + '" data-lec-title="' + lec.title + '" data-day-time="' + slot.dayTime + '" data-date="' + d + '" ' + (isFull ? 'disabled' : '') + '> ' +
                   '<i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + (isFull ? ' (마감)' : '') +
@@ -853,7 +870,7 @@
             const remainingSeats = slot.capacity - currentCount;
             const isFull = remainingSeats <= 0;
 
-            dateCheckboxesHtml += '<div class="date-checkbox-item">' +
+            dateItemsHtml += '<div class="date-checkbox-item">' +
               '<label>' +
                 '<input type="checkbox" class="student-date-chk" data-lec-id="' + lec.id + '" data-slot-id="' + slot.slotId + '" data-lec-title="' + lec.title + '" data-day-time="' + slot.dayTime + '" data-date="전체" ' + (isFull ? 'disabled' : '') + '> ' +
                 '<i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime +
@@ -862,19 +879,21 @@
             '</div>';
           }
 
-          slotsHtml += '<div class="slot-group-card">' +
-            '<div class="slot-group-header"><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</div>' +
-            '<div class="date-checkboxes">' + dateCheckboxesHtml + '</div>' +
+          subfoldersHtml += '<div class="tree-subfolder">' +
+            '<div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">' +
+              '<span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span>' +
+              '<i class="fa-solid fa-chevron-down" style="font-size:12px;"></i>' +
+            '</div>' +
+            '<div class="tree-subfolder-body">' + dateItemsHtml + '</div>' +
           '</div>';
         });
 
-        return '<div class="lecture-item">' +
-          '<div class="lecture-title-area">' +
-            '<div class="lecture-title">' + lec.title + '</div>' +
-            '<span class="category-tag">' + (lec.category || '기본') + '</span>' +
+        return '<div class="tree-folder">' +
+          '<div class="tree-folder-header" onclick="toggleTreeFolder(this)">' +
+            '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + ' <span style="font-size:12px; color:var(--text-muted); font-weight:500;">(' + lec.instructor + ')</span></span>' +
+            '<i class="fa-solid fa-chevron-down" style="font-size:14px;"></i>' +
           '</div>' +
-          '<div class="lecture-desc">' + lec.desc + ' <span style="color:var(--primary); font-weight:600;">(강사: ' + lec.instructor + ')</span></div>' +
-          '<div class="slots-container">' + slotsHtml + '</div>' +
+          '<div class="tree-folder-body">' + subfoldersHtml + '</div>' +
         '</div>';
       }).join('');
     }
@@ -927,11 +946,11 @@
           lectureTitle: lectureTitle,
           dayTime: displayInfo,
           selectedDate: selectedDate,
-          instructor: lectureObj.instructor,
           name: name,
           school: school,
           phone: phone,
-          date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          instructor: lectureObj.instructor,
+          appliedAt: new Date().toLocaleDateString()
         };
 
         applications.push(newApp);
@@ -939,13 +958,15 @@
       });
 
       saveData();
-
-      let msg = '';
-      if (successCount > 0) msg += successCount + '개의 일정이 성공적으로 신청되었습니다!\n';
-      if (duplicateCount > 0) msg += duplicateCount + '개의 항목은 이미 신청된 내역이어서 제외되었습니다.';
-      
-      alert(msg);
       renderStudentLectures();
+
+      let msg = successCount + '개의 일정이 성공적으로 신청되었습니다!';
+      if (duplicateCount > 0) {
+        msg += '\n(이미 중복 신청된 ' + duplicateCount + '건은 제외되었습니다)';
+      }
+      alert(msg);
+
+      document.querySelectorAll('.student-date-chk').forEach(c => c.checked = false);
     }
 
     function loadMyApplications() {
@@ -953,369 +974,248 @@
       const school = document.getElementById('mySearchSchool').value.trim();
       const phone = document.getElementById('mySearchPhone').value.trim();
 
-      if (!name || !school || phone.length !== 4) {
-        alert('학생 이름, 학교/학년, 전화번호 뒷 4자리를 모두 정확히 입력해주세요.');
+      if (!name || !school || !phone) {
+        alert('이름, 학교/학년, 전화번호 뒷 4자리를 모두 입력해주세요.');
         return;
       }
 
       const myApps = applications.filter(app => app.name === name && app.school === school && app.phone === phone);
       const container = document.getElementById('myResultContainer');
       const tbody = document.getElementById('myTableBody');
-      document.getElementById('myResultTitle').innerText = school + ' ' + name;
-
-      container.style.display = 'block';
+      document.getElementById('myResultTitle').innerText = name + ' (' + school + ')';
 
       if (myApps.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">조회된 신청 내역이 없습니다. (이름, 학교명, 번호가 정확한지 확인해주세요.)</td></tr>';
+        container.style.display = 'block';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">신청 내역이 존재하지 않습니다.</td></tr>';
         return;
       }
 
+      container.style.display = 'block';
       tbody.innerHTML = myApps.map(app => 
         '<tr>' +
           '<td><strong>' + app.lectureTitle + '</strong></td>' +
-          '<td><span style="color:var(--primary); font-weight:600;">' + app.dayTime + '</span></td>' +
-          '<td>' + (app.school || '-') + '</td>' +
-          '<td>' + (app.instructor || '-') + '</td>' +
-          '<td>' + app.date + '</td>' +
-          '<td><button class="action-badge badge-del" onclick="cancelMyApplication(' + app.id + ')">신청 취소</button></td>' +
+          '<td>' + app.dayTime + '</td>' +
+          '<td>' + app.school + '</td>' +
+          '<td>' + app.instructor + '</td>' +
+          '<td>' + app.appliedAt + '</td>' +
+          '<td><button class="action-badge badge-del" onclick="cancelApplication(' + app.id + ')">수강 취소</button></td>' +
         '</tr>'
       ).join('');
     }
 
-    function cancelMyApplication(appId) {
-      if (confirm('정말로 이 특강 신청을 취소하시겠습니까? 잔여석이 즉시 복구됩니다.')) {
-        applications = applications.filter(app => app.id !== appId);
-        saveData();
-        alert('신청이 취소되었습니다.');
-        loadMyApplications();
-        renderStudentLectures();
-      }
+    function cancelApplication(appId) {
+      if (!confirm('정말 이 수강 신청을 취소하시겠습니까?')) return;
+      applications = applications.filter(app => app.id !== appId);
+      saveData();
+      loadMyApplications();
+      renderStudentLectures();
+      alert('취소되었습니다.');
     }
 
     function checkAttPassword() {
-      const pwInput = document.getElementById('attPasswordInput').value;
-      if (pwInput === ADMIN_PW) {
+      const pw = document.getElementById('attPasswordInput').value;
+      if (pw === ADMIN_PW) {
         isAttLoggedIn = true;
+        document.getElementById('attLoginBox').style.display = 'none';
+        document.getElementById('attDashboardBox').style.display = 'block';
         updateAttendanceView();
-        document.getElementById('attPasswordInput').value = '';
       } else {
-        alert('비밀번호가 틀렸습니다.');
+        alert('비밀번호가 일치하지 않습니다.');
       }
     }
 
     function logoutAttendance() {
       isAttLoggedIn = false;
-      updateAttendanceView();
+      document.getElementById('attPasswordInput').value = '';
+      document.getElementById('attLoginBox').style.display = 'block';
+      document.getElementById('attDashboardBox').style.display = 'none';
     }
 
     function updateAttendanceView() {
-      const loginBox = document.getElementById('attLoginBox');
-      const dashBox = document.getElementById('attDashboardBox');
-
-      if (isAttLoggedIn) {
-        loginBox.style.display = 'none';
-        dashBox.style.display = 'block';
-        updateAttendanceFilter();
-      } else {
-        loginBox.style.display = 'block';
-        dashBox.style.display = 'none';
-      }
-    }
-
-    function renderAttendanceSheet() {
-      const filterVal = document.getElementById('attLectureFilter').value;
-      const container = document.getElementById('attTableContainer');
-
-      if (!filterVal) {
-        container.innerHTML = '<div class="empty-state">상단에서 조회할 특강 날짜 및 시간대를 선택해주세요.</div>';
+      if (!isAttLoggedIn) return;
+      const treeContainer = document.getElementById('attTreeContainer');
+      
+      if (lectures.length === 0) {
+        treeContainer.innerHTML = '<div class="empty-state">개설된 특강이 없습니다.</div>';
         return;
       }
 
-      const parts = filterVal.split('_');
-      const targetLectureId = parts[0];
-      const targetSlotId = parts[1];
+      treeContainer.innerHTML = lectures.map(lec => {
+        let subfoldersHtml = '';
+        lec.slots.forEach(slot => {
+          let dateItemsHtml = '';
+          if (slot.dates && slot.dates.length > 0) {
+            slot.dates.forEach(d => {
+              const filterKey = lec.id + '_' + slot.slotId + '_' + d;
+              dateItemsHtml += '<div class="tree-action-item" onclick="selectAttFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ' / ' + slot.dayTime + ')\')">' +
+                '<span><i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + '</span>' +
+                '<button class="action-badge badge-select">조회</button>' +
+              '</div>';
+            });
+          } else {
+            const filterKey = lec.id + '_' + slot.slotId + '_전체';
+            dateItemsHtml += '<div class="tree-action-item" onclick="selectAttFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + slot.dayTime + ')\')">' +
+              '<span><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime + '</span>' +
+              '<button class="action-badge badge-select">조회</button>' +
+            '</div>';
+          }
+
+          subfoldersHtml += '<div class="tree-subfolder">' +
+            '<div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">' +
+              '<span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span>' +
+              '<i class="fa-solid fa-chevron-down" style="font-size:12px;"></i>' +
+            '</div>' +
+            '<div class="tree-subfolder-body">' + dateItemsHtml + '</div>' +
+          '</div>';
+        });
+
+        return '<div class="tree-folder">' +
+          '<div class="tree-folder-header" onclick="toggleTreeFolder(this)">' +
+            '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + '</span>' +
+            '<i class="fa-solid fa-chevron-down" style="font-size:14px;"></i>' +
+          '</div>' +
+          '<div class="tree-folder-body">' + subfoldersHtml + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function selectAttFilter(filterKey, titleInfo) {
+      currentAttFilter = filterKey;
+      const parts = filterKey.split('_');
+      const lecId = parseInt(parts[0]);
+      const slotId = parseInt(parts[1]);
       const targetDate = parts[2];
 
-      const lectureObj = lectures.find(l => String(l.id) === String(targetLectureId));
-      if (!lectureObj) return;
-      const slotObj = lectureObj.slots.find(s => String(s.slotId) === String(targetSlotId));
-      if (!slotObj) return;
+      const filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && (targetDate === '전체' || app.selectedDate === targetDate));
+      const container = document.getElementById('attTableContainer');
 
-      const targetApps = applications.filter(app => {
-        if (String(app.lectureId) !== String(targetLectureId) || String(app.slotId) !== String(targetSlotId)) return false;
-        if (targetDate !== 'all' && app.selectedDate !== targetDate) return false;
-        return true;
-      });
-
-      if (targetApps.length === 0) {
-        container.innerHTML = '<div class="empty-state">선택한 날짜/시간대에 신청한 학생이 없습니다.</div>';
-        return;
-      }
-
-      const columnDateLabel = targetDate !== 'all' ? targetDate : '일정';
-
-      let html = '<table>' +
-        '<thead>' +
-          '<tr>' +
-            '<th>학생 이름</th>' +
-            '<th>학교/학년</th>' +
-            '<th style="text-align:center; min-width: 220px;">' + columnDateLabel + ' 출석 / 메모</th>' +
-          '</tr>' +
-        '</thead>' +
-        '<tbody>';
-
-      targetApps.forEach(app => {
-        const key = targetSlotId + '_' + (app.selectedDate || 'all') + '_' + app.phone;
-        const attInfo = attendanceData[key] || { checked: false, memo: '' };
-
-        html += '<tr>' +
-          '<td><strong>' + app.name + '</strong></td>' +
-          '<td>' + (app.school || '-') + '</td>' +
-          '<td style="text-align:center; background: #f8fafc; border-left: 1px solid var(--border-color);">' +
-            '<div style="display: flex; gap: 8px; align-items: center; justify-content: center;">' +
-              '<label style="font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px;">' +
-                '<input type="checkbox" style="width: 18px; height: 18px; cursor:pointer;" ' + (attInfo.checked ? 'checked' : '') + ' onchange="updateAttendanceStatus(\'' + key + '\', this.checked)"> 출석' +
-              '</label>' +
-              '<input type="text" class="form-control" style="padding: 6px 8px; font-size: 12px; width: 140px;" placeholder="메모..." value="' + (attInfo.memo || '') + '" oninput="updateAttendanceMemo(\'' + key + '\', this.value)">' +
-            '</div>' +
-          '</td>' +
-        '</tr>';
-      });
-
-      html += '</tbody></table>';
-      container.innerHTML = html;
+      container.innerHTML = '<div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">조회 중인 일정: ' + titleInfo + ' (총 ' + filteredApps.length + '명)</div>' +
+        '<table>' +
+          '<thead>' +
+            '<tr>' +
+              '<th style="width: 70px; text-align: center;">출석</th>' +
+              '<th>학생 이름</th>' +
+              '<th>학교/학년</th>' +
+              '<th>비고 / 메모</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody>' +
+            (filteredApps.length === 0 ? '<tr><td colspan="4" class="empty-state">신청한 학생이 없습니다.</td></tr>' :
+              filteredApps.map(app => {
+                const attKey = filterKey + '_' + app.id;
+                const isChecked = attendanceData[attKey] ? 'checked' : '';
+                const memoVal = attendanceMemo[attKey] || '';
+                return '<tr>' +
+                  '<td style="text-align: center;"><input type="checkbox" style="width:18px;height:18px;cursor:pointer;" ' + isChecked + ' onchange="toggleAttendanceStatus(\'' + attKey + '\', this.checked)"></td>' +
+                  '<td><strong>' + app.name + '</strong></td>' +
+                  '<td>' + app.school + '</td>' +
+                  '<td><input type="text" class="form-control" style="padding:6px 10px; font-size:13px;" placeholder="메모 입력..." value="' + memoVal + '" oninput="updateAttendanceMemo(\'' + attKey + '\', this.value)"></td>' +
+                '</tr>';
+              }).join('')
+            ) +
+          '</tbody>' +
+        '</table>';
     }
 
-    function updateAttendanceStatus(key, isChecked) {
-      if (!attendanceData[key]) attendanceData[key] = { checked: false, memo: '' };
-      attendanceData[key].checked = isChecked;
+    function toggleAttendanceStatus(attKey, status) {
+      attendanceData[attKey] = status;
       saveData();
     }
 
-    function updateAttendanceMemo(key, memoText) {
-      if (!attendanceData[key]) attendanceData[key] = { checked: false, memo: '' };
-      attendanceData[key].memo = memoText;
+    function updateAttendanceMemo(attKey, memoText) {
+      attendanceMemo[attKey] = memoText;
       saveData();
     }
 
     function checkAdminPassword() {
-      const pwInput = document.getElementById('adminPasswordInput').value;
-      if (pwInput === ADMIN_PW) {
+      const pw = document.getElementById('adminPasswordInput').value;
+      if (pw === ADMIN_PW) {
         isAdminLoggedIn = true;
+        document.getElementById('adminLoginBox').style.display = 'none';
+        document.getElementById('adminDashboardBox').style.display = 'block';
         updateAdminView();
-        document.getElementById('adminPasswordInput').value = '';
       } else {
-        alert('비밀번호가 틀렸습니다.');
+        alert('관리자 비밀번호가 틀렸습니다.');
       }
     }
 
     function logoutAdmin() {
       isAdminLoggedIn = false;
-      updateAdminView();
+      document.getElementById('adminPasswordInput').value = '';
+      document.getElementById('adminLoginBox').style.display = 'block';
+      document.getElementById('adminDashboardBox').style.display = 'none';
     }
 
     function updateAdminView() {
-      const loginBox = document.getElementById('adminLoginBox');
-      const dashBox = document.getElementById('adminDashboardBox');
+      if (!isAdminLoggedIn) return;
 
-      if (isAdminLoggedIn) {
-        loginBox.style.display = 'none';
-        dashBox.style.display = 'block';
-        updateAdminLectureFilter();
-        renderAdminDashboard();
-      } else {
-        loginBox.style.display = 'block';
-        dashBox.style.display = 'none';
-      }
-    }
-
-    function renderAdminDashboard() {
       document.getElementById('statTotalLec').innerText = lectures.length + '개';
       document.getElementById('statTotalApp').innerText = applications.length + '건';
 
-      const lecTbody = document.getElementById('adminLectureTableBody');
+      const adminLecTable = document.getElementById('adminLectureTableBody');
       if (lectures.length === 0) {
-        lecTbody.innerHTML = '<tr><td colspan="6" class="empty-state">등록된 특강이 없습니다.</td></tr>';
+        adminLecTable.innerHTML = '<tr><td colspan="6" class="empty-state">등록된 특강이 없습니다.</td></tr>';
       } else {
-        lecTbody.innerHTML = lectures.map((lec, index) => {
-          const slotsSummary = lec.slots.map(s => {
-            const dStr = s.dates && s.dates.length > 0 ? '[' + s.dates.join(', ') + '] ' : '';
-            return dStr + s.dayTime + ' (정원:' + s.capacity + ')';
-          }).join(' | ');
-
-          return '<tr>' +
-            '<td style="font-weight:700; color:var(--primary);">' + (index + 1) + '</td>' +
-            '<td><span class="category-tag">' + (lec.category || '기본') + '</span></td>' +
-            '<td><strong>' + lec.title + '</strong><br><span style="font-size:12px; color:var(--text-muted);">' + slotsSummary + '</span></td>' +
+        adminLecTable.innerHTML = lectures.map((lec, idx) => 
+          '<tr>' +
+            '<td>' + (idx + 1) + '</td>' +
+            '<td>' + (lec.category || '기본') + '</td>' +
+            '<td><strong>' + lec.title + '</strong><br><span style="font-size:12px;color:var(--text-muted);">' + lec.desc + '</span></td>' +
             '<td>' + lec.instructor + '</td>' +
             '<td>' +
-              '<button class="action-badge badge-move" onclick="moveLecture(' + index + ', -1)" ' + (index === 0 ? 'disabled style="opacity:0.3; cursor:default;"' : '') + '><i class="fa-solid fa-arrow-up"></i></button>' +
-              '<button class="action-badge badge-move" onclick="moveLecture(' + index + ', 1)" ' + (index === lectures.length - 1 ? 'disabled style="opacity:0.3; cursor:default;"' : '') + '><i class="fa-solid fa-arrow-down"></i></button>' +
+              '<button class="action-badge badge-move" onclick="moveLecture(' + lec.id + ', -1)" ' + (idx === 0 ? 'disabled' : '') + '>▲ 위로</button>' +
+              '<button class="action-badge badge-move" onclick="moveLecture(' + lec.id + ', 1)" ' + (idx === lectures.length - 1 ? 'disabled' : '') + '>▼ 아래로</button>' +
             '</td>' +
             '<td>' +
               '<button class="action-badge badge-edit" onclick="editLecture(' + lec.id + ')">수정</button>' +
               '<button class="action-badge badge-del" onclick="deleteLecture(' + lec.id + ')">삭제</button>' +
             '</td>' +
-          '</tr>';
-        }).join('');
+          '</tr>'
+        ).join('');
       }
 
+      updateAdminTree();
       renderAdminApplications();
+      if (document.getElementById('slotBuilderContainer').children.length === 0) {
+        addSlotRow();
+      }
     }
 
-    function renderAdminApplications() {
-      const tbody = document.getElementById('adminTableBody');
-      const filterVal = document.getElementById('adminLectureFilter').value;
-
-      let filteredApps = applications;
-      if (filterVal && filterVal !== '전체') {
-        const parts = filterVal.split('_');
-        const targetLectureId = parts[0];
-        const targetSlotId = parts[1];
-        const targetDate = parts[2];
-        
-        filteredApps = applications.filter(app => {
-          const matchLecSlot = String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId);
-          if (!matchLecSlot) return false;
-          if (targetDate === 'all') return true;
-          if (app.selectedDate === targetDate) return true;
-          return false;
-        });
-      }
-
-      if (filteredApps.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">조건에 일치하는 신청 내역이 없습니다.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = filteredApps.map(app => 
-        '<tr>' +
-          '<td><strong>' + app.lectureTitle + '</strong></td>' +
-          '<td><span style="color:var(--primary); font-weight:600;">' + app.dayTime + '</span></td>' +
-          '<td>' + app.name + '</td>' +
-          '<td>' + (app.school || '-') + '</td>' +
-          '<td>' + app.phone + '</td>' +
-          '<td>' + app.date + '</td>' +
-          '<td><button class="action-badge badge-del" onclick="deleteAppAdmin(' + app.id + ')">강제취소</button></td>' +
-        '</tr>'
-      ).join('');
-    }
-
-    function exportToExcel() {
-      const filterVal = document.getElementById('adminLectureFilter').value;
-      let targetApps = applications;
-      let filterName = '전체';
-
-      if (filterVal && filterVal !== '전체') {
-        const parts = filterVal.split('_');
-        const targetLectureId = parts[0];
-        const targetSlotId = parts[1];
-        const targetDate = parts[2];
-
-        targetApps = applications.filter(app => {
-          const matchLecSlot = String(app.lectureId) === String(targetLectureId) && String(app.slotId) === String(targetSlotId);
-          if (!matchLecSlot) return false;
-          if (targetDate === 'all') return true;
-          return app.selectedDate === targetDate;
-        });
-        
-        const foundLec = lectures.find(l => String(l.id) === String(targetLectureId));
-        const foundSlot = foundLec ? foundLec.slots.find(s => String(s.slotId) === String(targetSlotId)) : null;
-        
-        if (foundLec && foundSlot) {
-          filterName = (foundLec.title + '_' + foundSlot.dayTime + (targetDate !== 'all' ? '_' + targetDate : '')).replace(/[/\\?%*:|"<>]/g, '');
-        }
-      }
-
-      if (targetApps.length === 0) {
-        alert('추출할 신청 명단 데이터가 없습니다.');
-        return;
-      }
-
-      let csvContent = "\uFEFF" + "신청 특강명,시간/날짜,학생 이름,학교/학년,전화번호 뒷4자리,신청일시\n";
-      
-      targetApps.forEach(app => {
-        let row = [
-          '"' + (app.lectureTitle || '').replace(/"/g, '""') + '"',
-          '"' + (app.dayTime || '').replace(/"/g, '""') + '"',
-          '"' + (app.name || '').replace(/"/g, '""') + '"',
-          '"' + (app.school || '').replace(/"/g, '""') + '"',
-          '"' + (app.phone || '').replace(/"/g, '""') + '"',
-          '"' + (app.date || '').replace(/"/g, '""') + '"'
-        ].join(',');
-        csvContent += row + "\n";
-      });
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', '학원특강_신청명단_' + filterName + '.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    function addSlotRow(datesArr = [], dayTimeVal = '', capacityVal = 40) {
+    function addSlotRow() {
       const container = document.getElementById('slotBuilderContainer');
-      const rowId = 'slot_' + Date.now() + Math.random().toString(36).substr(2, 5);
-      
+      const rowId = Date.now() + Math.floor(Math.random() * 1000);
+
       const rowDiv = document.createElement('div');
       rowDiv.className = 'slot-input-row';
-      rowDiv.id = rowId;
-      
-      let html = '<div class="slot-main-info">' +
-        '<input type="text" class="form-control slot-daytime-input" placeholder="요일/시간 (예: 수요일 2-4시)" value="' + dayTimeVal + '">' +
-        '<div style="display:flex; align-items:center; gap:6px;">' +
-          '<input type="number" class="form-control slot-cap-input" placeholder="정원" value="' + capacityVal + '" min="1">' +
-          '<span style="font-size:13px; color:var(--text-muted); font-weight:600; white-space:nowrap;">명</span>' +
+      rowDiv.dataset.rowId = rowId;
+      rowDiv.innerHTML = 
+        '<div class="slot-main-info">' +
+          '<input type="text" class="form-control slot-daytime" placeholder="예: 수요일 오후 2-4시" style="font-size:14px; padding:8px 12px;">' +
+          '<input type="number" class="form-control slot-capacity" value="40" placeholder="정원" style="font-size:14px; padding:8px 12px;" min="1">' +
+          '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:10px 14px;">슬롯 삭제</button>' +
         '</div>' +
-        '<button type="button" class="action-badge badge-del" style="padding: 10px;" onclick="document.getElementById(\'' + rowId + '\').remove()"><i class="fa-solid fa-trash"></i> 삭제</button>' +
-      '</div>' +
-      '<div class="date-picker-box">' +
-        '<span style="font-size:12px; font-weight:600; color:var(--text-muted);"><i class="fa-regular fa-calendar-days"></i> 캘린더 날짜 추가:</span>' +
-        '<input type="date" class="form-control slot-date-picker" style="width: auto; padding: 6px 10px; font-size: 13px;" onchange="addDateTag(this, \'' + rowId + '\')">' +
-        '<div class="date-tags-list" style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-left:5px;"></div>' +
-      '</div>';
+        '<div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:5px;">수업 날짜들 추가:</div>' +
+        '<div class="date-picker-box">' +
+          '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter (예: 7/22)" style="width:180px; font-size:13px; padding:6px 10px;" onkeydown="handleDateInputKey(event, this)">' +
+          '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:6px;"></div>' +
+        '</div>';
 
-      rowDiv.innerHTML = html;
       container.appendChild(rowDiv);
-
-      const tagsContainer = rowDiv.querySelector('.date-tags-list');
-      datesArr.forEach(d => {
-        appendDateTag(tagsContainer, d);
-      });
     }
 
-    function addDateTag(pickerInput, rowId) {
-      const val = pickerInput.value;
-      if (!val) return;
-      
-      const rowDiv = document.getElementById(rowId);
-      const tagsContainer = rowDiv.querySelector('.date-tags-list');
+    function handleDateInputKey(event, inputEl) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const val = inputEl.value.trim();
+        if (!val) return;
 
-      const existingDates = [...tagsContainer.querySelectorAll('.date-tag')].map(t => t.dataset.date);
-      if (existingDates.includes(val)) {
-        pickerInput.value = '';
-        return;
+        const container = inputEl.nextElementSibling;
+        const tag = document.createElement('span');
+        tag.className = 'date-tag';
+        tag.innerHTML = val + ' <i class="fa-solid fa-xmark" onclick="this.parentElement.remove()"></i>';
+        container.appendChild(tag);
+        inputEl.value = '';
       }
-
-      appendDateTag(tagsContainer, val);
-      pickerInput.value = '';
-    }
-
-    function appendDateTag(container, dateStr) {
-      let displayStr = dateStr;
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        displayStr = parseInt(parts[1]) + '/' + parseInt(parts[2]);
-      }
-
-      const tag = document.createElement('span');
-      tag.className = 'date-tag';
-      tag.dataset.date = dateStr;
-      tag.innerHTML = displayStr + ' <i class="fa-solid fa-xmark" onclick="this.parentElement.remove()"></i>';
-      container.appendChild(tag);
     }
 
     function saveOrUpdateLecture() {
@@ -1325,122 +1225,70 @@
       const desc = document.getElementById('newDesc').value.trim();
       const instructor = document.getElementById('newInstructor').value.trim();
 
-      if (!title || !desc || !instructor) {
-        alert('특강명, 설명, 강사명을 모두 입력해주세요.');
-        return;
-      }
+      if (!title) { alert('특강명을 입력해주세요.'); document.getElementById('newTitle').focus(); return; }
+      if (!instructor) { alert('강사명을 입력해주세요.'); document.getElementById('newInstructor').focus(); return; }
 
       const slotRows = document.querySelectorAll('.slot-input-row');
       if (slotRows.length === 0) {
-        alert('최소 하나 이상의 수업 시간대 슬롯을 추가해주세요.');
+        alert('최소 1개 이상의 수업 시간대 슬롯을 추가해주세요.');
         return;
       }
 
       let slots = [];
       let isValid = true;
-      slotRows.forEach(row => {
-        const dayTime = row.querySelector('.slot-daytime-input').value.trim();
-        const capacity = parseInt(row.querySelector('.slot-cap-input').value);
-        
+
+      slotRows.forEach((row, idx) => {
+        const dayTime = row.querySelector('.slot-daytime').value.trim();
+        const capacity = parseInt(row.querySelector('.slot-capacity').value) || 40;
         const dateTags = row.querySelectorAll('.date-tag');
+        
+        if (!dayTime) {
+          alert((idx + 1) + '번째 슬롯의 수업 시간대(예: 수요일 2-4시)를 입력해주세요.');
+          isValid = false;
+          return;
+        }
+
         let dates = [];
         dateTags.forEach(t => {
-          const rawDate = t.dataset.date;
-          if (rawDate.includes('-')) {
-            const p = rawDate.split('-');
-            if(p.length === 3) {
-              dates.push(parseInt(p[1]) + '/' + parseInt(p[2])); 
-            } else {
-              dates.push(rawDate);
-            }
-          } else {
-            dates.push(rawDate);
-          }
+          dates.push(t.textContent.trim());
         });
 
-        if (!dayTime || isNaN(capacity) || capacity <= 0) {
-          isValid = false;
-        } else {
-          slots.push({
-            slotId: Date.now() + Math.floor(Math.random() * 1000),
-            dates: dates,
-            dayTime: dayTime,
-            capacity: capacity
-          });
-        }
+        slots.push({
+          slotId: Date.now() + idx + Math.floor(Math.random() * 1000),
+          dayTime: dayTime,
+          capacity: capacity,
+          dates: dates
+        });
       });
 
-      if (!isValid) {
-        alert('모든 슬롯의 요일/시간과 정원을 올바르게 입력해주세요.');
-        return;
-      }
+      if (!isValid) return;
 
       if (editId) {
-        const lecIndex = lectures.findIndex(l => l.id == editId);
-        if (lecIndex !== -1) {
-          lectures[lecIndex].category = category;
-          lectures[lecIndex].title = title;
-          lectures[lecIndex].desc = desc;
-          lectures[lecIndex].instructor = instructor;
-          lectures[lecIndex].slots = slots;
-
-          applications.forEach(app => {
-            if (app.lectureId == editId) {
-              app.lectureTitle = title;
-              app.instructor = instructor;
-            }
-          });
-
-          alert('특강 정보가 성공적으로 수정되었습니다.');
+        const lec = lectures.find(l => l.id === parseInt(editId));
+        if (lec) {
+          lec.category = category;
+          lec.title = title;
+          lec.desc = desc;
+          lec.instructor = instructor;
+          lec.slots = slots;
         }
+        alert('특강이 성공적으로 수정되었습니다.');
       } else {
-        lectures.push({ id: Date.now(), category, title, desc, instructor, slots });
-        alert('새로운 특강이 성공적으로 개설되었습니다!');
+        const newLec = {
+          id: Date.now(),
+          category: category,
+          title: title,
+          desc: desc,
+          instructor: instructor,
+          slots: slots
+        };
+        lectures.push(newLec);
+        alert('새 특강이 성공적으로 개설되었습니다.');
       }
 
       saveData();
       resetLectureForm();
-      updateAdminLectureFilter();
-      renderAdminDashboard();
-      updateStudentCategoryFilter();
-      renderStudentLectures();
-    }
-
-    function editLecture(id) {
-      const found = lectures.find(l => l.id === id);
-      if (!found) return;
-
-      document.getElementById('editLectureId').value = found.id;
-      document.getElementById('newCategory').value = found.category || '';
-      document.getElementById('newTitle').value = found.title;
-      document.getElementById('newDesc').value = found.desc;
-      document.getElementById('newInstructor').value = found.instructor;
-
-      const container = document.getElementById('slotBuilderContainer');
-      container.innerHTML = '';
-      if (found.slots && found.slots.length > 0) {
-        found.slots.forEach(s => {
-          let originalDates = s.dates ? s.dates.map(d => {
-            if(d.includes('/')) {
-              const parts = d.split('/');
-              const m = parts[0].padStart(2, '0');
-              const day = parts[1].padStart(2, '0');
-              return '2026-' + m + '-' + day;
-            }
-            return d;
-          }) : [];
-          addSlotRow(originalDates, s.dayTime, s.capacity);
-        });
-      } else {
-        addSlotRow();
-      }
-
-      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 특강 정보 수정';
-      document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-check"></i> 수정 완료하기';
-      document.getElementById('submitLecBtn').className = 'btn btn-warning';
-      document.getElementById('cancelEditBtn').style.display = 'block';
-
-      document.getElementById('lectureFormCard').scrollIntoView({ behavior: 'smooth' });
+      updateAdminView();
     }
 
     function resetLectureForm() {
@@ -1449,58 +1297,204 @@
       document.getElementById('newTitle').value = '';
       document.getElementById('newDesc').value = '';
       document.getElementById('newInstructor').value = '';
-      
-      const container = document.getElementById('slotBuilderContainer');
-      container.innerHTML = '';
-      addSlotRow(['2026-07-22', '2026-08-05'], '수요일 2-4시', 40);
-
+      document.getElementById('slotBuilderContainer').innerHTML = '';
       document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-circle-plus"></i> 새 특강 등록 (캘린더 일정 선택)';
       document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-plus"></i> 특강 개설하기';
-      document.getElementById('submitLecBtn').className = 'btn';
       document.getElementById('cancelEditBtn').style.display = 'none';
+      addSlotRow();
     }
 
-    function moveLecture(index, direction) {
-      const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= lectures.length) return;
+    function editLecture(lecId) {
+      const lec = lectures.find(l => l.id === lecId);
+      if (!lec) return;
 
-      const temp = lectures[index];
-      lectures[index] = lectures[targetIndex];
-      lectures[targetIndex] = temp;
+      document.getElementById('editLectureId').value = lec.id;
+      document.getElementById('newCategory').value = lec.category || '';
+      document.getElementById('newTitle').value = lec.title;
+      document.getElementById('newDesc').value = lec.desc || '';
+      document.getElementById('newInstructor').value = lec.instructor;
+
+      const container = document.getElementById('slotBuilderContainer');
+      container.innerHTML = '';
+
+      lec.slots.forEach(slot => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'slot-input-row';
+        rowDiv.innerHTML = 
+          '<div class="slot-main-info">' +
+            '<input type="text" class="form-control slot-daytime" value="' + slot.dayTime + '" placeholder="예: 수요일 오후 2-4시" style="font-size:14px; padding:8px 12px;">' +
+            '<input type="number" class="form-control slot-capacity" value="' + slot.capacity + '" placeholder="정원" style="font-size:14px; padding:8px 12px;" min="1">' +
+            '<button type="button" class="action-badge badge-del" onclick="this.closest(\'.slot-input-row\').remove()" style="padding:10px 14px;">슬롯 삭제</button>' +
+          '</div>' +
+          '<div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:5px;">수업 날짜들 추가:</div>' +
+          '<div class="date-picker-box">' +
+            '<input type="text" class="form-control slot-date-input" placeholder="날짜 입력 후 Enter (예: 7/22)" style="width:180px; font-size:13px; padding:6px 10px;" onkeydown="handleDateInputKey(event, this)">' +
+            '<div class="date-tags-container" style="display:flex; flex-wrap:wrap; gap:6px;">' +
+              (slot.dates ? slot.dates.map(d => '<span class="date-tag">' + d + ' <i class="fa-solid fa-xmark" onclick="this.parentElement.remove()"></i></span>').join('') : '') +
+            '</div>' +
+          '</div>';
+        container.appendChild(rowDiv);
+      });
+
+      document.getElementById('formModeTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 특강 정보 수정';
+      document.getElementById('submitLecBtn').innerHTML = '<i class="fa-solid fa-check"></i> 수정 사항 저장';
+      document.getElementById('cancelEditBtn').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteLecture(lecId) {
+      if (!confirm('정말 이 특강을 삭제하시겠습니까? 관련된 모든 신청 내역도 함께 삭제됩니다.')) return;
+      lectures = lectures.filter(l => l.id !== lecId);
+      applications = applications.filter(app => app.lectureId !== lecId);
+      saveData();
+      updateAdminView();
+      alert('삭제되었습니다.');
+    }
+
+    function moveLecture(lecId, direction) {
+      const idx = lectures.findIndex(l => l.id === lecId);
+      if (idx < 0) return;
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= lectures.length) return;
+
+      const temp = lectures[idx];
+      lectures[idx] = lectures[targetIdx];
+      lectures[targetIdx] = temp;
 
       saveData();
-      updateAdminLectureFilter();
-      renderAdminDashboard();
+      updateAdminView();
+    }
+
+    function updateAdminTree() {
+      const treeContainer = document.getElementById('adminTreeContainer');
+      
+      let html = '<div class="tree-folder open" onclick="selectAdminFilter(\'all\', \'전체 보기\')">' +
+        '<div class="tree-folder-header" style="background:#e0e7ff; color:var(--primary);">' +
+          '<span><i class="fa-solid fa-list"><b>전체 신청 명단 보기</b></i></span>' +
+        '</div>' +
+      '</div>';
+
+      if (lectures.length > 0) {
+        html += lectures.map(lec => {
+          let subfoldersHtml = '';
+          lec.slots.forEach(slot => {
+            let dateItemsHtml = '';
+            if (slot.dates && slot.dates.length > 0) {
+              slot.dates.forEach(d => {
+                const filterKey = lec.id + '_' + slot.slotId + '_' + d;
+                dateItemsHtml += '<div class="tree-action-item" onclick="selectAdminFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + d + ' / ' + slot.dayTime + ')\')">' +
+                  '<span><i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ' + d + '</span>' +
+                  '<button class="action-badge badge-select">조회</button>' +
+                '</div>';
+              });
+            } else {
+              const filterKey = lec.id + '_' + slot.slotId + '_전체';
+              dateItemsHtml += '<div class="tree-action-item" onclick="selectAdminFilter(\'' + filterKey + '\', \'' + lec.title + ' (' + slot.dayTime + ')\')">' +
+                '<span><i class="fa-regular fa-clock" style="color:var(--primary);"></i> ' + slot.dayTime + '</span>' +
+                '<button class="action-badge badge-select">조회</button>' +
+              '</div>';
+            }
+
+            subfoldersHtml += '<div class="tree-subfolder">' +
+              '<div class="tree-subfolder-header" onclick="toggleTreeSubfolder(this)">' +
+                '<span><i class="fa-solid fa-clock"></i> ' + slot.dayTime + '</span>' +
+                '<i class="fa-solid fa-chevron-down" style="font-size:12px;"></i>' +
+              '</div>' +
+              '<div class="tree-subfolder-body">' + dateItemsHtml + '</div>' +
+            '</div>';
+          });
+
+          return '<div class="tree-folder">' +
+            '<div class="tree-folder-header" onclick="toggleTreeFolder(this)">' +
+              '<span><i class="fa-solid fa-book" style="color:var(--primary);"></i> ' + lec.title + '</span>' +
+              '<i class="fa-solid fa-chevron-down" style="font-size:14px;"></i>' +
+            '</div>' +
+            '<div class="tree-folder-body">' + subfoldersHtml + '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      treeContainer.innerHTML = html;
+    }
+
+    function selectAdminFilter(filterKey, titleInfo) {
+      currentAdminFilter = filterKey;
+      document.getElementById('adminSelectedTitleInfo').innerText = '선택된 필터: ' + titleInfo;
+      renderAdminApplications();
+    }
+
+    function renderAdminApplications() {
+      const tbody = document.getElementById('adminTableBody');
+      let filteredApps = applications;
+
+      if (currentAdminFilter !== 'all') {
+        const parts = currentAdminFilter.split('_');
+        const lecId = parseInt(parts[0]);
+        const slotId = parseInt(parts[1]);
+        const targetDate = parts[2];
+
+        filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && (targetDate === '전체' || app.selectedDate === targetDate));
+      }
+
+      if (filteredApps.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">신청 내역이 없습니다.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredApps.map(app => 
+        '<tr>' +
+          '<td><strong>' + app.lectureTitle + '</strong></td>' +
+          '<td>' + app.dayTime + '</td>' +
+          '<td>' + app.name + '</td>' +
+          '<td>' + app.school + '</td>' +
+          '<td>' + app.phone + '</td>' +
+          '<td><button class="action-badge badge-del" onclick="adminDeleteApp(' + app.id + ')">삭제</button></td>' +
+        '</tr>'
+      ).join('');
+    }
+
+    function adminDeleteApp(appId) {
+      if (!confirm('해당 학생의 신청 내역을 관리자 권한으로 삭제하시겠습니까?')) return;
+      applications = applications.filter(app => app.id !== appId);
+      saveData();
+      updateAdminView();
+      alert('삭제되었습니다.');
+    }
+
+    function exportToExcel() {
+      let filteredApps = applications;
+      if (currentAdminFilter !== 'all') {
+        const parts = currentAdminFilter.split('_');
+        const lecId = parseInt(parts[0]);
+        const slotId = parseInt(parts[1]);
+        const targetDate = parts[2];
+        filteredApps = applications.filter(app => app.lectureId === lecId && app.slotId === slotId && (targetDate === '전체' || app.selectedDate === targetDate));
+      }
+
+      if (filteredApps.length === 0) {
+        alert('추출할 데이터가 없습니다.');
+        return;
+      }
+
+      let csv = '\uFEFF특강명,일정/시간,학생이름,학교/학년,전화번호뒷4자리,신청일시\n';
+      filteredApps.forEach(app => {
+        csv += '"' + app.lectureTitle + '","' + app.dayTime + '","' + app.name + '","' + app.school + '","' + app.phone + '","' + app.appliedAt + '"\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '특강_신청명단_' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    window.onload = function() {
+      updateStudentCategoryFilter();
       renderStudentLectures();
-    }
-
-    function deleteLecture(lectureId) {
-      if (confirm('정말로 이 특강을 삭제하시겠습니까? 이 특강에 신청했던 학생들의 내역도 함께 삭제됩니다.')) {
-        lectures = lectures.filter(l => l.id !== lectureId);
-        applications = applications.filter(app => app.lectureId !== lectureId);
-
-        saveData();
-        updateAdminLectureFilter();
-        renderAdminDashboard();
-        updateStudentCategoryFilter();
-        renderStudentLectures();
-        alert('특강이 성공적으로 삭제되었습니다.');
-      }
-    }
-
-    function deleteAppAdmin(appId) {
-      if (confirm('정말 해당 신청 내역을 강제로 취소하시겠습니까?')) {
-        applications = applications.filter(app => app.id !== appId);
-        saveData();
-        renderAdminDashboard();
-        renderStudentLectures();
-      }
-    }
-
-    addSlotRow(['2026-07-22', '2026-08-05'], '수요일 2-4시', 40);
-    updateStudentCategoryFilter();
-    updateAdminLectureFilter();
-    renderStudentLectures();
+    };
   </script>
 </body>
 </html>
