@@ -227,7 +227,6 @@
       padding-right: 2px;
     }
 
-    /* 트리 구조 스타일 */
     .tree-folder {
       background: white;
       border: 1px solid var(--border-color);
@@ -460,7 +459,6 @@
     <!-- 회원가입 / 로그인 뷰 -->
     <div id="authView" class="view-section active">
       <div class="auth-grid">
-        <!-- 로그인 카드 -->
         <div class="card" style="margin-bottom:0;">
           <h3><i class="fa-solid fa-right-to-bracket"></i> 로그인</h3>
           <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">이름, 학교, 전화번호 뒷 4자리로 간편하게 로그인하세요.</p>
@@ -479,7 +477,6 @@
           <button class="btn" onclick="handleLogin()"><i class="fa-solid fa-check"></i> 로그인하기</button>
         </div>
 
-        <!-- 회원가입 카드 -->
         <div class="card" style="margin-bottom:0;">
           <h3><i class="fa-solid fa-user-plus"></i> 간편 회원가입</h3>
           <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">비밀번호 없이 빠르게 가입하고 특강을 신청하세요.</p>
@@ -508,7 +505,7 @@
       </div>
     </div>
 
-    <!-- 수강생 신청 뷰 (로그인 후 이용 가능) -->
+    <!-- 수강생 신청 뷰 -->
     <div id="studentView" class="view-section">
       <div class="student-grid">
         <div class="card">
@@ -679,7 +676,7 @@
   </div>
 
   <script>
-    // Supabase 설정 및 초기화 (제공된 URL 및 Anon Key 적용)
+    // Supabase 설정 및 초기화
     const SUPABASE_URL = 'https://eghuxciqydcpiausyamy.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnaHV4Y2lxeWRjcGlhdXN5YW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwODExNTgsImV4cCI6MjEwMDY1NzE1OH0.f1vngIfuoaRB_ZRVHI4al1JMX4W0EIEbOHLVtvv_vGU';
     
@@ -697,17 +694,19 @@
     let currentUser = JSON.parse(localStorage.getItem('acad_current_user')) || null;
     let isAttLoggedIn = false;
 
-    // Supabase 데이터 동기화 함수 (lectures, students 테이블의 id, data 구조 활용)
+    // Supabase 데이터 동기화 함수
     async function loadDataFromSupabase() {
       try {
-        // 1. lectures 테이블 로드
         const { data: lecData, error: lecErr } = await _supabase.from('lectures').select('*');
         if (lecErr) throw lecErr;
         if (lecData && lecData.length > 0) {
-          lectures = lecData.map(row => ({ id: row.id, ...row.data }))
-                            .sort((a, b) => (a.order || 0) - (b.order || 0));
+          // 중복 ID 방지를 위해 Map을 사용하여 고유 id만 유지
+          const map = new Map();
+          lecData.forEach(row => {
+            map.set(row.id, { id: row.id, ...(row.data || {}) });
+          });
+          lectures = Array.from(map.values()).sort((a, b) => (a.order || 0) - (b.order || 0));
         } else {
-          // 기본 데이터 세팅
           lectures = [
             { 
               id: 1, 
@@ -729,11 +728,14 @@
           }
         }
 
-        // 2. students 테이블 로드
         const { data: stdData, error: stdErr } = await _supabase.from('students').select('*');
         if (stdErr) throw stdErr;
         if (stdData) {
-          users = stdData.map(row => ({ id: row.id, ...row.data }));
+          const stdMap = new Map();
+          stdData.forEach(row => {
+            stdMap.set(row.id, { id: row.id, ...(row.data || {}) });
+          });
+          users = Array.from(stdMap.values());
         }
       } catch (err) {
         console.error('Supabase 데이터 로드 실패:', err);
@@ -797,7 +799,7 @@
       await updateAllLecturesOrder();
     }
 
-    // 변경된 전체 순서를 DB에 반영
+    // 변경된 전체 순서를 DB에 반영하고 고유 ID 기준으로 동기화
     async function updateAllLecturesOrder() {
       for (let i = 0; i < lectures.length; i++) {
         lectures[i].order = i;
@@ -1543,16 +1545,17 @@
 
       let targetLec;
       if (editId) {
-        const lec = lectures.find(l => l.id === parseInt(editId));
-        if (lec) {
-          lec.category = category;
-          lec.title = title;
-          lec.desc = desc;
-          lec.instructor = instructor;
-          lec.requiredPoints = requiredPoints;
-          lec.deadline = deadline;
-          lec.slots = slots;
-          targetLec = lec;
+        const lecIdNum = parseInt(editId);
+        const lecIndex = lectures.findIndex(l => l.id === lecIdNum);
+        if (lecIndex !== -1) {
+          lectures[lecIndex].category = category;
+          lectures[lecIndex].title = title;
+          lectures[lecIndex].desc = desc;
+          lectures[lecIndex].instructor = instructor;
+          lectures[lecIndex].requiredPoints = requiredPoints;
+          lectures[lecIndex].deadline = deadline;
+          lectures[lecIndex].slots = slots;
+          targetLec = lectures[lecIndex];
         }
         alert('특강이 수정되었습니다.');
       } else {
@@ -1598,7 +1601,6 @@
         lectures = lectures.filter(l => l.id !== id);
         await deleteLectureFromSupabase(id);
         applications = applications.filter(a => a.lectureId !== id);
-        // 삭제 후 전체 순서 재정렬 동기화
         await updateAllLecturesOrder();
       }
     }
@@ -1638,7 +1640,6 @@
       document.body.removeChild(a);
     }
 
-    // 초기화 시 Supabase에서 데이터를 비동기로 불러온 후 UI 동기화 수행
     async function initApp() {
       await loadDataFromSupabase();
       syncLoginState();
