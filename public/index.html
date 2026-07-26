@@ -579,15 +579,8 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
               <h3 style="margin-bottom:0;"><i class="fa-solid fa-table"></i> 전체 신청 명단 관리</h3>
               <div style="display: flex; gap: 10px; align-items: center;">
-                <select id="adminDayFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderAdminApplications()">
-                  <option value="전체">요일별 필터: 전체 보기</option>
-                  <option value="월요일">월요일</option>
-                  <option value="화요일">화요일</option>
-                  <option value="수요일">수요일</option>
-                  <option value="목요일">목요일</option>
-                  <option value="금요일">금요일</option>
-                  <option value="토요일">토요일</option>
-                  <option value="일요일">일요일</option>
+                <select id="adminLectureFilter" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;" onchange="renderAdminApplications()">
+                  <option value="전체">특강별 필터: 전체 보기</option>
                 </select>
                 <button class="btn btn-success btn-sm" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> 엑셀로 추출</button>
               </div>
@@ -674,6 +667,15 @@
       let optionsHtml = '<option value="전체">전체 보기</option>';
       categories.forEach(cat => {
         optionsHtml += '<option value="' + cat + '">' + cat + '</option>';
+      });
+      filterSelect.innerHTML = optionsHtml;
+    }
+
+    function updateAdminLectureFilter() {
+      const filterSelect = document.getElementById('adminLectureFilter');
+      let optionsHtml = '<option value="전체">특강별 필터: 전체 보기</option>';
+      lectures.forEach(lec => {
+        optionsHtml += '<option value="' + lec.id + '">' + lec.title + '</option>';
       });
       filterSelect.innerHTML = optionsHtml;
     }
@@ -826,6 +828,7 @@
       if (isAdminLoggedIn) {
         loginBox.style.display = 'none';
         dashBox.style.display = 'block';
+        updateAdminLectureFilter();
         renderAdminDashboard();
       } else {
         loginBox.style.display = 'block';
@@ -865,11 +868,11 @@
 
     function renderAdminApplications() {
       const tbody = document.getElementById('adminTableBody');
-      const dayFilter = document.getElementById('adminDayFilter').value;
+      const lectureFilter = document.getElementById('adminLectureFilter').value;
 
       let filteredApps = applications;
-      if (dayFilter && dayFilter !== '전체') {
-        filteredApps = applications.filter(app => app.dayTime.includes(dayFilter));
+      if (lectureFilter && lectureFilter !== '전체') {
+        filteredApps = applications.filter(app => String(app.lectureId) === String(lectureFilter));
       }
 
       if (filteredApps.length === 0) {
@@ -890,10 +893,14 @@
     }
 
     function exportToExcel() {
-      const dayFilter = document.getElementById('adminDayFilter').value;
+      const lectureFilter = document.getElementById('adminLectureFilter').value;
       let targetApps = applications;
-      if (dayFilter && dayFilter !== '전체') {
-        targetApps = applications.filter(app => app.dayTime.includes(dayFilter));
+      let filterName = '전체';
+
+      if (lectureFilter && lectureFilter !== '전체') {
+        targetApps = applications.filter(app => String(app.lectureId) === String(lectureFilter));
+        const foundLec = lectures.find(l => String(l.id) === String(lectureFilter));
+        if (foundLec) filterName = foundLec.title.replace(/[/\\?%*:|"<>]/g, '');
       }
 
       if (targetApps.length === 0) {
@@ -918,7 +925,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', '학원특강_신청명단_' + (dayFilter === '전체' ? '전체' : dayFilter) + '.csv');
+      link.setAttribute('download', '학원특강_신청명단_' + filterName + '.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1003,6 +1010,7 @@
 
       saveData();
       resetLectureForm();
+      updateAdminLectureFilter();
       renderAdminDashboard();
       updateStudentCategoryFilter();
       renderStudentLectures();
@@ -1062,6 +1070,7 @@
       lectures[targetIndex] = temp;
 
       saveData();
+      updateAdminLectureFilter();
       renderAdminDashboard();
       renderStudentLectures();
     }
@@ -1072,6 +1081,7 @@
         applications = applications.filter(app => app.lectureId !== lectureId);
 
         saveData();
+        updateAdminLectureFilter();
         renderAdminDashboard();
         updateStudentCategoryFilter();
         renderStudentLectures();
@@ -1090,6 +1100,7 @@
 
     addSlotRow('', 20);
     updateStudentCategoryFilter();
+    updateAdminLectureFilter();
     renderStudentLectures();
   </script>
 </body>
