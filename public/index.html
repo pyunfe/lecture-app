@@ -343,6 +343,7 @@
       white-space: nowrap;
     }
     .seat-badge.full { background: #fee2e2; color: #991b1b; }
+    .seat-badge.applied { background: #d1fae5; color: #065f46; }
 
     .admin-stats {
       display: grid;
@@ -450,7 +451,6 @@
     }
     .date-tag i { cursor: pointer; }
 
-    /* 마이페이지 추가 탭 및 캘린더 스타일 */
     .mypage-tab-header {
       display: flex;
       gap: 8px;
@@ -635,18 +635,15 @@
           <button class="btn btn-sm btn-success" onclick="requestPointCharge(20000)">포인트 충전(2만 원) 가이드 확인</button>
         </div>
         
-        <!-- 마이페이지 탭 전환 버튼 -->
         <div class="mypage-tab-header">
           <button class="mp-tab-btn active" id="mpTabListBtn" onclick="switchMyPageTab('list')"><i class="fa-solid fa-list"></i> 리스트 보기</button>
           <button class="mp-tab-btn" id="mpTabCalBtn" onclick="switchMyPageTab('calendar')"><i class="fa-solid fa-calendar-days"></i> 모바일 캘린더</button>
         </div>
 
-        <!-- 리스트 보기 영역 -->
         <div id="mpListView" class="mp-sub-view">
           <div id="myGroupedListContainer"></div>
         </div>
 
-        <!-- 달력 보기 영역 -->
         <div id="mpCalendarView" class="mp-sub-view" style="display: none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#f1f5f9; padding:8px 12px; border-radius:10px;">
             <button class="btn btn-sm btn-secondary" onclick="changeCalMonth(-1)"><i class="fa-solid fa-chevron-left"></i> 이전 달</button>
@@ -793,11 +790,9 @@
     let currentUser = JSON.parse(localStorage.getItem('acad_current_user')) || null;
     let isAttLoggedIn = false;
 
-    // 마이페이지 달력 뷰용 현재 연/월 상태 (2026년 7월 기본)
     let calCurrentYear = 2026;
     let calCurrentMonth = 7;
 
-    // Supabase 데이터 동기화 함수
     async function loadDataFromSupabase() {
       try {
         const { data: lecData, error: lecErr } = await _supabase.from('lectures').select('*');
@@ -1117,6 +1112,9 @@
         filteredLectures = lectures.filter(lec => (lec.category || '기본') === selectedCategory);
       }
 
+      // 현재 로그인한 사용자의 기존 신청 내역 목록 추출
+      const myApps = currentUser ? applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school && app.phone === currentUser.phone) : [];
+
       if (filteredLectures.length === 0) {
         listEl.innerHTML = '<div class="empty-state">해당 폴더에 개설된 특강이 없습니다.</div>';
         return;
@@ -1128,13 +1126,15 @@
 
         if (!lec.slots || lec.slots.length === 0) {
           const currentCount = applications.filter(app => app.lectureId === lec.id && app.slotId === 0).length;
+          const isAlreadyApplied = myApps.some(app => app.lectureId === lec.id && app.selectedDate === '통특강');
+
           bodyContent = `<div style="padding: 8px;">
             <div class="date-checkbox-item">
               <label>
-                <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="0" data-lec-title="${lec.title}" data-day-time="방학 통특강" data-date="통특강"> 
-                <i class="fa-solid fa-calendar-check" style="color:var(--primary);"></i> 방학 통특강 (일정 없음)
+                <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="0" data-lec-title="${lec.title}" data-day-time="방학 통특강" data-date="통특강" ${isAlreadyApplied ? 'disabled' : ''}> 
+                <i class="fa-solid fa-calendar-check" style="color:var(--primary);"></i> 방학 통특강 (일정 없음) ${isAlreadyApplied ? '(이미 신청함)' : ''}
               </label>
-              <span class="seat-badge">신청자 ${currentCount}명</span>
+              ${isAlreadyApplied ? '<span class="seat-badge applied">신청완료</span>' : '<span class="seat-badge">신청자 ' + currentCount + '명</span>'}
             </div>
           </div>`;
         } else {
@@ -1146,13 +1146,14 @@
                 const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
                 const remainingSeats = slot.capacity - currentCount;
                 const isFull = remainingSeats <= 0;
+                const isAlreadyApplied = myApps.some(app => app.lectureId === lec.id && app.slotId === slot.slotId && app.selectedDate === d);
 
                 dateItemsHtml += `<div class="date-checkbox-item">
                   <label>
-                    <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="${slot.slotId}" data-lec-title="${lec.title}" data-day-time="${slot.dayTime}" data-date="${d}" ${isFull ? 'disabled' : ''}> 
-                    <i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${d} ${isFull ? '(마감)' : ''}
+                    <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="${slot.slotId}" data-lec-title="${lec.title}" data-day-time="${slot.dayTime}" data-date="${d}" ${isFull || isAlreadyApplied ? 'disabled' : ''}> 
+                    <i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${d} ${isAlreadyApplied ? '(이미 신청함)' : (isFull ? '(마감)' : '')}
                   </label>
-                  <span class="seat-badge ${isFull ? 'full' : ''}">${isFull ? '마감' : '잔여 ' + remainingSeats + '/' + slot.capacity}</span>
+                  ${isAlreadyApplied ? '<span class="seat-badge applied">신청완료</span>' : `<span class="seat-badge ${isFull ? 'full' : ''}">${isFull ? '마감' : '잔여 ' + remainingSeats + '/' + slot.capacity}</span>`}
                 </div>`;
               });
             }
@@ -1185,11 +1186,24 @@
         return;
       }
 
+      const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school && app.phone === currentUser.phone);
+
       let totalRequiredPoints = 0;
       let itemsToApply = [];
 
       for (let chk of checkedBoxes) {
         const lectureId = parseInt(chk.dataset.lecId);
+        const slotId = parseInt(chk.dataset.slotId);
+        const selectedDate = chk.dataset.date;
+        const lectureTitle = chk.dataset.lecTitle;
+
+        // 이미 신청한 내역이 있는지 한 번 더 철저히 검증 (중복 신청 방지)
+        const alreadyExists = myApps.some(app => app.lectureId === lectureId && app.slotId === slotId && app.selectedDate === selectedDate);
+        if (alreadyExists) {
+          alert(`'${lectureTitle} (${selectedDate})' 항목은 이미 신청하셨습니다.`);
+          return;
+        }
+
         const lectureObj = lectures.find(l => l.id === lectureId);
         if (!lectureObj) continue;
 
@@ -1348,7 +1362,6 @@
       container.innerHTML = html;
     }
 
-    // 모바일/PC 통합 세로 피드형 달력 렌더링 (오타 수정 완료)
     function renderMyCalendar() {
       const container = document.getElementById('myCalendarContainer');
       document.getElementById('calMonthTitle').innerText = `${calCurrentYear}년 ${calCurrentMonth}월`;
