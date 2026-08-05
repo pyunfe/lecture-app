@@ -437,7 +437,7 @@
     }
     .date-tag i { cursor: pointer; }
 
-    /* 마이페이지 추가 탭 및 캘린더 스타일 */
+    /* 마이페이지 추가 탭 및 모바일 카드형 캘린더 스타일 */
     .mypage-tab-header {
       display: flex;
       gap: 10px;
@@ -460,43 +460,54 @@
       color: white;
       border-color: var(--primary);
     }
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      background: #e2e8f0;
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .cal-header-cell {
-      background: #f1f5f9;
-      text-align: center;
-      font-weight: 700;
-      font-size: 12px;
-      padding: 10px;
-      color: var(--text-main);
-    }
-    .cal-cell {
-      background: white;
-      min-height: 90px;
-      padding: 6px;
+
+    /* 모바일 카드형 캘린더 전용 스타일 */
+    .mobile-calendar-container {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 12px;
     }
-    .cal-cell.other-month { background: #f8fafc; opacity: 0.5; }
-    .cal-date-num { font-size: 12px; font-weight: 600; color: var(--text-main); }
-    .cal-event-badge {
+    .cal-day-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .cal-day-card.has-event {
+      border-left: 5px solid var(--primary);
+      background: #faf5ff;
+    }
+    .cal-date-box {
+      min-width: 55px;
+      text-align: center;
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 8px 4px;
+    }
+    .cal-date-box.has-event {
       background: #e0e7ff;
       color: var(--primary);
-      font-size: 10px;
-      padding: 3px 5px;
-      border-radius: 4px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    }
+    .cal-date-day { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .cal-date-num { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .cal-events-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cal-event-item {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -622,7 +633,7 @@
         <!-- 마이페이지 탭 전환 버튼 -->
         <div class="mypage-tab-header">
           <button class="mp-tab-btn active" id="mpTabListBtn" onclick="switchMyPageTab('list')"><i class="fa-solid fa-list"></i> 리스트 보기 (그룹화)</button>
-          <button class="mp-tab-btn" id="mpTabCalBtn" onclick="switchMyPageTab('calendar')"><i class="fa-solid fa-calendar-days"></i> 달력 보기</button>
+          <button class="mp-tab-btn" id="mpTabCalBtn" onclick="switchMyPageTab('calendar')"><i class="fa-solid fa-calendar-days"></i> 모바일 카드 캘린더</button>
         </div>
 
         <!-- 리스트 보기 영역 -->
@@ -630,14 +641,14 @@
           <div id="myGroupedListContainer"></div>
         </div>
 
-        <!-- 달력 보기 영역 -->
+        <!-- 모바일 카드 캘린더 보기 영역 -->
         <div id="mpCalendarView" class="mp-sub-view" style="display: none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <button class="btn btn-sm btn-secondary" onclick="changeCalMonth(-1)"><i class="fa-solid fa-chevron-left"></i> 이전 달</button>
             <h4 id="calMonthTitle" style="font-size:16px; font-weight:700;">2026년 8월</h4>
             <button class="btn btn-sm btn-secondary" onclick="changeCalMonth(1)">다음 달 <i class="fa-solid fa-chevron-right"></i></button>
           </div>
-          <div id="myCalendarContainer"></div>
+          <div id="myCalendarContainer" class="mobile-calendar-container"></div>
         </div>
       </div>
     </div>
@@ -778,7 +789,7 @@
     let currentUser = JSON.parse(localStorage.getItem('acad_current_user')) || null;
     let isAttLoggedIn = false;
 
-    // 마이페이지 달력 뷰용 현재 연/월 상태
+    // 마이페이지 캘린더용 현재 연/월 상태
     let calCurrentYear = 2026;
     let calCurrentMonth = 8; // 8월 기준
 
@@ -1307,23 +1318,21 @@
       container.innerHTML = html;
     }
 
+    // 모바일 카드형 캘린더 렌더링 함수 (일정 있는 날만 표시하도록 수정됨)
     function renderMyCalendar() {
       const container = document.getElementById('myCalendarContainer');
       document.getElementById('calMonthTitle').innerText = `${calCurrentYear}년 ${calCurrentMonth}월`;
 
-      const firstDay = new Date(calCurrentYear, calCurrentMonth - 1, 1).getDay();
       const lastDate = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
-
       const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school);
 
-      let headers = ['일', '월', '화', '수', '목', '금', '토'].map(d => `<div class="cal-header-cell">${d}</div>`).join('');
-      let cells = '';
-
-      for (let i = 0; i < firstDay; i++) {
-        cells += `<div class="cal-cell other-month"></div>`;
-      }
+      const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+      let cardsHtml = '';
 
       for (let d = 1; d <= lastDate; d++) {
+        const currentDateObj = new Date(calCurrentYear, calCurrentMonth - 1, d);
+        const dayOfWeekStr = daysOfWeek[currentDateObj.getDay()];
+
         const dateStrSimple1 = `${calCurrentMonth}/${d}`;
         const dateStrSimple2 = `${calCurrentMonth}/${d < 10 ? '0' + d : d}`;
 
@@ -1332,19 +1341,40 @@
           return app.selectedDate === dateStrSimple1 || app.selectedDate === dateStrSimple2;
         });
 
+        const hasEvent = matchingApps.length > 0;
+
+        // 일정이 있는 날만 카드 형태로 렌더링
+        if (!hasEvent) continue;
+
         let eventsHtml = matchingApps.map(app => `
-          <div class="cal-event-badge" title="${app.lectureTitle} (${app.dayTime})">
-            ${app.lectureTitle}
+          <div class="cal-event-item">
+            <div>
+              <strong>${app.lectureTitle}</strong>
+              <div style="font-size:11px; color:var(--text-muted);"><i class="fa-regular fa-clock"></i> ${app.dayTime} (${app.instructor})</div>
+            </div>
+            <span class="seat-badge">신청완료</span>
           </div>
         `).join('');
 
-        cells += `<div class="cal-cell">
-          <div class="cal-date-num">${d}</div>
-          <div style="display:flex; flex-direction:column; gap:2px; overflow-y:auto; max-height:60px;">${eventsHtml}</div>
-        </div>`;
+        cardsHtml += `
+          <div class="cal-day-card has-event">
+            <div class="cal-date-box has-event">
+              <div class="cal-date-day">${dayOfWeekStr}</div>
+              <div class="cal-date-num">${d}</div>
+            </div>
+            <div class="cal-events-list">
+              ${eventsHtml}
+            </div>
+          </div>
+        `;
       }
 
-      container.innerHTML = `<div class="calendar-grid">${headers}${cells}</div>`;
+      // 일정이 아무것도 없는 경우 안내 표시
+      if (!cardsHtml) {
+        cardsHtml = '<div class="empty-state">해당 월에 예정된 특강 일정이 없습니다.</div>';
+      }
+
+      container.innerHTML = cardsHtml;
     }
 
     function changeCalMonth(dir) {
