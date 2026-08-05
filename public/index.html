@@ -329,6 +329,7 @@
       white-space: nowrap;
     }
     .seat-badge.full { background: #fee2e2; color: #991b1b; }
+    .seat-badge.completed { background: #d1fae5; color: #065f46; }
     .seat-badge.warning { background: #fef3c7; color: #d97706; }
 
     .admin-stats {
@@ -437,7 +438,6 @@
     }
     .date-tag i { cursor: pointer; }
 
-    /* 마이페이지 추가 탭 및 모바일 카드형 캘린더 스타일 */
     .mypage-tab-header {
       display: flex;
       gap: 10px;
@@ -461,7 +461,6 @@
       border-color: var(--primary);
     }
 
-    /* 모바일 카드형 캘린더 전용 스타일 */
     .mobile-calendar-container {
       display: flex;
       flex-direction: column;
@@ -789,11 +788,9 @@
     let currentUser = JSON.parse(localStorage.getItem('acad_current_user')) || null;
     let isAttLoggedIn = false;
 
-    // 마이페이지 캘린더용 현재 연/월 상태
     let calCurrentYear = 2026;
-    let calCurrentMonth = 8; // 8월 기준
+    let calCurrentMonth = 8;
 
-    // Supabase 데이터 동기화 함수
     async function loadDataFromSupabase() {
       try {
         const { data: lecData, error: lecErr } = await _supabase.from('lectures').select('*');
@@ -1119,19 +1116,24 @@
         return;
       }
 
+      // 현재 로그인한 사용자의 기존 신청 내역 (lectureId 및 slotId, selectedDate 기준)
+      const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school);
+
       listEl.innerHTML = filteredLectures.map(lec => {
         const reqPts = lec.requiredPoints !== undefined ? lec.requiredPoints : 10000;
         let bodyContent = '';
 
         if (!lec.slots || lec.slots.length === 0) {
           const currentCount = applications.filter(app => app.lectureId === lec.id && app.slotId === 0).length;
+          const isAlreadyApplied = myApps.some(app => app.lectureId === lec.id && app.slotId === 0);
+
           bodyContent = `<div style="padding: 10px;">
             <div class="date-checkbox-item">
               <label>
-                <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="0" data-lec-title="${lec.title}" data-day-time="방학 통특강 (전체 일정)" data-date="통특강"> 
+                <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="0" data-lec-title="${lec.title}" data-day-time="방학 통특강 (전체 일정)" data-date="통특강" ${isAlreadyApplied ? 'disabled' : ''}> 
                 <i class="fa-solid fa-calendar-check" style="color:var(--primary);"></i> 방학 기간 통틀어 수강 (일정 없음)
               </label>
-              <span class="seat-badge">신청자 ${currentCount}명</span>
+              ${isAlreadyApplied ? '<span class="seat-badge completed">신청완료</span>' : '<span class="seat-badge">신청자 ' + currentCount + '명</span>'}
             </div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">* 필요 포인트: <strong>${reqPts.toLocaleString()}원</strong></div>
           </div>`;
@@ -1144,13 +1146,25 @@
                 const currentCount = applications.filter(app => app.slotId === slot.slotId && app.selectedDate === d).length;
                 const remainingSeats = slot.capacity - currentCount;
                 const isFull = remainingSeats <= 0;
+                
+                // 해당 날짜/슬롯을 이미 신청했는지 체크
+                const isAlreadyApplied = myApps.some(app => app.lectureId === lec.id && app.slotId === slot.slotId && app.selectedDate === d);
+
+                let badgeHtml = '';
+                if (isAlreadyApplied) {
+                  badgeHtml = '<span class="seat-badge completed">신청완료</span>';
+                } else if (isFull) {
+                  badgeHtml = '<span class="seat-badge full">마감됨</span>';
+                } else {
+                  badgeHtml = `<span class="seat-badge">잔여 ${remainingSeats}/${slot.capacity}</span>`;
+                }
 
                 dateItemsHtml += `<div class="date-checkbox-item">
                   <label>
-                    <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="${slot.slotId}" data-lec-title="${lec.title}" data-day-time="${slot.dayTime}" data-date="${d}" ${isFull ? 'disabled' : ''}> 
-                    <i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${d} ${isFull ? '(마감)' : ''}
+                    <input type="checkbox" class="student-date-chk" data-lec-id="${lec.id}" data-slot-id="${slot.slotId}" data-lec-title="${lec.title}" data-day-time="${slot.dayTime}" data-date="${d}" ${isFull || isAlreadyApplied ? 'disabled' : ''}> 
+                    <i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${d} ${isAlreadyApplied ? '(신청완료)' : isFull ? '(마감)' : ''}
                   </label>
-                  <span class="seat-badge ${isFull ? 'full' : ''}">${isFull ? '마감됨' : '잔여 ' + remainingSeats + '/' + slot.capacity}</span>
+                  ${badgeHtml}
                 </div>`;
               });
             }
@@ -1318,7 +1332,6 @@
       container.innerHTML = html;
     }
 
-    // 모바일 카드형 캘린더 렌더링 함수 (일정 있는 날만 표시하도록 수정됨)
     function renderMyCalendar() {
       const container = document.getElementById('myCalendarContainer');
       document.getElementById('calMonthTitle').innerText = `${calCurrentYear}년 ${calCurrentMonth}월`;
@@ -1343,7 +1356,6 @@
 
         const hasEvent = matchingApps.length > 0;
 
-        // 일정이 있는 날만 카드 형태로 렌더링
         if (!hasEvent) continue;
 
         let eventsHtml = matchingApps.map(app => `
@@ -1369,7 +1381,6 @@
         `;
       }
 
-      // 일정이 아무것도 없는 경우 안내 표시
       if (!cardsHtml) {
         cardsHtml = '<div class="empty-state">해당 월에 예정된 특강 일정이 없습니다.</div>';
       }
