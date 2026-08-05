@@ -523,7 +523,7 @@
       <div class="auth-grid">
         <div class="card" style="margin-bottom:0;">
           <h3><i class="fa-solid fa-right-to-bracket"></i> 로그인</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">이름, 학교, 비밀번호로 간편하게 로그인하세요.</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">이름, 학교, 그리고 설정한 비밀번호로 로그인하세요.</p>
           <div class="form-group">
             <label>학생 이름</label>
             <input type="text" id="loginName" class="form-control" placeholder="홍길동">
@@ -540,8 +540,8 @@
         </div>
 
         <div class="card" style="margin-bottom:0;">
-          <h3><i class="fa-solid fa-user-plus"></i> 간편 회원가입</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">포인트 자동 충전을 위해 휴대전화 번호 뒷 4자리와 비밀번호를 함께 등록하세요.</p>
+          <h3><i class="fa-solid fa-user-plus"></i> 회원가입</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">비밀번호를 설정하여 안전하게 계정을 관리하세요.</p>
           <div class="form-group">
             <label>학생 이름</label>
             <input type="text" id="regName" class="form-control" placeholder="홍길동">
@@ -551,12 +551,12 @@
             <input type="text" id="regSchool" class="form-control" placeholder="청라고1">
           </div>
           <div class="form-group">
-            <label>전화번호 뒷 4자리 (포인트 자동 충전 연동용)</label>
+            <label>전화번호 뒷 4자리 (입금 확인용)</label>
             <input type="text" id="regPhone" class="form-control" maxlength="4" placeholder="1234">
           </div>
           <div class="form-group">
-            <label>비밀번호 (로그인용)</label>
-            <input type="password" id="regPassword" class="form-control" placeholder="사용할 비밀번호 입력">
+            <label>비밀번호 설정</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="비밀번호 입력">
           </div>
           <div class="form-group">
             <label>환불받을 계좌 정보 (은행명, 계좌번호, 예금주명)</label>
@@ -955,7 +955,6 @@
       }
     }
 
-    // 마이페이지 내부 탭 전환 함수 (리스트 보기 ⇄ 달력 보기)
     function switchMyPageTab(mode) {
       document.querySelectorAll('.mp-tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.mp-sub-view').forEach(v => v.style.display = 'none');
@@ -1251,9 +1250,8 @@
       renderMyCalendar();
     }
 
-    // 마이페이지 신청 내역 특강별 그룹화 렌더링
     function renderMyGroupedList() {
-      const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school && app.phone === currentUser.phone);
+      const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school);
       const container = document.getElementById('myGroupedListContainer');
 
       if (myApps.length === 0) {
@@ -1261,7 +1259,6 @@
         return;
       }
 
-      // 특강별 그룹화 (lectureId 기준)
       let grouped = {};
       myApps.forEach(app => {
         if (!grouped[app.lectureId]) {
@@ -1310,7 +1307,6 @@
       container.innerHTML = html;
     }
 
-    // 마이페이지 달력 뷰 렌더링
     function renderMyCalendar() {
       const container = document.getElementById('myCalendarContainer');
       document.getElementById('calMonthTitle').innerText = `${calCurrentYear}년 ${calCurrentMonth}월`;
@@ -1318,17 +1314,15 @@
       const firstDay = new Date(calCurrentYear, calCurrentMonth - 1, 1).getDay();
       const lastDate = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
 
-      const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school && app.phone === currentUser.phone);
+      const myApps = applications.filter(app => app.userName === currentUser.name && app.school === currentUser.school);
 
       let headers = ['일', '월', '화', '수', '목', '금', '토'].map(d => `<div class="cal-header-cell">${d}</div>`).join('');
       let cells = '';
 
-      // 이전 달 빈 칸
       for (let i = 0; i < firstDay; i++) {
         cells += `<div class="cal-cell other-month"></div>`;
       }
 
-      // 이번 달 날짜 채우기
       for (let d = 1; d <= lastDate; d++) {
         const dateStrSimple1 = `${calCurrentMonth}/${d}`;
         const dateStrSimple2 = `${calCurrentMonth}/${d < 10 ? '0' + d : d}`;
@@ -1638,7 +1632,7 @@
 
         users = users.filter(u => u.id !== userId);
         await deleteUserFromSupabase(userId);
-        applications = applications.filter(app => !(app.userName === targetUser.name && app.school === targetUser.school && app.phone === targetUser.phone));
+        applications = applications.filter(app => !(app.userName === targetUser.name && app.school === targetUser.school));
 
         saveData();
         syncLoginState();
